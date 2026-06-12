@@ -6,6 +6,9 @@
 <title>Hulya Apparel — Sistem Bisnis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root{
   /* Hulya Brand Colors */
@@ -223,6 +226,33 @@ textarea{resize:vertical;min-height:68px}
 .ir-inv input{margin:0}
 .ih-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 28px;gap:8px;margin-bottom:6px;padding:0 2px}
 .ih-inv span{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
+
+/* ── CRM ── */
+.crm-card{background:var(--white);border-radius:12px;border:1px solid rgba(27,42,74,.06);box-shadow:var(--sh);padding:20px;display:flex;gap:14px;align-items:center;cursor:pointer;transition:all .15s}
+.crm-card:hover{box-shadow:0 4px 20px rgba(27,42,74,.12);transform:translateY(-1px)}
+.crm-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--navy));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;flex-shrink:0}
+.crm-info{flex:1;min-width:0}
+.crm-name{font-weight:700;font-size:14px;color:var(--navy)}
+.crm-detail{font-size:12px;color:var(--g500);margin-top:2px}
+.crm-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--accent-light);color:var(--accent-dark)}
+
+/* ── Customer Autocomplete Dropdown ── */
+.cust-ac-wrap{position:relative}
+.cust-dd{position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--g300);border-top:none;border-radius:0 0 10px 10px;max-height:220px;overflow-y:auto;z-index:10;display:none;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.cust-dd.show{display:block}
+.cust-dd-item{padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--g100);transition:background .1s}
+.cust-dd-item:hover,.cust-dd-item.active{background:var(--accent-light)}
+.cust-dd-item .cdi-name{font-weight:600;color:var(--navy)}
+.cust-dd-item .cdi-phone{font-size:11px;color:var(--g500);margin-left:8px}
+.cust-dd-add{padding:10px 14px;cursor:pointer;font-size:13px;color:var(--accent);font-weight:700;border-top:2px solid var(--g200);background:var(--g50);display:flex;align-items:center;gap:6px;border-radius:0 0 10px 10px}
+.cust-dd-add:hover{background:var(--accent-light)}
+
+/* ── LOADING OVERLAY ── */
+#loading-overlay{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--white);gap:16px;transition:opacity .4s}
+#loading-overlay.done{opacity:0;pointer-events:none}
+.loading-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 @media print{
   #sb,#tb,.np{display:none!important}
   #main{margin-left:0!important}
@@ -232,10 +262,19 @@ textarea{resize:vertical;min-height:68px}
   .mh,.mf{display:none!important}
   .ivp{border:none!important;padding:20px!important}
   body{background:white!important}
+  #loading-overlay{display:none!important}
 }
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800">HULYA<span style="color:var(--gold)">.</span></div>
+  <div class="loading-spinner"></div>
+  <div style="font-size:13px;color:var(--g500)">Memuat data dari cloud...</div>
+</div>
+
 <div id="app">
 <!-- SIDEBAR -->
 <aside id="sb">
@@ -252,6 +291,9 @@ textarea{resize:vertical;min-height:68px}
   </div>
   <div class="ng"><div class="ng-lbl">Utama</div>
     <div class="ni on" onclick="nav('dashboard')"><span class="ic">📊</span>Dashboard</div>
+  </div>
+  <div class="ng"><div class="ng-lbl">CRM</div>
+    <div class="ni" onclick="nav('crm')"><span class="ic">👥</span>Customer<span id="crm-count" style="margin-left:auto;font-size:11px;background:rgba(58,175,212,.25);padding:1px 7px;border-radius:10px;color:var(--accent)"></span></div>
   </div>
   <div class="ng"><div class="ng-lbl">Penjualan</div>
     <div class="ni" onclick="nav('invoice')"><span class="ic">🧾</span>Invoice</div>
@@ -299,6 +341,24 @@ textarea{resize:vertical;min-height:68px}
       <div class="card">
         <div class="ch"><div class="ct">💰 Arus Kas 6 Bulan Terakhir</div></div>
         <div class="cb" id="dchart"></div>
+      </div>
+    </div>
+
+    <!-- CRM -->
+    <div id="pg-crm" class="pg">
+      <div class="sh2">
+        <div><div class="st2">Customer (CRM)</div><div class="sb2">Kelola data pelanggan & riwayat transaksi</div></div>
+        <div class="fl g8">
+          <button class="btn bg" onclick="exportCSV('customers')">⬇️ Export CSV</button>
+          <button class="btn bp" onclick="openCRMModal()">+ Tambah Customer</button>
+        </div>
+      </div>
+      <div class="sg3" id="crm-stats"></div>
+      <div class="card">
+        <div class="fb">
+          <input id="crm-search" placeholder="🔍 Cari nama, telepon, email..." oninput="renderCRMTable()"/>
+        </div>
+        <div class="tw" id="crm-table"></div>
       </div>
     </div>
 
@@ -477,14 +537,14 @@ textarea{resize:vertical;min-height:68px}
         <div id="spv" class="mt12"></div>
       </div></div>
       <div id="setC" class="hide"><div class="card cb">
-        <p style="font-size:13px;color:var(--g700);margin-bottom:16px">Data disimpan di <b>localStorage</b> browser. Backup JSON secara rutin untuk menghindari kehilangan data.</p>
+        <p style="font-size:13px;color:var(--g700);margin-bottom:16px">Data disimpan di <b>Firebase Cloud</b>. Data akan tetap tersinkronisasi di semua perangkat.</p>
         <div class="fl g8" style="flex-wrap:wrap">
           <button class="btn bbl" onclick="backupData()">📦 Backup JSON</button>
           <button class="btn bg" onclick="document.getElementById('rfi').click()">📂 Restore Data</button>
           <input type="file" id="rfi" accept=".json" class="hide" onchange="restoreData(event)"/>
           <button class="btn bg tred" style="border-color:var(--red)" onclick="resetAll()">🗑️ Reset Semua Data</button>
         </div>
-        <div class="wbox mt16">⚠️ Gunakan Backup JSON rutin. Data hilang jika cache browser di-clear.</div>
+        <div class="ibox mt16">☁️ Data tersimpan di Firebase Cloud — aman & tersinkronisasi otomatis ke semua perangkat.</div>
       </div></div>
     </div>
 
@@ -579,7 +639,11 @@ textarea{resize:vertical;min-height:68px}
           <option value="lunas">✅ Lunas</option><option value="batal">❌ Batal</option>
         </select>
       </div>
-      <div class="fi"><label>Nama Pelanggan *</label><input id="icus"/></div>
+      <div class="fi cust-ac-wrap">
+        <label>Nama Pelanggan *</label>
+        <input id="icus" autocomplete="off" placeholder="Ketik nama atau pilih customer..." oninput="filterCustDD('inv')" onfocus="showCustDD('inv')" onblur="setTimeout(()=>hideCustDD('inv'),200)"/>
+        <div class="cust-dd" id="cust-dd-inv"></div>
+      </div>
       <div class="fi"><label>Telepon</label><input id="iphn"/></div>
     </div>
     <div class="div"></div>
@@ -638,7 +702,11 @@ textarea{resize:vertical;min-height:68px}
           <option value="selesai">✅ Selesai</option><option value="batal">❌ Batal</option>
         </select>
       </div>
-      <div class="fi"><label>Nama Pelanggan *</label><input id="pcus"/></div>
+      <div class="fi cust-ac-wrap">
+        <label>Nama Pelanggan *</label>
+        <input id="pcus" autocomplete="off" placeholder="Ketik nama atau pilih customer..." oninput="filterCustDD('po')" onfocus="showCustDD('po')" onblur="setTimeout(()=>hideCustDD('po'),200)"/>
+        <div class="cust-dd" id="cust-dd-po"></div>
+      </div>
       <div class="fi"><label>Telepon</label><input id="pphn"/></div>
     </div>
     <div class="div"></div>
@@ -778,16 +846,140 @@ textarea{resize:vertical;min-height:68px}
   <div class="mbod" id="pvpb"></div>
 </div>
 </div>
+
+<!-- CRM MODAL -->
+<div class="mb" id="crm-modal">
+<div class="mo" style="max-width:520px">
+  <div class="mh"><div class="mtt" id="crm-modal-title">Tambah Customer</div><button class="mc" onclick="closeM('crm-modal')">✕</button></div>
+  <div class="mbod">
+    <div class="fg">
+      <div class="fi full"><label>Nama Customer *</label><input id="crm-name"/></div>
+      <div class="fi"><label>Telepon / WhatsApp</label><input id="crm-phone"/></div>
+      <div class="fi"><label>Email</label><input id="crm-email" type="email"/></div>
+      <div class="fi full"><label>Alamat</label><textarea id="crm-address" rows="2"></textarea></div>
+      <div class="fi full"><label>Catatan</label><textarea id="crm-notes" rows="2" placeholder="Preferensi, ukuran favorit, dll..."></textarea></div>
+    </div>
+    <input type="hidden" id="crm-eid"/>
+  </div>
+  <div class="mf">
+    <button class="btn bg" onclick="closeM('crm-modal')">Batal</button>
+    <button class="btn bp" onclick="saveCRM()">💾 Simpan</button>
+  </div>
+</div>
+</div>
+
+<!-- CRM DETAIL MODAL -->
+<div class="mb" id="crm-detail">
+<div class="mo" style="max-width:700px">
+  <div class="mh"><div class="mtt" id="crm-detail-title">Detail Customer</div><button class="mc" onclick="closeM('crm-detail')">✕</button></div>
+  <div class="mbod" id="crm-detail-body"></div>
+</div>
+</div>
+
 <script>
 // ══════════════════════════════════════════
-//  CORE
+//  FIREBASE INIT
 // ══════════════════════════════════════════
-const DB={
-  get:k=>{try{return JSON.parse(localStorage.getItem('h_'+k)||'[]')}catch{return[]}},
-  gO:k=>{try{return JSON.parse(localStorage.getItem('h_'+k)||'{}')}catch{return{}}},
-  set:(k,v)=>localStorage.setItem('h_'+k,JSON.stringify(v)),
-  sO:(k,v)=>localStorage.setItem('h_'+k,JSON.stringify(v))
+const firebaseConfig = {
+  apiKey: "AIzaSyAApVFG3ewNZOniW_hA2KfgGPwvTq2GGVs",
+  authDomain: "app-hulya-apparel.firebaseapp.com",
+  projectId: "app-hulya-apparel",
+  storageBucket: "app-hulya-apparel.firebasestorage.app",
+  messagingSenderId: "1044928418355",
+  appId: "1:1044928418355:web:4acabbc77f001f60f14946",
+  measurementId: "G-8ZBZPQRRTF"
 };
+firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore();
+
+// ══════════════════════════════════════════
+//  DB LAYER — Local Cache + Firestore Sync
+// ══════════════════════════════════════════
+const _cache = {
+  invoices: [],
+  pos: [],
+  stok: [],
+  pembelian: [],
+  pembukuan: [],
+  customers: [],
+  settings: {},
+  produksi: {}
+};
+
+const COLLECTIONS = ['invoices','pos','stok','pembelian','pembukuan','customers'];
+const OBJECTS = ['settings','produksi'];
+const ALL_KEYS = [...COLLECTIONS, ...OBJECTS];
+
+const DB = {
+  get(k) { return _cache[k] || []; },
+  set(k, v) {
+    _cache[k] = v;
+    firestore.collection('app').doc(k).set({ data: v }).catch(e => console.error('Firestore write error:', k, e));
+  },
+  gO(k) { return _cache[k] || {}; },
+  sO(k, v) {
+    _cache[k] = v;
+    firestore.collection('app').doc(k).set({ data: v }).catch(e => console.error('Firestore write error:', k, e));
+  }
+};
+
+// Load all data from Firestore on startup
+async function loadFromFirestore() {
+  try {
+    const promises = ALL_KEYS.map(async (key) => {
+      const doc = await firestore.collection('app').doc(key).get();
+      if (doc.exists && doc.data()?.data !== undefined) {
+        _cache[key] = doc.data().data;
+      }
+    });
+    await Promise.all(promises);
+  } catch (e) {
+    console.error('Firestore load error:', e);
+    toast('⚠️ Gagal memuat data dari cloud. Cek koneksi internet.', 'err');
+  }
+}
+
+// Real-time sync listeners
+function setupRealtimeSync() {
+  ALL_KEYS.forEach(key => {
+    firestore.collection('app').doc(key).onSnapshot(doc => {
+      if (doc.exists && doc.data()?.data !== undefined) {
+        const newData = doc.data().data;
+        const oldJSON = JSON.stringify(_cache[key]);
+        const newJSON = JSON.stringify(newData);
+        if (oldJSON !== newJSON) {
+          _cache[key] = newData;
+          // Re-render current page if data changed from another client
+          onDataSync();
+        }
+      }
+    }, err => console.error('Snapshot error:', key, err));
+  });
+}
+
+function onDataSync() {
+  // Re-render whatever page is currently active
+  const activePage = document.querySelector('.pg.on');
+  if (!activePage) return;
+  const pageId = activePage.id.replace('pg-', '');
+  const refreshMap = {
+    dashboard: rDash,
+    crm: () => { renderCRMStats(); renderCRMTable(); },
+    invoice: rInvT,
+    po: rPOT,
+    stok: rStokT,
+    pembelian: rBeliT,
+    pembukuan: rBuku,
+    laporan: rLap,
+    settings: rSet
+  };
+  if (refreshMap[pageId]) refreshMap[pageId]();
+  updateCRMCount();
+}
+
+// ══════════════════════════════════════════
+//  CORE HELPERS
+// ══════════════════════════════════════════
 const fRp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
 const td=()=>new Date().toISOString().slice(0,10);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
@@ -813,10 +1005,11 @@ function nav(page){
   document.querySelectorAll('.ni').forEach(n=>{
     if(n.getAttribute('onclick')?.includes("'"+page+"'"))n.classList.add('on');
   });
-  const T={dashboard:'Dashboard',invoice:'Invoice',po:'Purchase Order',stok:'Stok & Gudang',
+  const T={dashboard:'Dashboard',crm:'Customer (CRM)',invoice:'Invoice',po:'Purchase Order',stok:'Stok & Gudang',
     pembelian:'Pembelian',pembukuan:'Pembukuan',laporan:'Laporan Pajak',settings:'Pengaturan'};
   document.getElementById('tbtl').textContent=T[page]||page;
   if(page==='dashboard')rDash();
+  if(page==='crm'){renderCRMStats();renderCRMTable();}
   if(page==='invoice')rInvT();
   if(page==='po')rPOT();
   if(page==='stok')rStokT();
@@ -824,6 +1017,236 @@ function nav(page){
   if(page==='pembukuan')rBuku();
   if(page==='laporan')rLap();
   if(page==='settings')rSet();
+}
+
+// ══════════════════════════════════════════
+//  CRM — Customer Relationship Management
+// ══════════════════════════════════════════
+function updateCRMCount() {
+  const el = document.getElementById('crm-count');
+  const count = DB.get('customers').length;
+  if (el) el.textContent = count > 0 ? count : '';
+}
+
+function renderCRMStats() {
+  const custs = DB.get('customers');
+  const invs = DB.get('invoices');
+  const pos = DB.get('pos');
+  const now = new Date();
+  const thisMonth = now.toISOString().slice(0, 7);
+
+  // Active = has invoice or PO in last 3 months
+  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1).toISOString().slice(0, 10);
+  const activeNames = new Set();
+  invs.filter(i => i.date >= threeMonthsAgo).forEach(i => activeNames.add(i.customer?.toLowerCase()));
+  pos.filter(p => p.date >= threeMonthsAgo).forEach(p => activeNames.add(p.customer?.toLowerCase()));
+  const activeCount = custs.filter(c => activeNames.has(c.name?.toLowerCase())).length;
+
+  const newThisMonth = custs.filter(c => c.createdAt?.startsWith(thisMonth)).length;
+
+  // Total revenue from this customer base
+  const totalRev = invs.filter(i => i.status === 'lunas').reduce((s, i) => s + Number(i.total || 0), 0);
+
+  document.getElementById('crm-stats').innerHTML = `
+    <div class="sc"><div class="si">👥</div><div class="sl">Total Customer</div><div class="sv">${custs.length}</div><div class="ss">Terdaftar di CRM</div></div>
+    <div class="sc"><div class="si">🟢</div><div class="sl">Customer Aktif</div><div class="sv">${activeCount}</div><div class="ss">Transaksi 3 bulan terakhir</div></div>
+    <div class="sc"><div class="si">✨</div><div class="sl">Customer Baru</div><div class="sv">${newThisMonth}</div><div class="ss">Bulan ini</div></div>`;
+}
+
+function renderCRMTable() {
+  let custs = DB.get('customers');
+  const q = (document.getElementById('crm-search')?.value || '').toLowerCase();
+  if (q) custs = custs.filter(c => (c.name + c.phone + c.email).toLowerCase().includes(q));
+
+  // Sort newest first
+  custs = [...custs].sort((a, b) => (b.createdAt || '') > (a.createdAt || '') ? 1 : -1);
+
+  const invs = DB.get('invoices');
+  const pos = DB.get('pos');
+
+  document.getElementById('crm-table').innerHTML = custs.length ? `<table>
+    <thead><tr><th>Customer</th><th>Telepon</th><th>Email</th><th>Invoice</th><th>PO</th><th>Total Revenue</th><th>Aksi</th></tr></thead>
+    <tbody>${custs.map(c => {
+      const cInvs = invs.filter(i => i.customer?.toLowerCase() === c.name?.toLowerCase());
+      const cPOs = pos.filter(p => p.customer?.toLowerCase() === c.name?.toLowerCase());
+      const rev = cInvs.filter(i => i.status === 'lunas').reduce((s, i) => s + Number(i.total || 0), 0);
+      return `<tr>
+        <td><b style="color:var(--navy);cursor:pointer" onclick="viewCRMDetail('${c.id}')">${esc(c.name)}</b>${c.address ? `<br><small class="tgy">${esc(c.address).substring(0, 40)}</small>` : ''}</td>
+        <td>${esc(c.phone || '-')}</td>
+        <td class="tgy tsm">${esc(c.email || '-')}</td>
+        <td><span class="chip">${cInvs.length}</span></td>
+        <td><span class="chip">${cPOs.length}</span></td>
+        <td style="font-weight:700;color:${rev > 0 ? 'var(--green)' : 'var(--g500)'}">${rev > 0 ? fRp(rev) : '-'}</td>
+        <td style="white-space:nowrap;display:flex;gap:4px">
+          <button class="btn bg bs" onclick="viewCRMDetail('${c.id}')" title="Detail">👁️</button>
+          <button class="btn bg bs" onclick="openCRMModal('${c.id}')" title="Edit">✏️</button>
+          <button class="btn bg bs tred" onclick="delCRM('${c.id}')" title="Hapus">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('')}</tbody></table>` : emSt('👥', 'Belum ada customer. Tambah customer baru atau buat Invoice/PO.');
+}
+
+function openCRMModal(eid = null) {
+  document.getElementById('crm-eid').value = eid || '';
+  document.getElementById('crm-modal-title').textContent = eid ? 'Edit Customer' : 'Tambah Customer Baru';
+  if (eid) {
+    const c = DB.get('customers').find(x => x.id === eid);
+    if (!c) return;
+    document.getElementById('crm-name').value = c.name || '';
+    document.getElementById('crm-phone').value = c.phone || '';
+    document.getElementById('crm-email').value = c.email || '';
+    document.getElementById('crm-address').value = c.address || '';
+    document.getElementById('crm-notes').value = c.notes || '';
+  } else {
+    ['crm-name', 'crm-phone', 'crm-email', 'crm-address', 'crm-notes'].forEach(id => document.getElementById(id).value = '');
+  }
+  openM('crm-modal');
+}
+
+function saveCRM() {
+  const name = document.getElementById('crm-name').value.trim();
+  if (!name) { toast('Nama customer wajib diisi', 'err'); return; }
+  const eid = document.getElementById('crm-eid').value;
+  const data = {
+    id: eid || uid(),
+    name,
+    phone: document.getElementById('crm-phone').value.trim(),
+    email: document.getElementById('crm-email').value.trim(),
+    address: document.getElementById('crm-address').value.trim(),
+    notes: document.getElementById('crm-notes').value.trim(),
+    createdAt: eid ? (DB.get('customers').find(c => c.id === eid)?.createdAt || td()) : td(),
+    updatedAt: td()
+  };
+  let custs = DB.get('customers');
+  if (eid) custs = custs.map(c => c.id === eid ? data : c);
+  else custs.push(data);
+  DB.set('customers', custs);
+  closeM('crm-modal');
+  renderCRMStats();
+  renderCRMTable();
+  updateCRMCount();
+  toast('Customer disimpan ✅');
+}
+
+function delCRM(id) {
+  if (!confirm('Hapus customer ini?')) return;
+  DB.set('customers', DB.get('customers').filter(c => c.id !== id));
+  renderCRMStats();
+  renderCRMTable();
+  updateCRMCount();
+  toast('Customer dihapus');
+}
+
+function viewCRMDetail(id) {
+  const c = DB.get('customers').find(x => x.id === id);
+  if (!c) return;
+  const invs = DB.get('invoices').filter(i => i.customer?.toLowerCase() === c.name?.toLowerCase());
+  const pos = DB.get('pos').filter(p => p.customer?.toLowerCase() === c.name?.toLowerCase());
+  const rev = invs.filter(i => i.status === 'lunas').reduce((s, i) => s + Number(i.total || 0), 0);
+  const totalAll = invs.reduce((s, i) => s + Number(i.total || 0), 0);
+
+  document.getElementById('crm-detail-title').textContent = c.name;
+  document.getElementById('crm-detail-body').innerHTML = `
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px">
+      <div class="crm-avatar" style="width:56px;height:56px;font-size:22px">${c.name.charAt(0).toUpperCase()}</div>
+      <div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:var(--navy)">${esc(c.name)}</div>
+        <div style="font-size:12px;color:var(--g500);margin-top:2px">${esc(c.phone || '-')} · ${esc(c.email || '-')}</div>
+        ${c.address ? `<div style="font-size:12px;color:var(--g500)">${esc(c.address)}</div>` : ''}
+      </div>
+    </div>
+    ${c.notes ? `<div class="ibox mb16">📝 ${esc(c.notes)}</div>` : ''}
+    <div class="sg3 mb16">
+      <div class="sc" style="border-top-color:var(--green)"><div class="sl">Total Revenue</div><div class="sv" style="color:var(--green);font-size:18px">${fRp(rev)}</div></div>
+      <div class="sc" style="border-top-color:var(--accent)"><div class="sl">Invoice</div><div class="sv" style="font-size:18px">${invs.length}</div></div>
+      <div class="sc" style="border-top-color:var(--gold)"><div class="sl">Purchase Order</div><div class="sv" style="font-size:18px">${pos.length}</div></div>
+    </div>
+    ${invs.length ? `<div class="card mb16"><div class="ch"><div class="ct">🧾 Riwayat Invoice</div></div>
+      <div class="tw"><table><thead><tr><th>Ref</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead><tbody>
+      ${invs.map(i => `<tr><td style="font-weight:700;color:var(--red);cursor:pointer" onclick="closeM('crm-detail');prevInv('${i.id}')">${esc(i.ref)}</td><td>${i.date}</td><td style="font-weight:700">${fRp(i.total)}</td><td>${bHTML(i.status)}</td></tr>`).join('')}
+      </tbody></table></div></div>` : ''}
+    ${pos.length ? `<div class="card"><div class="ch"><div class="ct">📋 Riwayat PO</div></div>
+      <div class="tw"><table><thead><tr><th>Ref</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead><tbody>
+      ${pos.map(p => `<tr><td style="font-weight:700;color:var(--accent);cursor:pointer" onclick="closeM('crm-detail');prevPO('${p.id}')">${esc(p.ref)}</td><td>${p.date}</td><td style="font-weight:700">${fRp(p.total)}</td><td>${bHTML(p.status)}</td></tr>`).join('')}
+      </tbody></table></div></div>` : ''}
+    <div style="margin-top:16px;font-size:11px;color:var(--g500)">Terdaftar: ${c.createdAt || '-'} · Update: ${c.updatedAt || '-'}</div>`;
+  openM('crm-detail');
+}
+
+// Auto-add customer to CRM if not exists
+function ensureCustomerInCRM(name, phone) {
+  if (!name) return;
+  const custs = DB.get('customers');
+  const exists = custs.find(c => c.name.toLowerCase() === name.toLowerCase());
+  if (exists) {
+    // Update phone if provided and empty
+    if (phone && !exists.phone) {
+      exists.phone = phone;
+      DB.set('customers', custs);
+    }
+    return;
+  }
+  // Add new customer
+  custs.push({
+    id: uid(),
+    name,
+    phone: phone || '',
+    email: '',
+    address: '',
+    notes: '',
+    createdAt: td(),
+    updatedAt: td()
+  });
+  DB.set('customers', custs);
+  updateCRMCount();
+}
+
+// ══════════════════════════════════════════
+//  CUSTOMER AUTOCOMPLETE DROPDOWN
+// ══════════════════════════════════════════
+function showCustDD(ctx) {
+  filterCustDD(ctx);
+  document.getElementById('cust-dd-' + ctx).classList.add('show');
+}
+
+function hideCustDD(ctx) {
+  document.getElementById('cust-dd-' + ctx).classList.remove('show');
+}
+
+function filterCustDD(ctx) {
+  const inputId = ctx === 'inv' ? 'icus' : 'pcus';
+  const ddId = 'cust-dd-' + ctx;
+  const phoneId = ctx === 'inv' ? 'iphn' : 'pphn';
+  const q = document.getElementById(inputId).value.toLowerCase();
+  const custs = DB.get('customers');
+  let filtered = custs;
+  if (q) filtered = custs.filter(c => c.name.toLowerCase().includes(q) || (c.phone || '').includes(q));
+  filtered = filtered.slice(0, 10); // limit to 10 results
+
+  let html = filtered.map(c => `
+    <div class="cust-dd-item" onmousedown="selectCust('${ctx}','${esc(c.name.replace(/'/g, "\\'"))}','${esc((c.phone || '').replace(/'/g, "\\'"))}')">
+      <span class="cdi-name">${esc(c.name)}</span>
+      ${c.phone ? `<span class="cdi-phone">📱 ${esc(c.phone)}</span>` : ''}
+    </div>`).join('');
+
+  if (q && !custs.find(c => c.name.toLowerCase() === q)) {
+    html += `<div class="cust-dd-add" onmousedown="selectCust('${ctx}','${esc(q.replace(/'/g, "\\'"))}','')">
+      ✨ Tambah "<b>${esc(q)}</b>" sebagai customer baru
+    </div>`;
+  }
+
+  if (!html) html = `<div style="padding:12px;text-align:center;color:var(--g500);font-size:12px">Ketik nama untuk mencari atau menambah customer baru</div>`;
+
+  document.getElementById(ddId).innerHTML = html;
+  document.getElementById(ddId).classList.add('show');
+}
+
+function selectCust(ctx, name, phone) {
+  const inputId = ctx === 'inv' ? 'icus' : 'pcus';
+  const phoneId = ctx === 'inv' ? 'iphn' : 'pphn';
+  document.getElementById(inputId).value = name;
+  if (phone) document.getElementById(phoneId).value = phone;
+  hideCustDD(ctx);
 }
 
 // ══════════════════════════════════════════
@@ -931,7 +1354,7 @@ function openInvModal(eid=null){
     document.getElementById('idp').value=gS('dp',70);
     const bk=gS('bank',''),rk=gS('rekening',''),an=gS('atasnama','');
     document.getElementById('inot').value=bk?`Pembayaran transfer ke ${bk} ${rk} a/n ${an}`:'';
-    document.getElementById('itrm').value=gS('terms','DP 70%, Pelunasan 30% dibayar setelah barang selesai dan siap kirim.');
+    document.getElementById('itrm').value=gS('terms','');
     addII();
   }
   calcIT();openM('im');
@@ -957,7 +1380,6 @@ function addII(d=null){
   const id=++_ii;
   const r=document.createElement('div');
   r.className='ir-inv';r.id='ii-'+id;
-  // find sku if product exists in stok
   const stoks=DB.get('stok');
   const matchStok=d?.desc?stoks.find(s=>s.name===d.desc||s.sku===d.skuRef):null;
   const selectedSku=d?.skuRef||matchStok?.sku||'';
@@ -985,7 +1407,6 @@ function addII(d=null){
     <div class="itot" id="iit-${id}">${fRp((d?.qty||1)*(d?.price||0))}</div>
     <button class="btn bg bs" onclick="this.closest('.ir-inv').remove();calcIT()" style="padding:4px 6px">✕</button>`;
   document.getElementById('iitems').appendChild(r);
-  // if editing and was manual, show manual input
   if(d?.desc&&!matchStok){
     const sel=r.querySelector('.prod-sel');
     sel.value='__manual__';
@@ -1012,8 +1433,6 @@ function onInvProdChange(id){
   const minQty=Number(opt.dataset.min||0);
   if(badgeEl)badgeEl.innerHTML=sel.value?getStokBadge(qty,minQty):'';
   if(hintEl)hintEl.textContent=sel.value&&opt.dataset.sku?`SKU: ${opt.dataset.sku} · ${opt.dataset.unit||'pcs'}`:'';
-  // auto-fill harga if empty or was auto
-  const priceEl=document.getElementById('ii-'+id)?.querySelector('.iip');
   const pEl=document.querySelector(`#ii-${id} .iip`);
   if(pEl&&sel.value){
     const harga=Number(opt.dataset.harga||0);
@@ -1023,7 +1442,6 @@ function onInvProdChange(id){
 }
 
 function onInvQtyChange(id){
-  // check stok warning live
   const sel=document.getElementById('ii-sel-'+id);
   if(!sel||sel.value==='__manual__'||!sel.value){calcIT();return;}
   const opt=sel.options[sel.selectedIndex];
@@ -1072,7 +1490,6 @@ function calcIT(){
   document.getElementById('itot').innerHTML=`<b>${fRp(tot)}</b>`;
   document.getElementById('idpa').innerHTML=
     `<b style="color:var(--yellow)">DP (${dp}%):</b> ${fRp(dpA)}<br><b>Sisa:</b> ${fRp(tot-dpA)}`;
-  // Live stok warning
   const stoks=DB.get('stok');
   const warns=[];
   items.forEach(it=>{
@@ -1091,6 +1508,9 @@ function saveInv(preview=false){
   const ref=document.getElementById('iref').value.trim();
   const cus=document.getElementById('icus').value.trim();
   if(!ref||!cus){toast('No. Invoice & Pelanggan wajib','err');return;}
+  const phone=document.getElementById('iphn').value.trim();
+  // Auto-save customer to CRM
+  ensureCustomerInCRM(cus, phone);
   const items=getII();
   if(!items.some(i=>i.desc)){toast('Tambahkan minimal 1 produk','err');return;}
   const sub=items.reduce((s,i)=>s+i.qty*i.price,0);
@@ -1100,7 +1520,7 @@ function saveInv(preview=false){
   const eid=document.getElementById('ieid').value;
   const data={
     id:eid||uid(),ref,customer:cus,
-    phone:document.getElementById('iphn').value,
+    phone,
     date:document.getElementById('idat').value,
     due:document.getElementById('idue').value,
     status,items,subtotal:sub,discount:dsc,total:tot,
@@ -1110,7 +1530,6 @@ function saveInv(preview=false){
   };
   let invs=DB.get('invoices');
   const old=eid?invs.find(i=>i.id===eid):null;
-  // Stok deduction
   const warnings=deductStok(items,old?.items||[]);
   if(eid)invs=invs.map(i=>i.id===eid?data:i);else invs.push(data);
   DB.set('invoices',invs);
@@ -1139,7 +1558,7 @@ function rInvT(){
     <tbody>${invs.map(i=>`<tr>
       <td style="font-weight:700;color:var(--red);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevInv('${i.id}')">${esc(i.ref)}</td>
       <td>${esc(i.customer)}<br><small class="tgy">${esc(i.phone||'')}</small></td>
-      <td>${i.date}</td><td>${i.due||'-'}<br>${(()=>{const bc=getBuktiCount(i.id,'inv');return bc>0?`<small style="color:var(--accent)">📎 ${bc} bukti</small>`:'';})()}</td>
+      <td>${i.date}</td><td>${i.due||'-'}<br>${(()=>{const bc=getBuktiCount(i.id,'inv');return bc>0?`<small style="color:var(--accent)">📎 ${bc} bukti</small>`:''})()}</td>
       <td style="font-weight:700">${fRp(i.total)}</td>
       <td><select class="ssel" onchange="updInvSt('${i.id}',this.value)">
         ${['pending','proses','lunas','batal'].map(s=>`<option value="${s}"${i.status===s?' selected':''}>${{pending:'⏳ Pending',proses:'🔄 Proses',lunas:'✅ Lunas',batal:'❌ Batal'}[s]}</option>`).join('')}
@@ -1200,11 +1619,11 @@ function openProdFromPreview(){
 
 function buildInvHTML(doc,type='INVOICE'){
   const cfg=DB.gO('settings');
-  const cn=cfg.name||'Hulyaprint Bandung';
-  const ca=cfg.address||'Jl Pasirlayung Selatan III No 9, Kota Bandung, Jawa Barat';
-  const ct=cfg.telp||'6282130625782';
-  const ce=cfg.email||'hulyadigitalprint@gmail.com';
-  const sg=cfg.signer||'Angga Kusuma Ramadhani';
+  const cn=cfg.name||'Hulya Apparel';
+  const ca=cfg.address||'';
+  const ct=cfg.telp||'';
+  const ce=cfg.email||'';
+  const sg=cfg.signer||'';
   const logoData=localStorage.getItem('h_logo')||'';
   const isInv=type==='INVOICE';
   const dpA=isInv?doc.total*(doc.dpPct/100):0;
@@ -1218,7 +1637,7 @@ function buildInvHTML(doc,type='INVOICE'){
         ${logoHTML}
         <div class="ivbn">${esc(cn)}</div>
         <div class="ivba">${esc(ca).replace(/,\s*/g,'<br>')}
-          <br>Telp: ${esc(ct)} · ${esc(ce)}</div>
+          ${ct?'<br>Telp: '+esc(ct):''}${ce?' · '+esc(ce):''}</div>
       </div>
       <div style="text-align:right">
         <div class="ivmh" style="color:${headColor}">${type}</div>
@@ -1390,7 +1809,6 @@ function calcPT(){
     const tot=r.querySelector('.itot');if(tot)tot.textContent=fRp(q*p);t+=q*p;
   });
   document.getElementById('ptot').textContent=fRp(t);
-  // Live stok warning for PO
   const stoks=DB.get('stok');
   const warns=[];
   const poItems=getPOItems();
@@ -1423,7 +1841,6 @@ function getPOItems(){
 }
 
 function deductStok(items,oldItems=[]){
-  // Restore old items first (if editing)
   if(oldItems.length){
     let stoks=DB.get('stok');
     oldItems.forEach(oi=>{
@@ -1433,13 +1850,12 @@ function deductStok(items,oldItems=[]){
     });
     DB.set('stok',stoks);
   }
-  // Deduct new items
   let stoks=DB.get('stok');
   const warnings=[];
   items.forEach(it=>{
     if(!it.desc||it.qty<=0)return;
     const idx=stoks.findIndex(s=>it.skuRef?s.sku===it.skuRef:s.name===it.desc);
-    if(idx<0)return; // manual product, skip
+    if(idx<0)return;
     const before=Number(stoks[idx].qty);
     const after=before-Number(it.qty);
     if(after<0)warnings.push(`${stoks[idx].name}: stok ${before}, order ${it.qty} (minus ${Math.abs(after)})`);
@@ -1454,15 +1870,17 @@ function savePO(){
   const ref=document.getElementById('pref').value.trim();
   const cus=document.getElementById('pcus').value.trim();
   if(!ref||!cus){toast('No. PO & Pelanggan wajib','err');return;}
+  const phone=document.getElementById('pphn').value.trim();
+  // Auto-save customer to CRM
+  ensureCustomerInCRM(cus, phone);
   const items=getPOItems();
   if(!items.some(i=>i.desc)){toast('Tambahkan minimal 1 produk','err');return;}
   const tot=items.reduce((s,i)=>s+i.qty*i.price,0);
   const eid=document.getElementById('peid').value;
   const oldPO=eid?DB.get('pos').find(p=>p.id===eid):null;
-  const data={id:eid||uid(),ref,customer:cus,phone:document.getElementById('pphn').value,
+  const data={id:eid||uid(),ref,customer:cus,phone,
     date:document.getElementById('pdat').value,due:document.getElementById('pdue').value,
     status:document.getElementById('pst').value,items,total:tot,notes:document.getElementById('pnot').value};
-  // Stok deduction
   const warnings=deductStok(items,oldPO?.items||[]);
   let pos=DB.get('pos');
   if(eid)pos=pos.map(p=>p.id===eid?data:p);else pos.push(data);
@@ -1485,7 +1903,7 @@ function rPOT(){
     <tbody>${pos.map(p=>`<tr>
       <td style="font-weight:700;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevPO('${p.id}')">${esc(p.ref)}</td>
       <td>${esc(p.customer)}<br><small class="tgy">${esc(p.phone||'')}</small></td><td>${p.date}</td>
-      <td>${p.due||'-'}<br>${(()=>{const pd=DB.gO('produksi')[p.id];if(!pd)return'';const d=Object.keys(pd.stages||{}).length;return d>0?`<small style="color:var(--accent)">🏭 ${d}/5 tahap</small>`:'';})()}</td>
+      <td>${p.due||'-'}<br>${(()=>{const pd=DB.gO('produksi')[p.id];if(!pd)return'';const d=Object.keys(pd.stages||{}).length;return d>0?`<small style="color:var(--accent)">🏭 ${d}/5 tahap</small>`:''})()}</td>
       <td style="font-weight:700">${fRp(p.total)}</td>
       <td><select class="ssel" onchange="updPOSt('${p.id}',this.value)">
         ${['pending','proses','selesai','batal'].map(s=>`<option value="${s}"${p.status===s?' selected':''}>${{pending:'⏳ Pending',proses:'🔄 Proses',selesai:'✅ Selesai',batal:'❌ Batal'}[s]}</option>`).join('')}
@@ -1763,6 +2181,14 @@ function rLap(){
     return{m:mN[i],inc,out,lb:inc-out};
   }).filter(x=>x.inc||x.out);
 
+  // Customer revenue breakdown
+  const custs=DB.get('customers');
+  const custRevenue=custs.map(c=>{
+    const cInvs=iL.filter(i=>i.customer?.toLowerCase()===c.name?.toLowerCase());
+    const rev=cInvs.reduce((s,i)=>s+Number(i.total||0),0);
+    return{name:c.name,rev,count:cInvs.length};
+  }).filter(c=>c.rev>0).sort((a,b)=>b.rev-a.rev).slice(0,10);
+
   document.getElementById('lapc').innerHTML=`
     <div class="g2 mb16">
       <div class="card">
@@ -1800,6 +2226,17 @@ function rLap(){
           <td class="tred tb2">${fRp(kelu)}</td>
           <td style="font-weight:700;color:${lb>=0?'var(--green)':'var(--red)'}">${fRp(lb)}</td>
         </tr></tfoot>
+      </table></div>
+    </div>`:''}
+    ${custRevenue.length?`<div class="card mb16">
+      <div class="ch"><div class="ct">👥 Revenue per Customer (Top 10)</div></div>
+      <div class="tw"><table>
+        <thead><tr><th>Customer</th><th>Invoice Lunas</th><th>Total Revenue</th></tr></thead>
+        <tbody>${custRevenue.map(c=>`<tr>
+          <td style="font-weight:700">${esc(c.name)}</td>
+          <td><span class="chip">${c.count}</span></td>
+          <td style="font-weight:700;color:var(--green)">${fRp(c.rev)}</td>
+        </tr>`).join('')}</tbody>
       </table></div>
     </div>`:''}
     <div class="card mb16">
@@ -1841,18 +2278,18 @@ function setTab(id,btn){
 
 function rSet(){
   const s=DB.gO('settings');
-  document.getElementById('sn').value=s.name||'Hulyaprint Bandung';
+  document.getElementById('sn').value=s.name||'';
   document.getElementById('stg').value=s.tagline||'';
-  document.getElementById('sad').value=s.address||'Jl Pasirlayung Selatan III No 9, Kota Bandung, Jawa Barat';
-  document.getElementById('stp').value=s.telp||'6282130625782';
-  document.getElementById('sem').value=s.email||'hulyadigitalprint@gmail.com';
-  document.getElementById('ssi').value=s.signer||'Angga Kusuma Ramadhani';
+  document.getElementById('sad').value=s.address||'';
+  document.getElementById('stp').value=s.telp||'';
+  document.getElementById('sem').value=s.email||'';
+  document.getElementById('ssi').value=s.signer||'';
   document.getElementById('snp').value=s.npwp||'';
-  document.getElementById('sbk').value=s.bank||'BCA';
-  document.getElementById('srk').value=s.rekening||'0860239876';
-  document.getElementById('san').value=s.atasnama||'Angga Kusuma Ramadhani';
+  document.getElementById('sbk').value=s.bank||'';
+  document.getElementById('srk').value=s.rekening||'';
+  document.getElementById('san').value=s.atasnama||'';
   document.getElementById('sdp').value=s.dp||70;
-  document.getElementById('str').value=s.terms||'DP 70%, Pelunasan 30% dibayar setelah barang selesai dan siap kirim.';
+  document.getElementById('str').value=s.terms||'';
   loadLogoPreview();
 }
 
@@ -1879,7 +2316,7 @@ function saveSettings(){
 }
 
 // ══════════════════════════════════════════
-//  PRINT (isolated window — no layout bleed)
+//  PRINT
 // ══════════════════════════════════════════
 function printDoc(containerId){
   const el=document.getElementById(containerId);
@@ -1890,9 +2327,9 @@ function printDoc(containerId){
     <meta charset="UTF-8"/>
     <title>Hulya Apparel — Dokumen</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
-      :root{--red:#1B5FA8;--navy:#1B2A4A;--accent:#3AAFD4;--gold:#F5B731;--black:#1A1A1A;--g900:#1B2A4A;--g700:#3D4451;--g500:#6B7280;--g300:#D1D5DB;--g200:#E5E7EB;--g100:#F3F4F6;--g50:#F8FAFD;--white:#fff;--green:#16A34A;--gbg:#DCFCE7;--yellow:#D97706;--ybg:#FEF5DC;--blue:#1B5FA8;--bbg:#E8F2FC}
+      :root{--red:#1B5FA8;--navy:#1B2A4A;--accent:#3AAFD4;--gold:#F5B731;--black:#1A1A1A;--g900:#1B2A4A;--g700:#3D4451;--g500:#6B7280;--g300:#D1D5DB;--g200:#E5E7EB;--g100:#F3F4F6;--g50:#F8FAFD;--white:#fff;--green:#16A34A;--gbg:#DCFCE7;--yellow:#D97706;--ybg:#FEF3C7;--blue:#1B5FA8;--bbg:#E8F2FC}
       *{box-sizing:border-box;margin:0;padding:0}
       body{font-family:'Inter',sans-serif;font-size:13px;color:#1A1A1A;background:#fff;padding:0}
       .ivp{background:#fff;padding:36px 40px;max-width:720px;margin:0 auto;font-size:13px;line-height:1.6}
@@ -1999,8 +2436,8 @@ function dlCSV(rows,fn){
 
 function backupData(){
   const all={};
-  ['invoices','pos','stok','pembelian','pembukuan','settings'].forEach(k=>{
-    try{all['h_'+k]=JSON.parse(localStorage.getItem('h_'+k)||'[]')}catch{}
+  ALL_KEYS.forEach(k=>{
+    all['h_'+k]=_cache[k];
   });
   const blob=new Blob([JSON.stringify(all,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -2016,7 +2453,13 @@ function restoreData(e){
     try{
       const d=JSON.parse(ev.target.result);
       if(!confirm('Restore akan menimpa semua data. Lanjutkan?'))return;
-      Object.keys(d).forEach(k=>localStorage.setItem(k,JSON.stringify(d[k])));
+      Object.keys(d).forEach(k=>{
+        const key=k.replace('h_','');
+        if(ALL_KEYS.includes(key)){
+          _cache[key]=d[k];
+          firestore.collection('app').doc(key).set({data:d[k]});
+        }
+      });
       toast('Data direstore ✅','inf');setTimeout(()=>location.reload(),1500);
     }catch{toast('File tidak valid','err');}
   };r.readAsText(f);e.target.value='';
@@ -2025,8 +2468,11 @@ function restoreData(e){
 function resetAll(){
   if(!confirm('⚠️ HAPUS SEMUA DATA? Tidak bisa dibatalkan!'))return;
   if(!confirm('Yakin? Data hilang permanen!'))return;
-  ['invoices','pos','stok','pembelian','pembukuan','settings'].forEach(k=>localStorage.removeItem('h_'+k));
-  localStorage.removeItem('h__seed');
+  ALL_KEYS.forEach(k=>{
+    const empty=COLLECTIONS.includes(k)?[]:{};
+    _cache[k]=empty;
+    firestore.collection('app').doc(k).set({data:empty});
+  });
   toast('Data direset','inf');setTimeout(()=>location.reload(),1500);
 }
 
@@ -2051,56 +2497,6 @@ function autoRef(pfx){
 }
 
 // ══════════════════════════════════════════
-//  SEED (first run)
-// ══════════════════════════════════════════
-(function seed(){
-  if(localStorage.getItem('h__seed'))return;
-  DB.sO('settings',{
-    name:'Hulyaprint Bandung',tagline:'Premium Jersey Printing',
-    address:'Jl Pasirlayung Selatan III No 9, Kota Bandung, Jawa Barat',
-    telp:'6282130625782',email:'hulyadigitalprint@gmail.com',
-    signer:'Angga Kusuma Ramadhani',
-    bank:'BCA',rekening:'0860239876',atasnama:'Angga Kusuma Ramadhani',
-    dp:70,terms:'DP 70%, Pelunasan 30% dibayar setelah barang selesai dan siap kirim.',npwp:''
-  });
-  const inv={id:uid(),ref:'INV/202606/0001',customer:'Tn Raj Fatur',phone:'6282114029615',
-    date:'2026-06-11',due:'2026-06-18',status:'pending',
-    items:[
-      {desc:'Jersey, Fullprint Sublim, Brazil size SML',qty:32,price:65000},
-      {desc:'Jersey Dry Fit, FullPrint Sublim, Brazil size XL',qty:4,price:70000},
-      {desc:'Jersey Dry Fit, FullPrint Sublim, Brazil size 2XL',qty:2,price:75000}
-    ],
-    subtotal:2510000,discount:0,total:2510000,dpPct:70,
-    notes:'Pembayaran hanya di transfer ke Nomor Rekening BCA 0860239876 Atas Nama Angga Kusuma Ramadhani',
-    terms:'DP 70%, Pelunasan 30% dibayar setelah barang selesai dan siap kirim.'};
-  const po={id:uid(),ref:'PO/202606/0001',customer:'Komunitas Futsal Bandung FC',phone:'08121234567',
-    date:'2026-06-10',due:'2026-06-25',status:'proses',
-    items:[{desc:'Jersey Printing Fullcolor Lengan Panjang',qty:22,price:95000}],
-    total:2090000,notes:'Warna: merah-putih. Font nama: bold italic.'};
-  DB.set('invoices',[inv]);
-  DB.set('pos',[po]);
-  DB.set('stok',[
-    {id:uid(),name:'Jersey SML Fullprint Sublim',sku:'JRY-SML',category:'Jersey',qty:50,minQty:10,harga:65000,hpp:42000,unit:'pcs',desc:'Dry fit Brazil cut'},
-    {id:uid(),name:'Jersey L Dry Fit',sku:'JRY-L',category:'Jersey',qty:12,minQty:10,harga:68000,hpp:44000,unit:'pcs',desc:''},
-    {id:uid(),name:'Jersey XL Dry Fit',sku:'JRY-XL',category:'Jersey',qty:8,minQty:10,harga:70000,hpp:45000,unit:'pcs',desc:''},
-    {id:uid(),name:'Jersey 2XL Dry Fit',sku:'JRY-2XL',category:'Jersey',qty:3,minQty:5,harga:75000,hpp:48000,unit:'pcs',desc:''},
-    {id:uid(),name:'Tinta Sublim Epson',sku:'INK-001',category:'Bahan Baku',qty:4,minQty:5,harga:0,hpp:85000,unit:'botol',desc:'100ml'},
-    {id:uid(),name:'Kertas Transfer A3',sku:'KRT-A3',category:'Bahan Baku',qty:200,minQty:50,harga:0,hpp:1500,unit:'lembar',desc:''}
-  ]);
-  const beli={id:uid(),ref:'PB/202606/0001',supplier:'CV Bahan Tekstil Prima',
-    date:'2026-06-05',total:850000,notes:'Bahan produksi Juni',
-    items:[{desc:'Kain Dry Fit',qty:10,price:55000},{desc:'Tinta Sublim Set',qty:4,price:75000}]};
-  DB.set('pembelian',[beli]);
-  DB.set('pembukuan',[
-    {id:uid(),date:'2026-06-05',ref:'PB/202606/0001',desc:'Pembelian dari CV Bahan Tekstil Prima',debit:0,kredit:850000,akun:'Biaya Produksi',type:'pengeluaran',src:'pembelian',srcId:beli.id},
-    {id:uid(),date:'2026-05-20',ref:'INV/202605/0003',desc:'Pendapatan Invoice — Futsal Club Cimahi',debit:1750000,kredit:0,akun:'Pendapatan Usaha',type:'pendapatan',src:'invoice',srcId:'x1'},
-    {id:uid(),date:'2026-05-10',ref:'PB/202605/0001',desc:'Pembelian bahan baku Mei',debit:0,kredit:620000,akun:'Biaya Produksi',type:'pengeluaran',src:'pembelian',srcId:'y1'}
-  ]);
-  localStorage.setItem('h__seed','1');
-})();
-
-
-// ══════════════════════════════════════════
 //  FITUR 1 & 2: WA SHARE + TEMPLATE PESAN
 // ══════════════════════════════════════════
 const WA_TMPLS={
@@ -2108,7 +2504,7 @@ const WA_TMPLS={
     const cfg=DB.gO('settings');
     return `Halo ${d.customer} 👋
 
-Terima kasih sudah memesan di *${cfg.name||'Hulyaprint'}*!
+Terima kasih sudah memesan di *${cfg.name||'Hulya Apparel'}*!
 
 Berikut detail pesanan Anda:
 📋 *No. ${type==='po'?'PO':'Invoice'}:* ${d.ref}
@@ -2118,13 +2514,13 @@ ${type==='inv'&&d.dpPct?`🧾 *DP ${d.dpPct}%:* ${fRp(d.total*(d.dpPct/100))}\n`
 Mohon konfirmasi pesanan Anda ya.
 
 Terima kasih 🙏
-_${cfg.name||'Hulyaprint'}_`;
+_${cfg.name||'Hulya Apparel'}_`;
   },
   tagihan:(d,type)=>{
     const cfg=DB.gO('settings');
     return `Halo ${d.customer} 👋
 
-Berikut tagihan dari *${cfg.name||'Hulyaprint'}*:
+Berikut tagihan dari *${cfg.name||'Hulya Apparel'}*:
 
 🧾 *No. Invoice:* ${d.ref}
 📅 *Tanggal:* ${d.date}
@@ -2132,11 +2528,11 @@ Berikut tagihan dari *${cfg.name||'Hulyaprint'}*:
 💰 *Total:* *${fRp(d.total)}*
 ${d.dpPct?`🔖 *DP ${d.dpPct}%:* ${fRp(d.total*(d.dpPct/100))} | *Sisa:* ${fRp(d.total-(d.total*(d.dpPct/100)))}\n`:''}
 💳 *Pembayaran:*
-Transfer ke ${cfg.bank||'BCA'} ${cfg.rekening||'-'}
+Transfer ke ${cfg.bank||'-'} ${cfg.rekening||'-'}
 a/n ${cfg.atasnama||'-'}
 
 Mohon konfirmasi setelah transfer ya 🙏
-_${cfg.name||'Hulyaprint'}_`;
+_${cfg.name||'Hulya Apparel'}_`;
   },
   lunas:(d)=>{
     const cfg=DB.gO('settings');
@@ -2151,7 +2547,7 @@ _${cfg.name||'Hulyaprint'}_`;
 Terima kasih sudah mempercayai kami 🙏
 Pesanan sedang kami proses dan akan segera kami kabari update produksinya.
 
-_${cfg.name||'Hulyaprint'}_`;
+_${cfg.name||'Hulya Apparel'}_`;
   },
   followup:(d,type)=>{
     const cfg=DB.gO('settings');
@@ -2164,7 +2560,7 @@ Kami ingin mengingatkan bahwa ${type==='inv'?`tagihan *${d.ref}*`:`order *${d.re
 Apakah ada yang perlu kami bantu atau ada update dari pihak Anda?
 
 Terima kasih 🙏
-_${cfg.name||'Hulyaprint'}_`;
+_${cfg.name||'Hulya Apparel'}_`;
   },
   selesai:(d)=>{
     const cfg=DB.gO('settings');
@@ -2179,7 +2575,7 @@ Pesanan sudah melewati semua tahap produksi dan siap untuk dikirim atau diambil.
 
 Mohon konfirmasi untuk proses pengiriman/pengambilan ya 🙏
 
-_${cfg.name||'Hulyaprint'}_`;
+_${cfg.name||'Hulya Apparel'}_`;
   }
 };
 
@@ -2193,10 +2589,8 @@ function openWAModal(id,type){
   document.getElementById('wa-phone').value=_waDoc.phone||'';
   document.getElementById('wa-docid').value=id;
   document.getElementById('wa-doctype').value=type;
-  // reset tabs
   document.querySelectorAll('#wa-tmpl-tabs .ptbtn').forEach(b=>b.classList.remove('on'));
   document.querySelector('#wa-tmpl-tabs .ptbtn').classList.add('on');
-  // hide 'selesai' tab for invoice
   const tabs=document.querySelectorAll('#wa-tmpl-tabs .ptbtn');
   tabs[4].style.display=type==='po'?'':'none';
   _waTmpl='konfirmasi';
@@ -2254,7 +2648,6 @@ const PROD_STAGES=[
 function openProdModal(id){
   const po=DB.get('pos').find(p=>p.id===id);if(!po)return;
   document.getElementById('prod-poid').value=id;
-  // load saved prod data
   const allProd=DB.gO('produksi')||{};
   const pdata=allProd[id]||{stages:{},notes:''};
   document.getElementById('prod-info').innerHTML=
@@ -2301,7 +2694,6 @@ function saveProd(){
   if(!allProd[id])allProd[id]={stages:{},notes:''};
   allProd[id].notes=document.getElementById('prod-notes').value;
   DB.sO('produksi',allProd);
-  // check if all done → auto update PO status
   const done=PROD_STAGES.filter(s=>allProd[id].stages[s.key]).length;
   if(done===PROD_STAGES.length){
     let pos=DB.get('pos');
@@ -2390,12 +2782,9 @@ function openLightbox(src){
   openM('lbm');
 }
 
-// Also show bukti count badge in table — patch invoice row to show bukti indicator
 function getBuktiCount(id,type){
   try{return JSON.parse(localStorage.getItem(getBuktiKey(id,type))||'[]').length}catch{return 0;}
 }
-
-
 
 // Refresh all open product dropdowns when stok changes
 function refreshItemDropdowns(){
@@ -2406,14 +2795,35 @@ function refreshItemDropdowns(){
       const curr=sel.value;
       const opts=buildStokOptions(curr,'');
       sel.innerHTML=opts;
-      // restore selection
       if(curr)sel.value=curr;
     });
   });
 }
 
-// INIT
-rDash();chkStok();
+// ══════════════════════════════════════════
+//  APP INIT — Load Firebase then render
+// ══════════════════════════════════════════
+async function initApp() {
+  try {
+    await loadFromFirestore();
+    setupRealtimeSync();
+  } catch (e) {
+    console.error('Init error:', e);
+  }
+  // Hide loading overlay
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) {
+    overlay.classList.add('done');
+    setTimeout(() => overlay.remove(), 500);
+  }
+  // Render
+  rDash();
+  chkStok();
+  updateCRMCount();
+  loadLogoPreview();
+}
+
+initApp();
 </script>
 </body>
 </html>
