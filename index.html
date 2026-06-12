@@ -1279,6 +1279,20 @@ function selectCust(ctx, name, phone) {
 // ══════════════════════════════════════════
 function rDash(){
   let invs=DB.get('invoices'),buku=DB.get('pembukuan'),stoks=DB.get('stok');
+  
+  // Auto-cleanup orphaned pembukuan (self-healing for existing corrupted data)
+  let cleanBuku = buku.filter(b => {
+    if (b.src === 'invoice' && b.srcId) {
+      const inv = invs.find(i => i.id === b.srcId);
+      if (!inv || inv.status !== 'lunas') return false;
+    }
+    return true;
+  });
+  if(cleanBuku.length !== buku.length) {
+    DB.set('pembukuan', cleanBuku);
+    buku = cleanBuku;
+  }
+
   const cfg=DB.gO('settings');
   const f=document.getElementById('dash-filter')?.value||'month';
   const now=new Date();
@@ -1654,8 +1668,16 @@ function updInvSt(id,st){
   createPOFromInvoice(inv);
   if(st==='lunas'&&old!=='lunas'){
     addBE({date:td(),ref:inv.ref,desc:`Pendapatan Invoice ${inv.ref} — ${inv.customer}`,debit:inv.total,kredit:0,akun:'Pendapatan Usaha',type:'pendapatan',src:'invoice',srcId:inv.id});
+    rDash();
     toast('Invoice lunas ✅ — masuk pembukuan');
-  }else toast('Status diperbarui');
+  }else if(old==='lunas'&&st!=='lunas'){
+    DB.set('pembukuan', DB.get('pembukuan').filter(b => !(b.src === 'invoice' && b.srcId === id)));
+    rDash();
+    toast('Status diperbarui & ditarik dari pembukuan');
+  }else{
+    rDash();
+    toast('Status diperbarui');
+  }
 }
 
 function delInv(id){
