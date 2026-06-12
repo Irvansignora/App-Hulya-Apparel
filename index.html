@@ -172,6 +172,37 @@ textarea{resize:vertical;min-height:68px}
 .ivsw{text-align:center;padding-top:10px}
 .ivsl{border-bottom:1px solid var(--black);width:130px;margin:0 auto 6px}
 .ivsn{font-weight:700;font-size:12px}
+
+/* ── FITUR BARU ── */
+/* WA Share Button */
+.bwa{background:#25D366;color:#fff;border:none}.bwa:hover{background:#1da851}
+/* Template WA Modal */
+.wa-msg{background:#ECF8F0;border:1px solid #c3e6cb;border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;font-family:'Inter',sans-serif;color:#1a1a1a;max-height:260px;overflow-y:auto}
+.wa-tmpl-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--g300);background:var(--white);color:var(--g700);transition:all .15s;margin:3px}
+.wa-tmpl-btn:hover,.wa-tmpl-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Produksi Checklist */
+.prod-stage{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1.5px solid var(--g200);margin-bottom:8px;cursor:pointer;transition:all .15s;user-select:none}
+.prod-stage:hover{border-color:var(--accent);background:var(--accent-light)}
+.prod-stage.done{border-color:var(--green);background:#F0FBF4}
+.prod-stage.done .ps-icon{background:var(--green);color:#fff}
+.prod-stage .ps-icon{width:36px;height:36px;border-radius:50%;background:var(--g100);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .15s}
+.prod-stage .ps-info{flex:1}
+.prod-stage .ps-name{font-weight:700;font-size:13px;color:var(--navy)}
+.prod-stage .ps-sub{font-size:11px;color:var(--g500);margin-top:1px}
+.prod-stage .ps-time{font-size:11px;color:var(--g500);text-align:right;min-width:80px}
+.prod-progress{height:8px;border-radius:4px;background:var(--g200);margin-bottom:18px;overflow:hidden}
+.prod-progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .4s ease}
+/* Bukti Bayar */
+.bukti-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px}
+.bukti-item{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;background:var(--g100);border:1.5px solid var(--g200)}
+.bukti-item img{width:100%;height:100%;object-fit:cover}
+.bukti-item .del-bukti{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.bukti-add{border:2px dashed var(--g300);border-radius:8px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:4px;font-size:11px;color:var(--g500);background:var(--white);transition:all .15s}
+.bukti-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+/* Pill tabs inside modal */
+.ptab{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ptbtn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--g300);background:var(--white);color:var(--g700);transition:all .15s}
+.ptbtn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 @media print{
   #sb,#tb,.np{display:none!important}
   #main{margin-left:0!important}
@@ -440,6 +471,76 @@ textarea{resize:vertical;min-height:68px}
   </div>
 </div>
 </div>
+
+<!-- ══ WA MODAL ══ -->
+<div class="mb" id="wam">
+<div class="mo" style="max-width:560px">
+  <div class="mh"><div class="mtt">💬 Kirim via WhatsApp</div><button class="mc" onclick="closeM('wam')">✕</button></div>
+  <div class="mbod">
+    <div class="ptab" id="wa-tmpl-tabs">
+      <button class="ptbtn on" onclick="setWATmpl('konfirmasi',this)">Konfirmasi Order</button>
+      <button class="ptbtn" onclick="setWATmpl('tagihan',this)">Tagihan / Invoice</button>
+      <button class="ptbtn" onclick="setWATmpl('lunas',this)">Ucapan Lunas</button>
+      <button class="ptbtn" onclick="setWATmpl('followup',this)">Follow Up</button>
+      <button class="ptbtn" onclick="setWATmpl('selesai',this)">Order Selesai</button>
+    </div>
+    <div class="wa-msg" id="wa-preview" contenteditable="true" spellcheck="false"></div>
+    <div style="margin-top:12px;font-size:11px;color:var(--g500)">✏️ Pesan bisa diedit langsung di atas sebelum dikirim</div>
+    <input type="hidden" id="wa-phone"/>
+    <input type="hidden" id="wa-docid"/>
+    <input type="hidden" id="wa-doctype"/>
+  </div>
+  <div class="mf">
+    <button class="btn bg" onclick="copyWAMsg()">📋 Copy Pesan</button>
+    <button class="btn bwa" onclick="sendWA()">💬 Buka WhatsApp</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ PRODUKSI MODAL ══ -->
+<div class="mb" id="prodm">
+<div class="mo" style="max-width:560px">
+  <div class="mh"><div class="mtt">🏭 Rekap Produksi</div><button class="mc" onclick="closeM('prodm')">✕</button></div>
+  <div class="mbod">
+    <div id="prod-info" style="background:var(--g50);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px"></div>
+    <div class="prod-progress"><div class="prod-progress-fill" id="prod-bar" style="width:0%"></div></div>
+    <div id="prod-stages"></div>
+    <div style="margin-top:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g700)">Catatan Produksi</label>
+      <textarea id="prod-notes" rows="2" style="margin-top:6px;width:100%" placeholder="Tambahkan catatan produksi..."></textarea>
+    </div>
+    <input type="hidden" id="prod-poid"/>
+  </div>
+  <div class="mf">
+    <button class="btn bg" onclick="closeM('prodm')">Tutup</button>
+    <button class="btn bp" onclick="saveProd()">💾 Simpan Progress</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ BUKTI BAYAR MODAL ══ -->
+<div class="mb" id="buktim">
+<div class="mo" style="max-width:520px">
+  <div class="mh"><div class="mtt">📎 Bukti Pembayaran</div><button class="mc" onclick="closeM('buktim')">✕</button></div>
+  <div class="mbod">
+    <div id="bukti-ref" style="font-size:12px;color:var(--g500);margin-bottom:12px"></div>
+    <div class="bukti-grid" id="bukti-grid"></div>
+    <input type="file" id="bukti-file" accept="image/*" multiple class="hide" onchange="handleBuktiUpload(event)"/>
+    <div style="margin-top:14px;font-size:11px;color:var(--g500)">💡 Klik gambar untuk lihat full. Maks 5 foto, tiap foto maks 800KB.</div>
+    <input type="hidden" id="bukti-docid"/>
+    <input type="hidden" id="bukti-doctype"/>
+  </div>
+  <div class="mf">
+    <button class="btn bg" onclick="closeM('buktim')">Tutup</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ BUKTI LIGHTBOX ══ -->
+<div class="mb" id="lbm" onclick="closeM('lbm')" style="background:rgba(0,0,0,.85)">
+  <img id="lb-img" style="max-width:94vw;max-height:90vh;border-radius:8px;object-fit:contain"/>
+</div>
+
 <!-- TOAST -->
 <div class="tw2" id="twrap"></div>
 
@@ -631,6 +732,8 @@ textarea{resize:vertical;min-height:68px}
 <div class="mo" style="max-width:760px">
   <div class="mh np"><div class="mtt">Preview Invoice</div>
     <div class="fl g8">
+      <button class="btn bwa bs" id="pv-wa-btn" onclick="openWAFromPreview('inv')">💬 WA</button>
+      <button class="btn bg bs" id="pv-bukti-btn" onclick="openBuktiFromPreview('inv')" style="color:var(--accent);border-color:var(--accent)">📎 Bukti</button>
       <button class="btn bp bs" onclick="printDoc('pvib')">🖨️ Print / PDF</button>
       <button class="mc" onclick="closeM('pvim')">✕</button>
     </div>
@@ -644,6 +747,8 @@ textarea{resize:vertical;min-height:68px}
 <div class="mo" style="max-width:760px">
   <div class="mh np"><div class="mtt">Preview Purchase Order</div>
     <div class="fl g8">
+      <button class="btn bwa bs" id="pv-po-wa-btn" onclick="openWAFromPreview('po')">💬 WA</button>
+      <button class="btn bg bs" id="pv-prod-btn" onclick="openProdFromPreview()" style="color:var(--gold);border-color:var(--gold)">🏭 Produksi</button>
       <button class="btn bp bs" onclick="printDoc('pvpb')">🖨️ Print / PDF</button>
       <button class="mc" onclick="closeM('pvpm')">✕</button>
     </div>
@@ -892,13 +997,15 @@ function rInvT(){
     <tbody>${invs.map(i=>`<tr>
       <td style="font-weight:700;color:var(--red);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevInv('${i.id}')">${esc(i.ref)}</td>
       <td>${esc(i.customer)}<br><small class="tgy">${esc(i.phone||'')}</small></td>
-      <td>${i.date}</td><td>${i.due||'-'}</td>
+      <td>${i.date}</td><td>${i.due||'-'}<br>${(()=>{const bc=getBuktiCount(i.id,'inv');return bc>0?`<small style="color:var(--accent)">📎 ${bc} bukti</small>`:'';})()}</td>
       <td style="font-weight:700">${fRp(i.total)}</td>
       <td><select class="ssel" onchange="updInvSt('${i.id}',this.value)">
         ${['pending','proses','lunas','batal'].map(s=>`<option value="${s}"${i.status===s?' selected':''}>${{pending:'⏳ Pending',proses:'🔄 Proses',lunas:'✅ Lunas',batal:'❌ Batal'}[s]}</option>`).join('')}
       </select></td>
-      <td style="white-space:nowrap">
-        <button class="btn bg bs" onclick="prevInv('${i.id}')">👁️</button>
+      <td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn bg bs" onclick="prevInv('${i.id}')" title="Preview">👁️</button>
+        <button class="btn bwa bs" onclick="openWAModal('${i.id}','inv')" title="Kirim WA">💬</button>
+        <button class="btn bg bs" style="color:var(--accent);border-color:var(--accent)" onclick="openBuktiModal('${i.id}','inv')" title="Bukti Bayar">📎</button>
         <button class="btn bg bs" onclick="openInvModal('${i.id}')">✏️</button>
         <button class="btn bg bs tred" onclick="delInv('${i.id}')">🗑️</button>
       </td>
@@ -921,10 +1028,22 @@ function delInv(id){
   rInvT();toast('Invoice dihapus');
 }
 
+let _curInvId=null,_curPOId=null;
 function prevInv(id){
   const inv=DB.get('invoices').find(i=>i.id===id);if(!inv)return;
+  _curInvId=id;
   document.getElementById('pvib').innerHTML=buildInvHTML(inv,'INVOICE');
   openM('pvim');
+}
+function openWAFromPreview(type){
+  if(type==='inv'&&_curInvId){closeM('pvim');openWAModal(_curInvId,'inv');}
+  else if(type==='po'&&_curPOId){closeM('pvpm');openWAModal(_curPOId,'po');}
+}
+function openBuktiFromPreview(type){
+  if(_curInvId){closeM('pvim');openBuktiModal(_curInvId,'inv');}
+}
+function openProdFromPreview(){
+  if(_curPOId){closeM('pvpm');openProdModal(_curPOId);}
 }
 
 function buildInvHTML(doc,type='INVOICE'){
@@ -1080,13 +1199,16 @@ function rPOT(){
     <thead><tr><th>No. PO</th><th>Pelanggan</th><th>Tanggal</th><th>Target</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
     <tbody>${pos.map(p=>`<tr>
       <td style="font-weight:700;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevPO('${p.id}')">${esc(p.ref)}</td>
-      <td>${esc(p.customer)}</td><td>${p.date}</td><td>${p.due||'-'}</td>
+      <td>${esc(p.customer)}<br><small class="tgy">${esc(p.phone||'')}</small></td><td>${p.date}</td>
+      <td>${p.due||'-'}<br>${(()=>{const pd=DB.gO('produksi')[p.id];if(!pd)return'';const d=Object.keys(pd.stages||{}).length;return d>0?`<small style="color:var(--accent)">🏭 ${d}/5 tahap</small>`:'';})()}</td>
       <td style="font-weight:700">${fRp(p.total)}</td>
       <td><select class="ssel" onchange="updPOSt('${p.id}',this.value)">
         ${['pending','proses','selesai','batal'].map(s=>`<option value="${s}"${p.status===s?' selected':''}>${{pending:'⏳ Pending',proses:'🔄 Proses',selesai:'✅ Selesai',batal:'❌ Batal'}[s]}</option>`).join('')}
       </select></td>
-      <td style="white-space:nowrap">
-        <button class="btn bg bs" onclick="prevPO('${p.id}')">👁️</button>
+      <td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn bg bs" onclick="prevPO('${p.id}')" title="Preview">👁️</button>
+        <button class="btn bwa bs" onclick="openWAModal('${p.id}','po')" title="Kirim WA">💬</button>
+        <button class="btn bg bs" style="color:var(--gold);border-color:var(--gold)" onclick="openProdModal('${p.id}')" title="Rekap Produksi">🏭</button>
         <button class="btn bg bs" onclick="openPOModal('${p.id}')">✏️</button>
         <button class="btn bg bs tred" onclick="delPO('${p.id}')">🗑️</button>
       </td>
@@ -1102,6 +1224,7 @@ function delPO(id){
 }
 function prevPO(id){
   const po=DB.get('pos').find(p=>p.id===id);if(!po)return;
+  _curPOId=id;
   document.getElementById('pvpb').innerHTML=buildInvHTML(po,'PURCHASE ORDER');
   openM('pvpm');
 }
@@ -1680,6 +1803,303 @@ function autoRef(pfx){
   ]);
   localStorage.setItem('h__seed','1');
 })();
+
+
+// ══════════════════════════════════════════
+//  FITUR 1 & 2: WA SHARE + TEMPLATE PESAN
+// ══════════════════════════════════════════
+const WA_TMPLS={
+  konfirmasi:(d,type)=>{
+    const cfg=DB.gO('settings');
+    return `Halo ${d.customer} 👋
+
+Terima kasih sudah memesan di *${cfg.name||'Hulyaprint'}*!
+
+Berikut detail pesanan Anda:
+📋 *No. ${type==='po'?'PO':'Invoice'}:* ${d.ref}
+📅 *Tanggal:* ${d.date}
+${d.due?`⏰ *${type==='po'?'Target Selesai':'Jatuh Tempo'}:* ${d.due}\n`:''}💰 *Total:* ${fRp(d.total)}
+${type==='inv'&&d.dpPct?`🧾 *DP ${d.dpPct}%:* ${fRp(d.total*(d.dpPct/100))}\n`:''}
+Mohon konfirmasi pesanan Anda ya.
+
+Terima kasih 🙏
+_${cfg.name||'Hulyaprint'}_`;
+  },
+  tagihan:(d,type)=>{
+    const cfg=DB.gO('settings');
+    return `Halo ${d.customer} 👋
+
+Berikut tagihan dari *${cfg.name||'Hulyaprint'}*:
+
+🧾 *No. Invoice:* ${d.ref}
+📅 *Tanggal:* ${d.date}
+⏰ *Jatuh Tempo:* ${d.due||'-'}
+💰 *Total:* *${fRp(d.total)}*
+${d.dpPct?`🔖 *DP ${d.dpPct}%:* ${fRp(d.total*(d.dpPct/100))} | *Sisa:* ${fRp(d.total-(d.total*(d.dpPct/100)))}\n`:''}
+💳 *Pembayaran:*
+Transfer ke ${cfg.bank||'BCA'} ${cfg.rekening||'-'}
+a/n ${cfg.atasnama||'-'}
+
+Mohon konfirmasi setelah transfer ya 🙏
+_${cfg.name||'Hulyaprint'}_`;
+  },
+  lunas:(d)=>{
+    const cfg=DB.gO('settings');
+    return `Halo ${d.customer} 👋
+
+✅ Pembayaran Anda sudah kami terima!
+
+🧾 *No. Invoice:* ${d.ref}
+💰 *Nominal:* ${fRp(d.total)}
+📅 *Tanggal Lunas:* ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}
+
+Terima kasih sudah mempercayai kami 🙏
+Pesanan sedang kami proses dan akan segera kami kabari update produksinya.
+
+_${cfg.name||'Hulyaprint'}_`;
+  },
+  followup:(d,type)=>{
+    const cfg=DB.gO('settings');
+    return `Halo ${d.customer} 👋
+
+Maaf mengganggu waktunya 🙏
+
+Kami ingin mengingatkan bahwa ${type==='inv'?`tagihan *${d.ref}*`:`order *${d.ref}*`} senilai *${fRp(d.total)}* ${type==='inv'?`akan jatuh tempo pada *${d.due||'-'}*`:`ditarget selesai pada *${d.due||'-'}*`}.
+
+Apakah ada yang perlu kami bantu atau ada update dari pihak Anda?
+
+Terima kasih 🙏
+_${cfg.name||'Hulyaprint'}_`;
+  },
+  selesai:(d)=>{
+    const cfg=DB.gO('settings');
+    return `Halo ${d.customer} 👋
+
+🎉 *Pesanan Anda Sudah Selesai!*
+
+📋 *No. PO:* ${d.ref}
+✅ *Status:* Selesai & Siap Kirim/Ambil
+
+Pesanan sudah melewati semua tahap produksi dan siap untuk dikirim atau diambil.
+
+Mohon konfirmasi untuk proses pengiriman/pengambilan ya 🙏
+
+_${cfg.name||'Hulyaprint'}_`;
+  }
+};
+
+let _waDoc=null,_waType='inv',_waTmpl='konfirmasi';
+
+function openWAModal(id,type){
+  _waType=type;
+  const docs=type==='inv'?DB.get('invoices'):DB.get('pos');
+  _waDoc=docs.find(d=>d.id===id);
+  if(!_waDoc)return;
+  document.getElementById('wa-phone').value=_waDoc.phone||'';
+  document.getElementById('wa-docid').value=id;
+  document.getElementById('wa-doctype').value=type;
+  // reset tabs
+  document.querySelectorAll('#wa-tmpl-tabs .ptbtn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('#wa-tmpl-tabs .ptbtn').classList.add('on');
+  // hide 'selesai' tab for invoice
+  const tabs=document.querySelectorAll('#wa-tmpl-tabs .ptbtn');
+  tabs[4].style.display=type==='po'?'':'none';
+  _waTmpl='konfirmasi';
+  renderWAPreview();
+  openM('wam');
+}
+
+function setWATmpl(tmpl,btn){
+  _waTmpl=tmpl;
+  document.querySelectorAll('#wa-tmpl-tabs .ptbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderWAPreview();
+}
+
+function renderWAPreview(){
+  if(!_waDoc)return;
+  const fn=WA_TMPLS[_waTmpl];
+  const msg=fn?fn(_waDoc,_waType):'';
+  document.getElementById('wa-preview').textContent=msg;
+}
+
+function getWAMsg(){
+  return document.getElementById('wa-preview').textContent||'';
+}
+
+function sendWA(){
+  const phone=(document.getElementById('wa-phone').value||'').replace(/\D/g,'');
+  const msg=getWAMsg();
+  if(!phone){toast('Nomor HP customer tidak ada. Edit invoice/PO dulu ya.','err');return;}
+  const url=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+}
+
+function copyWAMsg(){
+  const msg=getWAMsg();
+  navigator.clipboard.writeText(msg).then(()=>toast('Pesan dicopy ke clipboard ✅')).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=msg;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    toast('Pesan dicopy ✅');
+  });
+}
+
+// ══════════════════════════════════════════
+//  FITUR 3: REKAP PRODUKSI PER PO
+// ══════════════════════════════════════════
+const PROD_STAGES=[
+  {key:'potong',icon:'✂️',name:'Potong Bahan',sub:'Kain dipotong sesuai pola & ukuran'},
+  {key:'jahit',icon:'🧵',name:'Jahit / Obras',sub:'Proses jahit dan finishing obras'},
+  {key:'print',icon:'🖨️',name:'Print & Sublim',sub:'Cetak desain fullprint sublimasi'},
+  {key:'qc',icon:'🔍',name:'Quality Check',sub:'Pengecekan kualitas & kerapihan'},
+  {key:'packing',icon:'📦',name:'Packing',sub:'Lipat, tag, dan packaging siap kirim'}
+];
+
+function openProdModal(id){
+  const po=DB.get('pos').find(p=>p.id===id);if(!po)return;
+  document.getElementById('prod-poid').value=id;
+  // load saved prod data
+  const allProd=DB.gO('produksi')||{};
+  const pdata=allProd[id]||{stages:{},notes:''};
+  document.getElementById('prod-info').innerHTML=
+    `<b>${esc(po.customer)}</b> &nbsp;·&nbsp; ${esc(po.ref)} &nbsp;·&nbsp; <span style="color:var(--g500)">${po.items.length} item · ${fRp(po.total)}</span>`;
+  document.getElementById('prod-notes').value=pdata.notes||po.notes||'';
+  renderProdStages(pdata.stages||{});
+  openM('prodm');
+}
+
+function renderProdStages(stages){
+  const done=PROD_STAGES.filter(s=>stages[s.key]).length;
+  const pct=Math.round((done/PROD_STAGES.length)*100);
+  document.getElementById('prod-bar').style.width=pct+'%';
+  document.getElementById('prod-stages').innerHTML=PROD_STAGES.map(s=>{
+    const isDone=!!stages[s.key];
+    const ts=stages[s.key]?new Date(stages[s.key]).toLocaleDateString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+    return `<div class="prod-stage${isDone?' done':''}" onclick="toggleProdStage('${s.key}')">
+      <div class="ps-icon">${isDone?'✅':s.icon}</div>
+      <div class="ps-info">
+        <div class="ps-name">${s.name}</div>
+        <div class="ps-sub">${s.sub}</div>
+      </div>
+      <div class="ps-time">${isDone?'<span style="color:var(--green);font-weight:600">✓ Done</span><br><span>'+ts+'</span>':'<span style="color:var(--g300)">Belum</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleProdStage(key){
+  const id=document.getElementById('prod-poid').value;
+  const allProd=DB.gO('produksi')||{};
+  if(!allProd[id])allProd[id]={stages:{},notes:''};
+  if(allProd[id].stages[key]){
+    delete allProd[id].stages[key];
+  }else{
+    allProd[id].stages[key]=new Date().toISOString();
+  }
+  DB.sO('produksi',allProd);
+  renderProdStages(allProd[id].stages);
+}
+
+function saveProd(){
+  const id=document.getElementById('prod-poid').value;
+  const allProd=DB.gO('produksi')||{};
+  if(!allProd[id])allProd[id]={stages:{},notes:''};
+  allProd[id].notes=document.getElementById('prod-notes').value;
+  DB.sO('produksi',allProd);
+  // check if all done → auto update PO status
+  const done=PROD_STAGES.filter(s=>allProd[id].stages[s.key]).length;
+  if(done===PROD_STAGES.length){
+    let pos=DB.get('pos');
+    pos=pos.map(p=>p.id===id?{...p,status:'selesai'}:p);
+    DB.set('pos',pos);rPOT();
+    toast('🎉 Produksi selesai! Status PO diupdate ke Selesai');
+  }else{
+    toast('Progress produksi disimpan ✅');
+  }
+  closeM('prodm');
+}
+
+// ══════════════════════════════════════════
+//  FITUR 4: BUKTI PEMBAYARAN
+// ══════════════════════════════════════════
+function openBuktiModal(id,type){
+  const docs=type==='inv'?DB.get('invoices'):DB.get('pos');
+  const doc=docs.find(d=>d.id===id);if(!doc)return;
+  document.getElementById('bukti-docid').value=id;
+  document.getElementById('bukti-doctype').value=type;
+  document.getElementById('bukti-ref').innerHTML=
+    `📄 ${esc(doc.ref)} &nbsp;·&nbsp; ${esc(doc.customer)} &nbsp;·&nbsp; <b>${fRp(doc.total)}</b>`;
+  renderBuktiGrid(id,type);
+  openM('buktim');
+}
+
+function getBuktiKey(id,type){return `bukti_${type}_${id}`;}
+
+function getBuktiList(id,type){
+  try{return JSON.parse(localStorage.getItem(getBuktiKey(id,type))||'[]')}catch{return[];}
+}
+
+function renderBuktiGrid(id,type){
+  const list=getBuktiList(id,type);
+  const grid=document.getElementById('bukti-grid');
+  let html=list.map((item,idx)=>`
+    <div class="bukti-item">
+      <img src="${item.data}" onclick="openLightbox('${item.data}')" title="${esc(item.name||'')}" style="cursor:zoom-in"/>
+      <button class="del-bukti" onclick="delBukti(${idx},'${id}','${type}')" title="Hapus">✕</button>
+    </div>`).join('');
+  if(list.length<5){
+    html+=`<div class="bukti-add" onclick="document.getElementById('bukti-file').click()">
+      <span style="font-size:24px">+</span>
+      <span>Tambah Foto</span>
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function handleBuktiUpload(e){
+  const id=document.getElementById('bukti-docid').value;
+  const type=document.getElementById('bukti-doctype').value;
+  const files=[...e.target.files];
+  const list=getBuktiList(id,type);
+  const remaining=5-list.length;
+  const toProcess=files.slice(0,remaining);
+  let done=0;
+  if(!toProcess.length){toast('Maksimal 5 foto','err');return;}
+  toProcess.forEach(file=>{
+    if(file.size>819200){toast(`${file.name} terlalu besar (maks 800KB)`,'err');done++;if(done===toProcess.length)renderBuktiGrid(id,type);return;}
+    const r=new FileReader();
+    r.onload=ev=>{
+      list.push({data:ev.target.result,name:file.name,date:new Date().toISOString()});
+      done++;
+      if(done===toProcess.length){
+        localStorage.setItem(getBuktiKey(id,type),JSON.stringify(list));
+        renderBuktiGrid(id,type);
+        toast(`${done} foto berhasil diupload ✅`);
+      }
+    };
+    r.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+function delBukti(idx,id,type){
+  const list=getBuktiList(id,type);
+  list.splice(idx,1);
+  localStorage.setItem(getBuktiKey(id,type),JSON.stringify(list));
+  renderBuktiGrid(id,type);
+  toast('Foto dihapus');
+}
+
+function openLightbox(src){
+  document.getElementById('lb-img').src=src;
+  openM('lbm');
+}
+
+// Also show bukti count badge in table — patch invoice row to show bukti indicator
+function getBuktiCount(id,type){
+  try{return JSON.parse(localStorage.getItem(getBuktiKey(id,type))||'[]').length}catch{return 0;}
+}
+
 
 // INIT
 rDash();chkStok();
