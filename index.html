@@ -564,6 +564,7 @@ textarea{resize:vertical;min-height:68px}
           <input type="file" id="rfi" accept=".json" class="hide" onchange="restoreData(event)"/>
           <button class="btn bg tred" style="border-color:var(--red)" onclick="resetAll()">🗑️ Reset Semua Data</button>
         </div>
+        <div class="ibox mt16">☁️ Data tersimpan di Firebase Cloud — aman & tersinkronisasi otomatis ke semua perangkat.</div>
       </div></div>
     </div>
 
@@ -576,12 +577,19 @@ textarea{resize:vertical;min-height:68px}
 <div class="mo" style="max-width:560px">
   <div class="mh"><div class="mtt">💬 Kirim via WhatsApp</div><button class="mc" onclick="closeM('wam')">✕</button></div>
   <div class="mbod">
-    <div class="ptab" id="wa-tmpl-tabs">
+    <!-- Tabs untuk Invoice -->
+    <div class="ptab" id="wa-tabs-inv">
       <button class="ptbtn on" onclick="setWATmpl('konfirmasi',this)">Konfirmasi Order</button>
       <button class="ptbtn" onclick="setWATmpl('tagihan',this)">Tagihan / Invoice</button>
       <button class="ptbtn" onclick="setWATmpl('lunas',this)">Ucapan Lunas</button>
       <button class="ptbtn" onclick="setWATmpl('followup',this)">Follow Up</button>
-      <button class="ptbtn" onclick="setWATmpl('selesai',this)">Order Selesai</button>
+    </div>
+    <!-- Tabs untuk PO / Tim Produksi -->
+    <div class="ptab hide" id="wa-tabs-po">
+      <button class="ptbtn on" onclick="setWATmpl('po_instruksi',this)">📋 Instruksi Produksi</button>
+      <button class="ptbtn" onclick="setWATmpl('po_progress',this)">🔄 Minta Update</button>
+      <button class="ptbtn" onclick="setWATmpl('po_urgent',this)">⚡ Urgent / Prioritas</button>
+      <button class="ptbtn" onclick="setWATmpl('po_selesai',this)">✅ Konfirmasi Selesai</button>
     </div>
     <div class="wa-msg" id="wa-preview" contenteditable="true" spellcheck="false"></div>
     <div style="margin-top:12px;font-size:11px;color:var(--g500)">✏️ Pesan bisa diedit langsung di atas sebelum dikirim</div>
@@ -590,8 +598,9 @@ textarea{resize:vertical;min-height:68px}
     <input type="hidden" id="wa-doctype"/>
   </div>
   <div class="mf">
+    <div style="font-size:11px;color:var(--g500);margin-right:auto;align-self:center" id="wa-dest-info"></div>
     <button class="btn bg" onclick="copyWAMsg()">📋 Copy Pesan</button>
-    <button class="btn bwa" onclick="sendWA()">💬 Buka WhatsApp</button>
+    <button class="btn bwa" onclick="sendWA()" id="wa-send-btn">💬 Buka WhatsApp</button>
   </div>
 </div>
 </div>
@@ -1576,8 +1585,8 @@ function createPOFromInvoice(invData) {
     status: poStatus,
     items: invData.items.map(it => ({ ...it })),
     total: invData.total,
-    notes: invData.notes || '',
-    terms: invData.terms || '',
+    notes: exists ? exists.notes || '' : '',
+    terms: '',
     invoiceId: invData.id
   };
 
@@ -1756,12 +1765,17 @@ function buildInvHTML(doc,type='INVOICE'){
             <tr><td style="padding:4px 8px;color:#6B7280;text-align:left;">${isInv?'Jatuh Tempo':'Target Selesai'}</td><td style="padding:4px 8px;font-weight:600;text-align:right;">${doc.due||'-'}</td></tr>
             <tr><td style="padding:4px 8px;color:#6B7280;text-align:left;border-bottom:1px solid #E5E7EB;">Status</td><td style="padding:4px 8px;font-weight:600;text-align:right;border-bottom:1px solid #E5E7EB;">${(doc.status||'').toUpperCase()}</td></tr>
             
-            <tr><td style="padding:12px 8px 4px;color:#6B7280;text-align:left;vertical-align:top;">${isInv?'Tagihan Untuk':'Untuk Pelanggan'}</td>
+            ${isInv?`<tr><td style="padding:12px 8px 4px;color:#6B7280;text-align:left;vertical-align:top;">Tagihan Untuk</td>
                 <td style="padding:12px 8px 4px;text-align:right;">
                   <div style="font-weight:700;font-size:14px;color:var(--navy);">${esc(doc.customer)}</div>
                   <div style="color:#6B7280;margin-top:2px;">${esc(doc.phone||'')}</div>
                 </td>
-            </tr>
+            </tr>`:''}
+            ${!isInv?`<tr><td style="padding:12px 8px 4px;color:#6B7280;text-align:left;vertical-align:top;">Pelanggan</td>
+                <td style="padding:12px 8px 4px;text-align:right;">
+                  <div style="font-weight:700;font-size:14px;color:var(--navy);">${esc(doc.customer)}</div>
+                </td>
+            </tr>`:''}
           </tbody>
         </table>
       </div>
@@ -1821,7 +1835,7 @@ function buildInvHTML(doc,type='INVOICE'){
               <td style="padding-bottom:10px;vertical-align:top;width:120px;font-weight:700;color:#374151;border-bottom:1px dashed #D1D5DB;">${isInv?'Keterangan':'Catatan Produksi'}</td>
               <td style="padding-bottom:10px;vertical-align:top;color:#4B5563;border-bottom:1px dashed #D1D5DB;">${esc(isInv?doc.notes||'':doc.notes||'-').replace(/\n/g,'<br>')}</td>
             </tr>
-            ${doc.terms?`
+            ${isInv&&doc.terms?`
             <tr>
               <td style="padding-top:10px;vertical-align:top;font-weight:700;color:#374151;">Syarat & Ketentuan</td>
               <td style="padding-top:10px;vertical-align:top;color:#4B5563;line-height:1.6;">${esc(doc.terms).replace(/\n/g,'<br>')}</td>
@@ -2775,6 +2789,92 @@ Pesanan sudah melewati semua tahap produksi dan siap untuk dikirim atau diambil.
 Mohon konfirmasi untuk proses pengiriman/pengambilan ya 🙏
 
 _${cfg.name||'Hulya Apparel'}_`;
+  },
+
+  // ── Template PO untuk Tim Produksi ──
+  po_instruksi:(d)=>{
+    const cfg=DB.gO('settings');
+    const itemList=(d.items||[]).map((it,i)=>`  ${i+1}. ${it.desc} — *${it.qty} pcs*`).join('\n');
+    return `🏭 *INSTRUKSI PRODUKSI*
+${cfg.name||'Hulya Apparel'}
+
+📋 *No. PO:* ${d.ref}
+📅 *Tanggal Order:* ${d.date}
+⏰ *Target Selesai:* ${d.due||'-'}
+👤 *Customer:* ${d.customer}
+
+*DAFTAR ITEM PRODUKSI:*
+${itemList}
+
+💰 *Nilai PO:* ${fRp(d.total)}
+${d.notes?'\n📝 *Catatan:*\n'+d.notes+'\n':''}
+Mohon segera diproses sesuai target ya. Konfirmasi penerimaan instruksi ini 🙏
+
+_${cfg.name||'Hulya Apparel'}_`;
+  },
+
+  po_progress:(d)=>{
+    const cfg=DB.gO('settings');
+    return `🔄 *UPDATE PROGRESS PRODUKSI*
+
+Halo Tim 👋
+
+Mohon info update terkini untuk order berikut:
+
+📋 *No. PO:* ${d.ref}
+👤 *Customer:* ${d.customer}
+⏰ *Target Selesai:* ${d.due||'-'}
+
+Sudah sampai tahap mana ya? Apakah ada kendala atau kebutuhan tambahan?
+
+Tolong balas pesan ini dengan update progresnya 🙏
+
+_${cfg.name||'Hulya Apparel'}_`;
+  },
+
+  po_urgent:(d)=>{
+    const cfg=DB.gO('settings');
+    const itemList=(d.items||[]).map((it,i)=>`  ${i+1}. ${it.desc} — *${it.qty} pcs*`).join('\n');
+    return `⚡ *PRIORITAS URGENT — PRODUKSI*
+
+Halo Tim 👋
+
+Order berikut perlu diprioritaskan:
+
+📋 *No. PO:* ${d.ref}
+👤 *Customer:* ${d.customer}
+⏰ *Target Selesai:* *${d.due||'-'}* ⚠️
+
+*ITEM:*
+${itemList}
+${d.notes?'\n📝 *Catatan Khusus:*\n'+d.notes+'\n':''}
+Mohon dikerjakan *segera* dan update progress setiap tahap ya.
+
+Terima kasih 🙏
+_${cfg.name||'Hulya Apparel'}_`;
+  },
+
+  po_selesai:(d)=>{
+    const cfg=DB.gO('settings');
+    return `✅ *KONFIRMASI SELESAI PRODUKSI*
+
+Halo Tim 👋
+
+Apakah order berikut sudah selesai semua tahapan dan siap kirim?
+
+📋 *No. PO:* ${d.ref}
+👤 *Customer:* ${d.customer}
+💰 *Nilai PO:* ${fRp(d.total)}
+
+Checklist sebelum konfirmasi:
+☐ Semua item sudah lengkap
+☐ Quality check sudah dilakukan
+☐ Packing sudah selesai
+☐ Siap kirim / diambil
+
+Balas dengan *SELESAI* jika sudah oke ya 🙏
+
+_${cfg.name||'Hulya Apparel'}_`;
   }
 };
 
@@ -2788,18 +2888,41 @@ function openWAModal(id,type){
   document.getElementById('wa-phone').value=_waDoc.phone||'';
   document.getElementById('wa-docid').value=id;
   document.getElementById('wa-doctype').value=type;
-  document.querySelectorAll('#wa-tmpl-tabs .ptbtn').forEach(b=>b.classList.remove('on'));
-  document.querySelector('#wa-tmpl-tabs .ptbtn').classList.add('on');
-  const tabs=document.querySelectorAll('#wa-tmpl-tabs .ptbtn');
-  tabs[4].style.display=type==='po'?'':'none';
-  _waTmpl='konfirmasi';
+  // Switch tab sets based on type
+  const tabsInv=document.getElementById('wa-tabs-inv');
+  const tabsPO=document.getElementById('wa-tabs-po');
+  if(type==='po'){
+    tabsInv.classList.add('hide');
+    tabsPO.classList.remove('hide');
+    tabsPO.querySelectorAll('.ptbtn').forEach(b=>b.classList.remove('on'));
+    tabsPO.querySelector('.ptbtn').classList.add('on');
+    _waTmpl='po_instruksi';
+  }else{
+    tabsPO.classList.add('hide');
+    tabsInv.classList.remove('hide');
+    tabsInv.querySelectorAll('.ptbtn').forEach(b=>b.classList.remove('on'));
+    tabsInv.querySelector('.ptbtn').classList.add('on');
+    _waTmpl='konfirmasi';
+  }
+  // Update dest info label
+  const destEl=document.getElementById('wa-dest-info');
+  if(destEl){
+    if(type==='po'){
+      destEl.innerHTML='🏭 Ke: <b>Tim Produksi</b>';
+      document.getElementById('wa-send-btn').textContent='💬 Kirim ke Tim Produksi';
+    }else{
+      destEl.innerHTML='👤 Ke: <b>'+(_waDoc.customer||'Customer')+'</b>';
+      document.getElementById('wa-send-btn').textContent='💬 Buka WhatsApp';
+    }
+  }
   renderWAPreview();
   openM('wam');
 }
 
 function setWATmpl(tmpl,btn){
   _waTmpl=tmpl;
-  document.querySelectorAll('#wa-tmpl-tabs .ptbtn').forEach(b=>b.classList.remove('on'));
+  const activeTabSet=_waType==='po'?'wa-tabs-po':'wa-tabs-inv';
+  document.querySelectorAll('#'+activeTabSet+' .ptbtn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   renderWAPreview();
 }
@@ -2818,7 +2941,11 @@ function getWAMsg(){
 function sendWA(){
   const phone=(document.getElementById('wa-phone').value||'').replace(/\D/g,'');
   const msg=getWAMsg();
-  if(!phone){toast('Nomor HP customer tidak ada. Edit invoice/PO dulu ya.','err');return;}
+  const isPO=_waType==='po';
+  if(!phone){
+    toast(isPO?'Nomor HP tim produksi belum ada. Gunakan tombol Copy saja ya.':'Nomor HP customer tidak ada. Edit invoice/PO dulu ya.','err');
+    return;
+  }
   const url=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
 }
