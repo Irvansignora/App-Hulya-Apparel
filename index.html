@@ -97,9 +97,12 @@ textarea{resize:vertical;min-height:68px}
 .mf{padding:13px 22px;border-top:1px solid var(--g100);display:flex;justify-content:flex-end;gap:10px;background:var(--g50);border-radius:0 0 14px 14px;position:sticky;bottom:0}
 /* ITEM ROWS */
 .ir{display:grid;grid-template-columns:2fr 80px 120px 110px 34px;gap:8px;align-items:center;margin-bottom:8px}
+.ir-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 32px;gap:8px;align-items:start;margin-bottom:10px}
 .ir input{margin:0}
 .itot{font-weight:700;font-size:13px;text-align:right}
 .ih{display:grid;grid-template-columns:2fr 80px 120px 110px 34px;gap:8px;margin-bottom:6px;padding:0 2px}
+.ih-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 32px;gap:8px;margin-bottom:6px;padding:0 2px}
+.ih-inv span{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
 .ih span{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
 /* SUMMARY */
 .sr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--g100);font-size:13px}
@@ -203,6 +206,23 @@ textarea{resize:vertical;min-height:68px}
 .ptab{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
 .ptbtn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--g300);background:var(--white);color:var(--g700);transition:all .15s}
 .ptbtn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ── PRODUCT DROPDOWN ── */
+.prod-sel-wrap{position:relative;flex:1}
+.prod-sel{width:100%;padding:7px 30px 7px 10px;border:1px solid var(--g300);border-radius:7px;font-size:13px;font-family:inherit;background:var(--white);color:var(--black);transition:border .15s;cursor:pointer;appearance:none;-webkit-appearance:none}
+.prod-sel:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(58,175,212,.15)}
+.prod-sel-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:11px;color:var(--g500)}
+.stok-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;margin-left:4px}
+.stok-ok{background:var(--gbg);color:var(--green)}
+.stok-low{background:var(--gold-light);color:var(--gold-dark)}
+.stok-empty{background:#FEE2E2;color:#DC2626}
+.stok-hint{font-size:10px;color:var(--g500);margin-top:2px;padding-left:2px}
+.stok-warn-box{background:#FEF5DC;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--g700);margin-top:10px;line-height:1.7}
+/* Item row wider for dropdown */
+.ir-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 28px;gap:8px;align-items:start;margin-bottom:8px}
+.ir-inv input{margin:0}
+.ih-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 28px;gap:8px;margin-bottom:6px;padding:0 2px}
+.ih-inv span{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
 @media print{
   #sb,#tb,.np{display:none!important}
   #main{margin-left:0!important}
@@ -565,9 +585,9 @@ textarea{resize:vertical;min-height:68px}
     <div class="div"></div>
     <div class="fl ic g8" style="justify-content:space-between;margin-bottom:10px">
       <div style="font-weight:700;font-size:13px">Item Produk</div>
-      <button class="btn bg bs" onclick="addII()">+ Baris</button>
+      <button class="btn bg bs" onclick="addII()">+ Produk</button>
     </div>
-    <div class="ih"><span>Deskripsi</span><span>Qty</span><span>Harga Satuan</span><span>Total</span><span></span></div>
+    <div class="ih-inv"><span>Produk / Deskripsi</span><span>Qty</span><span>Harga Satuan</span><span>Total</span><span></span></div>
     <div id="iitems"></div>
     <div class="div"></div>
     <div style="display:flex;gap:16px;flex-wrap:wrap">
@@ -594,6 +614,7 @@ textarea{resize:vertical;min-height:68px}
     </div>
     <input type="hidden" id="ieid"/>
   </div>
+  <div id="inv-stok-warn" class="stok-warn-box" style="display:none;margin:0 20px 8px"></div>
   <div class="mf">
     <button class="btn bg" onclick="closeM('im')">Batal</button>
     <button class="btn bg" onclick="saveInv(true)">👁️ Simpan &amp; Preview</button>
@@ -623,9 +644,9 @@ textarea{resize:vertical;min-height:68px}
     <div class="div"></div>
     <div class="fl ic g8" style="justify-content:space-between;margin-bottom:10px">
       <div style="font-weight:700;font-size:13px">Item Order</div>
-      <button class="btn bg bs" onclick="addPI()">+ Baris</button>
+      <button class="btn bg bs" onclick="addPI()">+ Produk</button>
     </div>
-    <div class="ih"><span>Deskripsi</span><span>Qty</span><span>Harga</span><span>Total</span><span></span></div>
+    <div class="ih-inv"><span>Produk / Deskripsi</span><span>Qty</span><span>Harga</span><span>Total</span><span></span></div>
     <div id="pitems"></div>
     <div class="div"></div>
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
@@ -634,6 +655,7 @@ textarea{resize:vertical;min-height:68px}
     </div>
     <input type="hidden" id="peid"/>
   </div>
+  <div id="po-stok-warn" class="stok-warn-box" style="display:none;margin:0 20px 8px"></div>
   <div class="mf">
     <button class="btn bg" onclick="closeM('pm')">Batal</button>
     <button class="btn bp" onclick="savePO()">💾 Simpan PO</button>
@@ -915,30 +937,130 @@ function openInvModal(eid=null){
   calcIT();openM('im');
 }
 
+function buildStokOptions(selectedDesc='',selectedSku=''){
+  const stoks=DB.get('stok');
+  const opts=stoks.map(s=>{
+    const stokInfo=s.qty<=0?'(Habis)':s.qty<=s.minQty?`(Sisa ${s.qty})`:s.qty<=s.minQty*2?`(${s.qty} pcs)`:`(${s.qty} pcs)`;
+    const sel=(selectedSku&&s.sku===selectedSku)||(selectedDesc&&s.name===selectedDesc)?'selected':'';
+    return `<option value="${esc(s.name)}" data-sku="${esc(s.sku||'')}" data-harga="${s.harga||0}" data-hpp="${s.hpp||0}" data-qty="${s.qty}" data-unit="${esc(s.unit||'pcs')}" data-min="${s.minQty||0}" ${sel}>${esc(s.name)} ${stokInfo}</option>`;
+  }).join('');
+  return `<option value="">-- Pilih Produk --</option>${opts}<option value="__manual__">✏️ Input Manual...</option>`;
+}
+
+function getStokBadge(qty,minQty){
+  if(qty<=0)return`<span class="stok-badge stok-empty">Habis</span>`;
+  if(qty<=minQty)return`<span class="stok-badge stok-low">⚠️ Sisa ${qty}</span>`;
+  return`<span class="stok-badge stok-ok">✓ ${qty} pcs</span>`;
+}
+
 function addII(d=null){
   const id=++_ii;
   const r=document.createElement('div');
-  r.className='ir';r.id='ii-'+id;
+  r.className='ir-inv';r.id='ii-'+id;
+  // find sku if product exists in stok
+  const stoks=DB.get('stok');
+  const matchStok=d?.desc?stoks.find(s=>s.name===d.desc||s.sku===d.skuRef):null;
+  const selectedSku=d?.skuRef||matchStok?.sku||'';
+  const currentQty=matchStok?.qty??null;
+  const minQty=matchStok?.minQty??0;
+  const badgeHTML=currentQty!==null?getStokBadge(currentQty,minQty):'';
+  const hintHTML=matchStok?`<div class="stok-hint">SKU: ${esc(matchStok.sku||'-')} · ${esc(matchStok.unit||'pcs')}</div>`:'<div class="stok-hint" id="ii-hint-'+id+'"></div>';
+
   r.innerHTML=`
-    <input class="iid" placeholder="Deskripsi produk" value="${esc(d?.desc||'')}" oninput="calcIT()"/>
-    <input class="iiq" type="number" min="1" value="${d?.qty||1}" oninput="calcIT()"/>
+    <div style="display:flex;flex-direction:column">
+      <div class="prod-sel-wrap">
+        <select class="prod-sel iid" id="ii-sel-${id}" onchange="onInvProdChange(${id})">
+          ${buildStokOptions(d?.desc||'',selectedSku)}
+        </select>
+        <span class="prod-sel-arrow">▾</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-top:3px">
+        <span id="ii-badge-${id}">${badgeHTML}</span>
+        ${hintHTML}
+      </div>
+      <input class="iid-manual" id="ii-manual-${id}" placeholder="Nama produk manual..." style="display:none;margin-top:4px;padding:6px 10px;border:1px solid var(--g300);border-radius:7px;font-size:13px" oninput="calcIT()"/>
+    </div>
+    <input class="iiq" type="number" min="1" value="${d?.qty||1}" oninput="onInvQtyChange(${id})"/>
     <input class="iip" type="number" min="0" value="${d?.price||0}" oninput="calcIT()"/>
     <div class="itot" id="iit-${id}">${fRp((d?.qty||1)*(d?.price||0))}</div>
-    <button class="btn bg bs" onclick="this.closest('.ir').remove();calcIT()" style="padding:4px 8px">✕</button>`;
+    <button class="btn bg bs" onclick="this.closest('.ir-inv').remove();calcIT()" style="padding:4px 6px">✕</button>`;
   document.getElementById('iitems').appendChild(r);
+  // if editing and was manual, show manual input
+  if(d?.desc&&!matchStok){
+    const sel=r.querySelector('.prod-sel');
+    sel.value='__manual__';
+    const manual=r.querySelector('.iid-manual');
+    manual.style.display='block';
+    manual.value=d.desc;
+  }
+}
+
+function onInvProdChange(id){
+  const sel=document.getElementById('ii-sel-'+id);
+  const opt=sel.options[sel.selectedIndex];
+  const badgeEl=document.getElementById('ii-badge-'+id);
+  const hintEl=document.getElementById('ii-hint-'+id);
+  const manualEl=document.getElementById('ii-manual-'+id);
+  if(sel.value==='__manual__'){
+    if(manualEl){manualEl.style.display='block';manualEl.focus();}
+    if(badgeEl)badgeEl.innerHTML='';
+    if(hintEl)hintEl.textContent='';
+    calcIT();return;
+  }
+  if(manualEl)manualEl.style.display='none';
+  const qty=Number(opt.dataset.qty||0);
+  const minQty=Number(opt.dataset.min||0);
+  if(badgeEl)badgeEl.innerHTML=sel.value?getStokBadge(qty,minQty):'';
+  if(hintEl)hintEl.textContent=sel.value&&opt.dataset.sku?`SKU: ${opt.dataset.sku} · ${opt.dataset.unit||'pcs'}`:'';
+  // auto-fill harga if empty or was auto
+  const priceEl=document.getElementById('ii-'+id)?.querySelector('.iip');
+  const pEl=document.querySelector(`#ii-${id} .iip`);
+  if(pEl&&sel.value){
+    const harga=Number(opt.dataset.harga||0);
+    if(harga>0)pEl.value=harga;
+  }
+  calcIT();
+}
+
+function onInvQtyChange(id){
+  // check stok warning live
+  const sel=document.getElementById('ii-sel-'+id);
+  if(!sel||sel.value==='__manual__'||!sel.value){calcIT();return;}
+  const opt=sel.options[sel.selectedIndex];
+  const stokQty=Number(opt.dataset.qty||0);
+  const ordQty=Number(document.querySelector(`#ii-${id} .iiq`)?.value||0);
+  const badgeEl=document.getElementById('ii-badge-'+id);
+  if(badgeEl&&ordQty>stokQty){
+    badgeEl.innerHTML=`<span class="stok-badge stok-empty">⚠️ Stok hanya ${stokQty}</span>`;
+  }else if(badgeEl){
+    badgeEl.innerHTML=getStokBadge(stokQty,Number(opt.dataset.min||0));
+  }
+  calcIT();
 }
 
 function getII(){
-  return [...document.querySelectorAll('#iitems .ir')].map(r=>({
-    desc:r.querySelector('.iid').value,
-    qty:Number(r.querySelector('.iiq').value)||0,
-    price:Number(r.querySelector('.iip').value)||0
-  }));
+  return [...document.querySelectorAll('#iitems .ir-inv')].map(r=>{
+    const sel=r.querySelector('.prod-sel');
+    const manualEl=r.querySelector('.iid-manual');
+    let desc='',skuRef='';
+    if(sel&&sel.value==='__manual__'){
+      desc=manualEl?manualEl.value:'';
+    }else if(sel&&sel.value){
+      desc=sel.value;
+      const opt=sel.options[sel.selectedIndex];
+      skuRef=opt?.dataset?.sku||'';
+    }
+    return{
+      desc,skuRef,
+      qty:Number(r.querySelector('.iiq').value)||0,
+      price:Number(r.querySelector('.iip').value)||0
+    };
+  });
 }
 
 function calcIT(){
   const items=getII();
-  document.querySelectorAll('#iitems .ir').forEach((r,i)=>{
+  document.querySelectorAll('#iitems .ir-inv').forEach((r,i)=>{
     const t=r.querySelector('.itot');if(t)t.textContent=fRp((items[i]?.qty||0)*(items[i]?.price||0));
   });
   const sub=items.reduce((s,i)=>s+i.qty*i.price,0);
@@ -950,6 +1072,19 @@ function calcIT(){
   document.getElementById('itot').innerHTML=`<b>${fRp(tot)}</b>`;
   document.getElementById('idpa').innerHTML=
     `<b style="color:var(--yellow)">DP (${dp}%):</b> ${fRp(dpA)}<br><b>Sisa:</b> ${fRp(tot-dpA)}`;
+  // Live stok warning
+  const stoks=DB.get('stok');
+  const warns=[];
+  items.forEach(it=>{
+    if(!it.desc||!it.skuRef&&!it.desc)return;
+    const s=stoks.find(s=>it.skuRef?s.sku===it.skuRef:s.name===it.desc);
+    if(s&&Number(it.qty)>Number(s.qty))warns.push(`⚠️ <b>${esc(s.name)}</b>: stok tersisa <b>${s.qty} ${s.unit||'pcs'}</b>, order <b>${it.qty}</b>`);
+  });
+  const warnEl=document.getElementById('inv-stok-warn');
+  if(warnEl){
+    if(warns.length){warnEl.style.display='block';warnEl.innerHTML='⚠️ <b>Perhatian Stok:</b><br>'+warns.join('<br>');}
+    else warnEl.style.display='none';
+  }
 }
 
 function saveInv(preview=false){
@@ -957,6 +1092,7 @@ function saveInv(preview=false){
   const cus=document.getElementById('icus').value.trim();
   if(!ref||!cus){toast('No. Invoice & Pelanggan wajib','err');return;}
   const items=getII();
+  if(!items.some(i=>i.desc)){toast('Tambahkan minimal 1 produk','err');return;}
   const sub=items.reduce((s,i)=>s+i.qty*i.price,0);
   const dsc=Number(document.getElementById('idsc').value)||0;
   const tot=sub-dsc;
@@ -974,13 +1110,19 @@ function saveInv(preview=false){
   };
   let invs=DB.get('invoices');
   const old=eid?invs.find(i=>i.id===eid):null;
+  // Stok deduction
+  const warnings=deductStok(items,old?.items||[]);
   if(eid)invs=invs.map(i=>i.id===eid?data:i);else invs.push(data);
   DB.set('invoices',invs);
   if(status==='lunas'&&(!old||old.status!=='lunas')){
     addBE({date:data.date,ref:data.ref,desc:`Pendapatan Invoice ${data.ref} — ${cus}`,debit:tot,kredit:0,akun:'Pendapatan Usaha',type:'pendapatan',src:'invoice',srcId:data.id});
-    toast('Invoice lunas ✅ — otomatis masuk pembukuan');
-  }else toast('Invoice disimpan');
-  closeM('im');rInvT();
+    if(warnings.length)toast(`Invoice lunas ✅ ⚠️ Stok minus: ${warnings[0]}`,'err');
+    else toast('Invoice lunas ✅ Stok diperbarui & masuk pembukuan');
+  }else{
+    if(warnings.length)toast(`Invoice disimpan ⚠️ Stok minus: ${warnings[0]}`,'err');
+    else toast('Invoice disimpan ✅ Stok diperbarui');
+  }
+  closeM('im');rInvT();rDash();
   if(preview)prevInv(data.id);
 }
 
@@ -1024,8 +1166,18 @@ function updInvSt(id,st){
 
 function delInv(id){
   if(!confirm('Hapus invoice ini?'))return;
+  const inv=DB.get('invoices').find(i=>i.id===id);
+  if(inv?.items?.length){
+    let stoks=DB.get('stok');
+    inv.items.forEach(it=>{
+      if(!it.desc||it.qty<=0)return;
+      const idx=stoks.findIndex(s=>it.skuRef?s.sku===it.skuRef:s.name===it.desc);
+      if(idx>=0)stoks[idx].qty=Number(stoks[idx].qty)+Number(it.qty);
+    });
+    DB.set('stok',stoks);chkStok(stoks);
+  }
   DB.set('invoices',DB.get('invoices').filter(i=>i.id!==id));
-  rInvT();toast('Invoice dihapus');
+  rInvT();rDash();toast('Invoice dihapus & stok dikembalikan');
 }
 
 let _curInvId=null,_curPOId=null;
@@ -1153,40 +1305,173 @@ function openPOModal(eid=null){
 function addPI(d=null){
   const id=++_pi;
   const r=document.createElement('div');
-  r.className='ir';r.id='pi-'+id;
+  r.className='ir-inv';r.id='pi-'+id;
+  const stoks=DB.get('stok');
+  const matchStok=d?.desc?stoks.find(s=>s.name===d.desc||s.sku===d.skuRef):null;
+  const selectedSku=d?.skuRef||matchStok?.sku||'';
+  const currentQty=matchStok?.qty??null;
+  const minQty=matchStok?.minQty??0;
+  const badgeHTML=currentQty!==null?getStokBadge(currentQty,minQty):'';
+  const hintHTML=matchStok?`<div class="stok-hint">SKU: ${esc(matchStok.sku||'-')} · ${esc(matchStok.unit||'pcs')}</div>`:`<div class="stok-hint" id="pi-hint-${id}"></div>`;
+
   r.innerHTML=`
-    <input class="pid" placeholder="Deskripsi item" value="${esc(d?.desc||'')}"/>
-    <input class="piq" type="number" min="1" value="${d?.qty||1}" oninput="calcPT()"/>
+    <div style="display:flex;flex-direction:column">
+      <div class="prod-sel-wrap">
+        <select class="prod-sel pid" id="pi-sel-${id}" onchange="onPOProdChange(${id})">
+          ${buildStokOptions(d?.desc||'',selectedSku)}
+        </select>
+        <span class="prod-sel-arrow">▾</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-top:3px">
+        <span id="pi-badge-${id}">${badgeHTML}</span>
+        ${hintHTML}
+      </div>
+      <input class="pid-manual" id="pi-manual-${id}" placeholder="Nama produk manual..." style="display:none;margin-top:4px;padding:6px 10px;border:1px solid var(--g300);border-radius:7px;font-size:13px" oninput="calcPT()"/>
+    </div>
+    <input class="piq" type="number" min="1" value="${d?.qty||1}" oninput="onPOQtyChange(${id})"/>
     <input class="pip" type="number" min="0" value="${d?.price||0}" oninput="calcPT()"/>
     <div class="itot">${fRp((d?.qty||1)*(d?.price||0))}</div>
-    <button class="btn bg bs" onclick="this.closest('.ir').remove();calcPT()" style="padding:4px 8px">✕</button>`;
+    <button class="btn bg bs" onclick="this.closest('.ir-inv').remove();calcPT()" style="padding:4px 6px">✕</button>`;
   document.getElementById('pitems').appendChild(r);
+  if(d?.desc&&!matchStok){
+    const sel=r.querySelector('.prod-sel');
+    sel.value='__manual__';
+    const manual=r.querySelector('.pid-manual');
+    manual.style.display='block';
+    manual.value=d.desc;
+  }
+}
+
+function onPOProdChange(id){
+  const sel=document.getElementById('pi-sel-'+id);
+  const opt=sel.options[sel.selectedIndex];
+  const badgeEl=document.getElementById('pi-badge-'+id);
+  const hintEl=document.getElementById('pi-hint-'+id);
+  const manualEl=document.getElementById('pi-manual-'+id);
+  if(sel.value==='__manual__'){
+    if(manualEl){manualEl.style.display='block';manualEl.focus();}
+    if(badgeEl)badgeEl.innerHTML='';
+    if(hintEl)hintEl.textContent='';
+    calcPT();return;
+  }
+  if(manualEl)manualEl.style.display='none';
+  const qty=Number(opt.dataset.qty||0);
+  const minQty=Number(opt.dataset.min||0);
+  if(badgeEl)badgeEl.innerHTML=sel.value?getStokBadge(qty,minQty):'';
+  if(hintEl)hintEl.textContent=sel.value&&opt.dataset.sku?`SKU: ${opt.dataset.sku} · ${opt.dataset.unit||'pcs'}`:'';
+  const pEl=document.querySelector(`#pi-${id} .pip`);
+  if(pEl&&sel.value){
+    const harga=Number(opt.dataset.harga||0);
+    if(harga>0)pEl.value=harga;
+  }
+  calcPT();
+}
+
+function onPOQtyChange(id){
+  const sel=document.getElementById('pi-sel-'+id);
+  if(!sel||sel.value==='__manual__'||!sel.value){calcPT();return;}
+  const opt=sel.options[sel.selectedIndex];
+  const stokQty=Number(opt.dataset.qty||0);
+  const ordQty=Number(document.querySelector(`#pi-${id} .piq`)?.value||0);
+  const badgeEl=document.getElementById('pi-badge-'+id);
+  if(badgeEl&&ordQty>stokQty){
+    badgeEl.innerHTML=`<span class="stok-badge stok-empty">⚠️ Stok hanya ${stokQty}</span>`;
+  }else if(badgeEl){
+    badgeEl.innerHTML=getStokBadge(stokQty,Number(opt.dataset.min||0));
+  }
+  calcPT();
 }
 
 function calcPT(){
   let t=0;
-  document.querySelectorAll('#pitems .ir').forEach(r=>{
+  const rows=[...document.querySelectorAll('#pitems .ir-inv')];
+  rows.forEach(r=>{
     const q=Number(r.querySelector('.piq').value)||0,p=Number(r.querySelector('.pip').value)||0;
-    r.querySelector('.itot').textContent=fRp(q*p);t+=q*p;
+    const tot=r.querySelector('.itot');if(tot)tot.textContent=fRp(q*p);t+=q*p;
   });
   document.getElementById('ptot').textContent=fRp(t);
+  // Live stok warning for PO
+  const stoks=DB.get('stok');
+  const warns=[];
+  const poItems=getPOItems();
+  poItems.forEach(it=>{
+    if(!it.desc)return;
+    const s=stoks.find(s=>it.skuRef?s.sku===it.skuRef:s.name===it.desc);
+    if(s&&Number(it.qty)>Number(s.qty))warns.push(`⚠️ <b>${esc(s.name)}</b>: stok tersisa <b>${s.qty} ${s.unit||'pcs'}</b>, order <b>${it.qty}</b>`);
+  });
+  const warnEl=document.getElementById('po-stok-warn');
+  if(warnEl){
+    if(warns.length){warnEl.style.display='block';warnEl.innerHTML='⚠️ <b>Perhatian Stok:</b><br>'+warns.join('<br>');}
+    else warnEl.style.display='none';
+  }
+}
+
+function getPOItems(){
+  return [...document.querySelectorAll('#pitems .ir-inv')].map(r=>{
+    const sel=r.querySelector('.prod-sel');
+    const manualEl=r.querySelector('.pid-manual');
+    let desc='',skuRef='';
+    if(sel&&sel.value==='__manual__'){
+      desc=manualEl?manualEl.value:'';
+    }else if(sel&&sel.value){
+      desc=sel.value;
+      const opt=sel.options[sel.selectedIndex];
+      skuRef=opt?.dataset?.sku||'';
+    }
+    return{desc,skuRef,qty:Number(r.querySelector('.piq').value)||0,price:Number(r.querySelector('.pip').value)||0};
+  });
+}
+
+function deductStok(items,oldItems=[]){
+  // Restore old items first (if editing)
+  if(oldItems.length){
+    let stoks=DB.get('stok');
+    oldItems.forEach(oi=>{
+      if(!oi.skuRef&&!oi.desc)return;
+      const idx=stoks.findIndex(s=>oi.skuRef?s.sku===oi.skuRef:s.name===oi.desc);
+      if(idx>=0)stoks[idx].qty=Number(stoks[idx].qty)+Number(oi.qty);
+    });
+    DB.set('stok',stoks);
+  }
+  // Deduct new items
+  let stoks=DB.get('stok');
+  const warnings=[];
+  items.forEach(it=>{
+    if(!it.desc||it.qty<=0)return;
+    const idx=stoks.findIndex(s=>it.skuRef?s.sku===it.skuRef:s.name===it.desc);
+    if(idx<0)return; // manual product, skip
+    const before=Number(stoks[idx].qty);
+    const after=before-Number(it.qty);
+    if(after<0)warnings.push(`${stoks[idx].name}: stok ${before}, order ${it.qty} (minus ${Math.abs(after)})`);
+    stoks[idx].qty=after;
+  });
+  DB.set('stok',stoks);
+  chkStok(stoks);
+  return warnings;
 }
 
 function savePO(){
   const ref=document.getElementById('pref').value.trim();
   const cus=document.getElementById('pcus').value.trim();
   if(!ref||!cus){toast('No. PO & Pelanggan wajib','err');return;}
-  const items=[...document.querySelectorAll('#pitems .ir')].map(r=>({
-    desc:r.querySelector('.pid').value,qty:Number(r.querySelector('.piq').value)||0,price:Number(r.querySelector('.pip').value)||0
-  }));
+  const items=getPOItems();
+  if(!items.some(i=>i.desc)){toast('Tambahkan minimal 1 produk','err');return;}
   const tot=items.reduce((s,i)=>s+i.qty*i.price,0);
   const eid=document.getElementById('peid').value;
+  const oldPO=eid?DB.get('pos').find(p=>p.id===eid):null;
   const data={id:eid||uid(),ref,customer:cus,phone:document.getElementById('pphn').value,
     date:document.getElementById('pdat').value,due:document.getElementById('pdue').value,
     status:document.getElementById('pst').value,items,total:tot,notes:document.getElementById('pnot').value};
+  // Stok deduction
+  const warnings=deductStok(items,oldPO?.items||[]);
   let pos=DB.get('pos');
   if(eid)pos=pos.map(p=>p.id===eid?data:p);else pos.push(data);
-  DB.set('pos',pos);closeM('pm');rPOT();toast('PO disimpan');
+  DB.set('pos',pos);closeM('pm');rPOT();rDash();
+  if(warnings.length){
+    toast(`PO disimpan ⚠️ Stok minus: ${warnings[0]}`,'err');
+  }else{
+    toast('PO disimpan ✅ Stok diperbarui');
+  }
 }
 
 function rPOT(){
@@ -1220,7 +1505,17 @@ function updPOSt(id,s){
 }
 function delPO(id){
   if(!confirm('Hapus PO?'))return;
-  DB.set('pos',DB.get('pos').filter(p=>p.id!==id));rPOT();toast('PO dihapus');
+  const po=DB.get('pos').find(p=>p.id===id);
+  if(po?.items?.length){
+    let stoks=DB.get('stok');
+    po.items.forEach(it=>{
+      if(!it.desc||it.qty<=0)return;
+      const idx=stoks.findIndex(s=>it.skuRef?s.sku===it.skuRef:s.name===it.desc);
+      if(idx>=0)stoks[idx].qty=Number(stoks[idx].qty)+Number(it.qty);
+    });
+    DB.set('stok',stoks);chkStok(stoks);
+  }
+  DB.set('pos',DB.get('pos').filter(p=>p.id!==id));rPOT();rDash();toast('PO dihapus & stok dikembalikan');
 }
 function prevPO(id){
   const po=DB.get('pos').find(p=>p.id===id);if(!po)return;
@@ -1262,7 +1557,7 @@ function saveStok(){
     desc:document.getElementById('sds').value};
   let stoks=DB.get('stok');
   if(eid)stoks=stoks.map(s=>s.id===eid?d:s);else stoks.push(d);
-  DB.set('stok',stoks);closeM('sm');rStokT();chkStok();toast('Produk disimpan');
+  DB.set('stok',stoks);closeM('sm');rStokT();chkStok();refreshItemDropdowns();toast('Produk disimpan');
 }
 
 function adjStok(id){
@@ -2100,6 +2395,22 @@ function getBuktiCount(id,type){
   try{return JSON.parse(localStorage.getItem(getBuktiKey(id,type))||'[]').length}catch{return 0;}
 }
 
+
+
+// Refresh all open product dropdowns when stok changes
+function refreshItemDropdowns(){
+  ['iitems','pitems'].forEach(containerId=>{
+    const container=document.getElementById(containerId);
+    if(!container)return;
+    container.querySelectorAll('.prod-sel').forEach(sel=>{
+      const curr=sel.value;
+      const opts=buildStokOptions(curr,'');
+      sel.innerHTML=opts;
+      // restore selection
+      if(curr)sel.value=curr;
+    });
+  });
+}
 
 // INIT
 rDash();chkStok();
