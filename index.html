@@ -325,7 +325,12 @@ textarea{resize:vertical;min-height:68px}
     <!-- DASHBOARD -->
     <div id="pg-dashboard" class="pg on">
       <div class="sh2">
-        <div><div class="st2">Selamat datang 👋</div><div class="sb2" id="dsub">Ringkasan bisnis hari ini</div></div>
+        <div><div class="st2">Selamat datang 👋</div><div class="sb2" id="dsub">Ringkasan bisnis</div></div>
+        <select id="dash-filter" onchange="rDash()" style="padding:7px 14px;border-radius:8px;border:1px solid var(--g300);font-size:13px;font-weight:600;color:var(--navy);background:var(--white);cursor:pointer">
+          <option value="all">Semua Waktu</option>
+          <option value="month" selected>Bulan Ini</option>
+          <option value="week">Minggu Ini</option>
+        </select>
       </div>
       <div class="sg" id="dstats"></div>
       <div class="g2 mb16">
@@ -524,6 +529,21 @@ textarea{resize:vertical;min-height:68px}
               </div>
             </div>
           </div>
+          <div class="fi full">
+            <label>Tanda Tangan Digital (untuk Invoice & PO)</label>
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+              <div id="ttd-preview" style="width:120px;height:60px;border:2px dashed var(--g300);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--g50)">
+                <span id="ttd-placeholder" style="font-size:11px;color:var(--g500);text-align:center">Belum ada<br>ttd</span>
+                <img id="ttd-img" style="display:none;max-width:100%;max-height:100%;object-fit:contain"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <button class="btn bg bs" onclick="document.getElementById('ttd-file').click()">📁 Upload TTD</button>
+                <button class="btn bg bs tred" onclick="removeTTD()">✕ Hapus TTD</button>
+                <input type="file" id="ttd-file" accept="image/*" class="hide" onchange="handleTTDUpload(event)"/>
+                <span style="font-size:11px;color:var(--g500)">PNG transparan direkomendasikan, maks 300KB</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div></div>
       <div id="setB" class="hide"><div class="card cb">
@@ -717,9 +737,14 @@ textarea{resize:vertical;min-height:68px}
     <div class="ih-inv"><span>Produk / Deskripsi</span><span>Qty</span><span>Harga</span><span>Total</span><span></span></div>
     <div id="pitems"></div>
     <div class="div"></div>
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
-      <div class="fi" style="flex:1"><label>Catatan Produksi</label><textarea id="pnot" rows="2"></textarea></div>
-      <div style="text-align:right;font-size:15px;font-weight:700">Total:<br><span id="ptot" style="color:var(--accent)">Rp 0</span></div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div class="fi"><label>Catatan Produksi</label><textarea id="pnot" rows="2"></textarea></div>
+        <div class="fi mt12"><label>Syarat &amp; Ketentuan</label><textarea id="ptrm" rows="2"></textarea></div>
+      </div>
+      <div style="min-width:200px;text-align:right;display:flex;flex-direction:column;justify-content:flex-end">
+        <div style="font-size:15px;font-weight:700;margin-bottom:8px">Total:<br><span id="ptot" style="color:var(--accent)">Rp 0</span></div>
+      </div>
     </div>
     <input type="hidden" id="peid"/>
   </div>
@@ -1253,10 +1278,25 @@ function selectCust(ctx, name, phone) {
 //  DASHBOARD
 // ══════════════════════════════════════════
 function rDash(){
-  const invs=DB.get('invoices'),buku=DB.get('pembukuan'),stoks=DB.get('stok');
+  let invs=DB.get('invoices'),buku=DB.get('pembukuan'),stoks=DB.get('stok');
   const cfg=DB.gO('settings');
+  const f=document.getElementById('dash-filter')?.value||'month';
+  const now=new Date();
+  
+  if(f!=='all'){
+    let startDate='';
+    if(f==='month'){
+      startDate=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
+    }else if(f==='week'){
+      const d=new Date(now);d.setDate(d.getDate()-d.getDay());
+      startDate=d.toISOString().slice(0,10);
+    }
+    invs=invs.filter(i=>i.date>=startDate);
+    buku=buku.filter(b=>b.date>=startDate);
+  }
+
   document.getElementById('tbc').textContent=cfg.name||'Hulya Apparel';
-  document.getElementById('dsub').textContent=(cfg.name||'Hulya Apparel')+' · '+td();
+  document.getElementById('dsub').textContent=(cfg.name||'Hulya Apparel')+' · '+({all:'Semua Waktu',month:'Bulan Ini',week:'Minggu Ini'}[f]||'');
   const pend=buku.filter(b=>b.type==='pendapatan').reduce((s,b)=>s+Number(b.debit||0),0);
   const kelu=buku.filter(b=>b.type==='pengeluaran').reduce((s,b)=>s+Number(b.kredit||0),0);
   const piut=invs.filter(i=>i.status==='pending'||i.status==='proses').reduce((s,i)=>s+Number(i.total||0),0);
@@ -1339,7 +1379,7 @@ function openInvModal(eid=null){
     document.getElementById('icus').value=v.customer;
     document.getElementById('iphn').value=v.phone||'';
     document.getElementById('inot').value=v.notes||'';
-    document.getElementById('itrm').value=v.terms||'';
+    document.getElementById('itrm').value=v.terms!==undefined?v.terms:gS('terms','');
     document.getElementById('idsc').value=v.discount||0;
     document.getElementById('idp').value=v.dpPct??gS('dp',70);
     v.items.forEach(it=>addII(it));
@@ -1504,6 +1544,39 @@ function calcIT(){
   }
 }
 
+function createPOFromInvoice(invData) {
+  let pos = DB.get('pos');
+  const exists = pos.find(p => p.invoiceId === invData.id);
+  
+  let poStatus = 'pending';
+  if (invData.status === 'proses') poStatus = 'proses';
+  else if (invData.status === 'lunas') poStatus = 'selesai';
+  else if (invData.status === 'batal') poStatus = 'batal';
+
+  const poData = {
+    id: exists ? exists.id : uid(),
+    ref: exists ? exists.ref : autoRef('PO'),
+    customer: invData.customer,
+    phone: invData.phone,
+    date: invData.date,
+    due: invData.due || da(14),
+    status: poStatus,
+    items: invData.items.map(it => ({ ...it })),
+    total: invData.total,
+    notes: invData.notes || '',
+    terms: invData.terms || '',
+    invoiceId: invData.id
+  };
+
+  if (exists) {
+    pos = pos.map(p => p.id === exists.id ? poData : p);
+  } else {
+    pos.push(poData);
+  }
+  DB.set('pos', pos);
+  if (typeof rPOT === 'function') rPOT();
+}
+
 function saveInv(preview=false){
   const ref=document.getElementById('iref').value.trim();
   const cus=document.getElementById('icus').value.trim();
@@ -1533,6 +1606,7 @@ function saveInv(preview=false){
   const warnings=deductStok(items,old?.items||[]);
   if(eid)invs=invs.map(i=>i.id===eid?data:i);else invs.push(data);
   DB.set('invoices',invs);
+  createPOFromInvoice(data);
   if(status==='lunas'&&(!old||old.status!=='lunas')){
     addBE({date:data.date,ref:data.ref,desc:`Pendapatan Invoice ${data.ref} — ${cus}`,debit:tot,kredit:0,akun:'Pendapatan Usaha',type:'pendapatan',src:'invoice',srcId:data.id});
     if(warnings.length)toast(`Invoice lunas ✅ ⚠️ Stok minus: ${warnings[0]}`,'err');
@@ -1577,6 +1651,7 @@ function updInvSt(id,st){
   let invs=DB.get('invoices');
   const inv=invs.find(i=>i.id===id);const old=inv?.status;
   if(!inv)return;inv.status=st;DB.set('invoices',invs);
+  createPOFromInvoice(inv);
   if(st==='lunas'&&old!=='lunas'){
     addBE({date:td(),ref:inv.ref,desc:`Pendapatan Invoice ${inv.ref} — ${inv.customer}`,debit:inv.total,kredit:0,akun:'Pendapatan Usaha',type:'pendapatan',src:'invoice',srcId:inv.id});
     toast('Invoice lunas ✅ — masuk pembukuan');
@@ -1596,6 +1671,8 @@ function delInv(id){
     DB.set('stok',stoks);chkStok(stoks);
   }
   DB.set('invoices',DB.get('invoices').filter(i=>i.id!==id));
+  DB.set('pos',DB.get('pos').filter(p=>p.invoiceId!==id));
+  DB.set('pembukuan',DB.get('pembukuan').filter(b=>b.srcId!==id));
   rInvT();rDash();toast('Invoice dihapus & stok dikembalikan');
 }
 
@@ -1628,65 +1705,118 @@ function buildInvHTML(doc,type='INVOICE'){
   const isInv=type==='INVOICE';
   const dpA=isInv?doc.total*(doc.dpPct/100):0;
   const headColor=isInv?'var(--navy)':'var(--accent)';
+  
   const logoHTML=logoData
-    ?`<img src="${logoData}" style="max-height:70px;max-width:160px;object-fit:contain;display:block;margin-bottom:6px"/>`
-    :'';
-  return `<div class="ivp">
-    <div class="ivtop">
-      <div>
+    ?`<img src="${logoData}" style="max-height:80px;max-width:180px;object-fit:contain;display:block;margin-bottom:10px"/>`
+    :`<div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:var(--navy);margin-bottom:10px">${esc(cn)}</div>`;
+
+  const compInfo=logoData?`<div style="font-weight:700;font-size:15px;color:var(--navy);margin-bottom:4px">${esc(cn)}</div>`: '';
+  
+  const fmtRp = (val) => `<div style="display:flex;justify-content:space-between;"><span>Rp</span><span>${Number(val).toLocaleString('id-ID')}</span></div>`;
+
+  return `<div class="ivp" style="font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;padding:20px;border:1px solid #E5E7EB;border-radius:8px;">
+    <!-- HEADER -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:30px;">
+      <div style="flex:1;">
         ${logoHTML}
-        <div class="ivbn">${esc(cn)}</div>
-        <div class="ivba">${esc(ca).replace(/,\s*/g,'<br>')}
-          ${ct?'<br>Telp: '+esc(ct):''}${ce?' · '+esc(ce):''}</div>
+        ${compInfo}
+        <div style="font-size:12px;color:#4B5563;line-height:1.6;max-width:250px;">
+          ${esc(ca).replace(/\n/g,'<br>')}
+          ${ct?'<br>Telp: '+esc(ct):''}${ce?'<br>Email: '+esc(ce):''}
+        </div>
       </div>
-      <div style="text-align:right">
-        <div class="ivmh" style="color:${headColor}">${type}</div>
-        <table class="ivmt" style="margin-top:8px;margin-left:auto"><tbody>
-          <tr><td>${isInv?'Referensi':'No. PO'}</td><td>${esc(doc.ref)}</td></tr>
-          <tr><td>Tanggal</td><td>${doc.date}</td></tr>
-          <tr><td>${isInv?'Jatuh Tempo':'Target'}</td><td>${doc.due||'-'}</td></tr>
-          <tr><td>Status</td><td>${bHTML(doc.status)}</td></tr>
-        </tbody></table>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:flex-end;">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;letter-spacing:-1px;color:${headColor};margin-bottom:15px;">${type}</div>
+        
+        <table style="width:100%;max-width:300px;font-size:12px;border-collapse:collapse;">
+          <tbody>
+            <tr><td style="padding:4px 8px;color:#6B7280;text-align:left;width:100px;">${isInv?'No. Invoice':'No. PO'}</td><td style="padding:4px 8px;font-weight:700;text-align:right;">${esc(doc.ref)}</td></tr>
+            <tr><td style="padding:4px 8px;color:#6B7280;text-align:left;">Tanggal</td><td style="padding:4px 8px;font-weight:600;text-align:right;">${doc.date}</td></tr>
+            <tr><td style="padding:4px 8px;color:#6B7280;text-align:left;">${isInv?'Jatuh Tempo':'Target Selesai'}</td><td style="padding:4px 8px;font-weight:600;text-align:right;">${doc.due||'-'}</td></tr>
+            <tr><td style="padding:4px 8px;color:#6B7280;text-align:left;border-bottom:1px solid #E5E7EB;">Status</td><td style="padding:4px 8px;font-weight:600;text-align:right;border-bottom:1px solid #E5E7EB;">${(doc.status||'').toUpperCase()}</td></tr>
+            
+            <tr><td style="padding:12px 8px 4px;color:#6B7280;text-align:left;vertical-align:top;">${isInv?'Tagihan Untuk':'Untuk Pelanggan'}</td>
+                <td style="padding:12px 8px 4px;text-align:right;">
+                  <div style="font-weight:700;font-size:14px;color:var(--navy);">${esc(doc.customer)}</div>
+                  <div style="color:#6B7280;margin-top:2px;">${esc(doc.phone||'')}</div>
+                </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="ivsep"></div>
-    <div class="ivpar">
-      <div><div class="ivpl">Info Perusahaan</div><div class="ivpn">${esc(cn)}</div><div class="ivpi">${esc(ca)}</div></div>
-      <div><div class="ivpl">${isInv?'Tagihan Untuk':'Untuk Pelanggan'}</div><div class="ivpn">${esc(doc.customer)}</div><div class="ivpi">Telp: ${esc(doc.phone||'-')}</div></div>
-    </div>
-    <table class="ivtbl">
-      <thead><tr>
-        <th>No</th><th>Deskripsi</th><th>Qty</th><th>Harga</th><th>Jumlah</th>
-      </tr></thead>
-      <tbody>${(doc.items||[]).map((it,i)=>`<tr>
-        <td style="color:var(--g500);text-align:center">${i+1}</td>
-        <td>${esc(it.desc)}</td>
-        <td style="text-align:center">${it.qty}</td>
-        <td style="text-align:right">${Number(it.price).toLocaleString('id-ID')}</td>
-        <td style="text-align:right">${Number(it.qty*it.price).toLocaleString('id-ID')}</td>
-      </tr>`).join('')}</tbody>
+
+    <!-- ITEMS -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:12px;">
+      <thead>
+        <tr style="background:#34495E;color:#fff;">
+          <th style="padding:10px;text-align:center;width:40px;border-right:2px solid #FFF;color:var(--gold);">NO</th>
+          <th style="padding:10px;text-align:left;border-right:2px solid #FFF;color:var(--gold);">DESKRIPSI PRODUK</th>
+          <th style="padding:10px;text-align:center;width:60px;border-right:2px solid #FFF;">QTY</th>
+          <th style="padding:10px;text-align:right;width:120px;border-right:2px solid #FFF;">HARGA</th>
+          <th style="padding:10px;text-align:right;width:140px;">JUMLAH</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${(doc.items||[]).map((it,i)=>`
+        <tr style="background:#F4F5F7;color:#34495E;">
+          <td style="padding:10px;text-align:center;border-right:2px solid #FFF;border-bottom:2px solid #FFF;font-weight:600;">${i+1}</td>
+          <td style="padding:10px;border-right:2px solid #FFF;border-bottom:2px solid #FFF;font-weight:500;">${esc(it.desc)}</td>
+          <td style="padding:10px;text-align:center;border-right:2px solid #FFF;border-bottom:2px solid #FFF;">${it.qty}</td>
+          <td style="padding:10px;border-right:2px solid #FFF;border-bottom:2px solid #FFF;">${fmtRp(it.price)}</td>
+          <td style="padding:10px;border-bottom:2px solid #FFF;">${fmtRp(it.qty*it.price)}</td>
+        </tr>
+        `).join('')}
+      </tbody>
     </table>
-    <div class="ivtw">
-      <table class="ivtt"><tbody>
-        ${isInv&&doc.subtotal!==undefined?`<tr><td>Subtotal</td><td>Rp ${Number(doc.subtotal).toLocaleString('id-ID')}</td></tr>`:''}
-        ${isInv&&doc.discount?`<tr><td>Diskon</td><td>- Rp ${Number(doc.discount).toLocaleString('id-ID')}</td></tr>`:''}
-        <tr class="grd"><td><b>Total</b></td><td><b>Rp ${Number(doc.total).toLocaleString('id-ID')}</b></td></tr>
-      </tbody></table>
+
+    <!-- TOTALS -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:30px;">
+      <table style="width:100%;max-width:320px;font-size:13px;border-collapse:collapse;">
+        <tbody>
+          ${isInv&&doc.subtotal!==undefined?`
+          <tr><td style="padding:6px 12px;color:#6B7280;text-align:left;border:1px solid #E5E7EB;">Subtotal</td><td style="padding:6px 12px;border:1px solid #E5E7EB;font-weight:600;">${fmtRp(doc.subtotal)}</td></tr>
+          `:''}
+          ${isInv&&doc.discount?`
+          <tr><td style="padding:6px 12px;color:#6B7280;text-align:left;border:1px solid #E5E7EB;">Diskon</td><td style="padding:6px 12px;border:1px solid #E5E7EB;font-weight:600;color:#DC2626;">- ${fmtRp(doc.discount)}</td></tr>
+          `:''}
+          <tr><td style="padding:10px 12px;font-weight:700;color:${headColor};text-align:left;border:1px solid #E5E7EB;background:#F3F4F6;">TOTAL</td><td style="padding:10px 12px;border:1px solid #E5E7EB;font-weight:800;font-size:15px;background:#F3F4F6;">${fmtRp(doc.total)}</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="ivfg">
-      <div>
-        ${isInv&&doc.dpPct?`<div style="background:var(--ybg);border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:12px">
-          <b>DP ${doc.dpPct}%:</b> Rp ${dpA.toLocaleString('id-ID')} &nbsp;|&nbsp; <b>Sisa:</b> Rp ${(doc.total-dpA).toLocaleString('id-ID')}
-        </div>`:''}
-        <div class="ivnl">${isInv?'Keterangan':'Catatan Produksi'}</div>
-        <div style="font-size:12px;color:var(--g700);line-height:1.7">${esc(isInv?doc.notes||'':doc.notes||'-').replace(/\n/g,'<br>')}</div>
-        ${isInv&&doc.terms?`<div class="ivnl" style="margin-top:12px">Syarat &amp; Ketentuan</div>
-        <div style="font-size:12px;color:var(--g700);line-height:1.7">${esc(doc.terms).replace(/\n/g,'<br>')}</div>`:''}
+
+    <!-- NOTES & SIGNATURE -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;">
+      <div style="flex:1;">
+        ${isInv&&doc.dpPct?`
+        <div style="background:#FEF3C7;border:1px solid #F5B731;border-radius:6px;padding:10px 12px;font-size:12px;margin-bottom:15px;display:inline-block;">
+          <b>DP ${doc.dpPct}%:</b> Rp ${Number(dpA).toLocaleString('id-ID')} &nbsp;|&nbsp; <b>Sisa Tagihan:</b> Rp ${Number(doc.total-dpA).toLocaleString('id-ID')}
+        </div>
+        `:''}
+        
+        <table style="width:100%;font-size:12px;border-collapse:collapse;">
+          <tbody>
+            <tr>
+              <td style="padding-bottom:10px;vertical-align:top;width:120px;font-weight:700;color:#374151;border-bottom:1px dashed #D1D5DB;">${isInv?'Keterangan':'Catatan Produksi'}</td>
+              <td style="padding-bottom:10px;vertical-align:top;color:#4B5563;border-bottom:1px dashed #D1D5DB;">${esc(isInv?doc.notes||'':doc.notes||'-').replace(/\n/g,'<br>')}</td>
+            </tr>
+            ${doc.terms?`
+            <tr>
+              <td style="padding-top:10px;vertical-align:top;font-weight:700;color:#374151;">Syarat & Ketentuan</td>
+              <td style="padding-top:10px;vertical-align:top;color:#4B5563;line-height:1.6;">${esc(doc.terms).replace(/\n/g,'<br>')}</td>
+            </tr>
+            `:''}
+          </tbody>
+        </table>
       </div>
-      <div class="ivsw">
-        <div style="font-size:11px;color:var(--g500);margin-bottom:42px">${doc.date}</div>
-        <div class="ivsl"></div>
-        <div class="ivsn">${esc(sg)}</div>
+
+      <div style="text-align:center;min-width:160px;margin-top:10px;">
+        <div style="font-size:12px;color:#4B5563;margin-bottom:4px;">${doc.date}</div>
+        <div style="height:70px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;">
+          ${localStorage.getItem('h_ttd') ? `<img src="${localStorage.getItem('h_ttd')}" style="max-height:70px;max-width:140px;object-fit:contain;"/>` : '<div style="height:50px"></div>'}
+        </div>
+        <div style="border-bottom:1px solid #1A1A1A;width:140px;margin:0 auto 6px;"></div>
+        <div style="font-weight:700;font-size:13px;color:#1A1A1A;">${esc(sg)}</div>
       </div>
     </div>
   </div>`;
@@ -1709,6 +1839,7 @@ function openPOModal(eid=null){
     document.getElementById('pcus').value=v.customer;
     document.getElementById('pphn').value=v.phone||'';
     document.getElementById('pnot').value=v.notes||'';
+    document.getElementById('ptrm').value=v.terms!==undefined?v.terms:gS('terms','');
     v.items.forEach(it=>addPI(it));
   }else{
     document.getElementById('pref').value=autoRef('PO');
@@ -1716,6 +1847,7 @@ function openPOModal(eid=null){
     document.getElementById('pdue').value=da(14);
     document.getElementById('pst').value='pending';
     ['pcus','pphn','pnot'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('ptrm').value=gS('terms','');
     addPI();
   }
   calcPT();openM('pm');
@@ -1880,8 +2012,13 @@ function savePO(){
   const oldPO=eid?DB.get('pos').find(p=>p.id===eid):null;
   const data={id:eid||uid(),ref,customer:cus,phone,
     date:document.getElementById('pdat').value,due:document.getElementById('pdue').value,
-    status:document.getElementById('pst').value,items,total:tot,notes:document.getElementById('pnot').value};
-  const warnings=deductStok(items,oldPO?.items||[]);
+    status:document.getElementById('pst').value,items,total:tot,notes:document.getElementById('pnot').value,
+    terms:document.getElementById('ptrm').value,
+    invoiceId:oldPO?.invoiceId||''};
+  
+  // Only deduct stock if PO is NOT linked to an Invoice
+  const warnings=data.invoiceId?[]:deductStok(items,oldPO?.items||[]);
+  
   let pos=DB.get('pos');
   if(eid)pos=pos.map(p=>p.id===eid?data:p);else pos.push(data);
   DB.set('pos',pos);closeM('pm');rPOT();rDash();
@@ -1924,7 +2061,8 @@ function updPOSt(id,s){
 function delPO(id){
   if(!confirm('Hapus PO?'))return;
   const po=DB.get('pos').find(p=>p.id===id);
-  if(po?.items?.length){
+  // Only restore stock if PO is NOT linked to an Invoice
+  if(po&&!po.invoiceId&&po.items?.length){
     let stoks=DB.get('stok');
     po.items.forEach(it=>{
       if(!it.desc||it.qty<=0)return;
@@ -2094,7 +2232,9 @@ function rBeliT(){
 
 function delBeli(id){
   if(!confirm('Hapus pembelian?'))return;
-  DB.set('pembelian',DB.get('pembelian').filter(b=>b.id!==id));rBeliT();toast('Pembelian dihapus');
+  DB.set('pembelian',DB.get('pembelian').filter(b=>b.id!==id));
+  DB.set('pembukuan',DB.get('pembukuan').filter(b=>b.srcId!==id));
+  rBeliT();toast('Pembelian dihapus');
 }
 
 // ══════════════════════════════════════════
@@ -2291,6 +2431,7 @@ function rSet(){
   document.getElementById('sdp').value=s.dp||70;
   document.getElementById('str').value=s.terms||'';
   loadLogoPreview();
+  loadTTDPreview();
 }
 
 function upPayPrev(){
@@ -2358,8 +2499,8 @@ function printDoc(containerId){
       .ivtt .grd td{font-size:15px;color:var(--navy);border-top:2px solid var(--accent);padding-top:8px}
       .ivfg{display:grid;grid-template-columns:1fr 1fr;gap:24px}
       .ivnl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--g500);font-weight:600;margin-bottom:5px}
-      .ivsw{text-align:center;padding-top:10px}
-      .ivsl{border-bottom:1px solid #1A1A1A;width:130px;margin:0 auto 6px}
+      .ivsw{display:flex;flex-direction:column;align-items:center;min-width:140px;text-align:center;margin-left:auto}
+      .ivsl{border-bottom:1px solid #1A1A1A;width:130px;margin-bottom:6px}
       .ivsn{font-weight:700;font-size:12px}
       .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
       .bp2{background:var(--ybg);color:var(--yellow)}.bpr{background:var(--bbg);color:var(--blue)}
@@ -2412,6 +2553,43 @@ function showLogoPreview(data){
 function loadLogoPreview(){
   const data=localStorage.getItem('h_logo')||'';
   showLogoPreview(data);
+}
+
+function handleTTDUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  if(file.size>307200){toast('TTD terlalu besar. Maks 300KB','err');return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const data=ev.target.result;
+    localStorage.setItem('h_ttd',data);
+    showTTDPreview(data);
+    toast('Tanda tangan berhasil diupload ✅');
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+function removeTTD(){
+  localStorage.removeItem('h_ttd');
+  showTTDPreview('');
+  toast('Tanda tangan dihapus');
+}
+
+function showTTDPreview(data){
+  const img=document.getElementById('ttd-img');
+  const ph=document.getElementById('ttd-placeholder');
+  if(img && ph) {
+    if(data){
+      img.src=data;img.style.display='block';ph.style.display='none';
+    }else{
+      img.src='';img.style.display='none';ph.style.display='block';
+    }
+  }
+}
+
+function loadTTDPreview(){
+  const data=localStorage.getItem('h_ttd')||'';
+  showTTDPreview(data);
 }
 
 // ══════════════════════════════════════════
@@ -2821,6 +2999,7 @@ async function initApp() {
   chkStok();
   updateCRMCount();
   loadLogoPreview();
+  loadTTDPreview();
 }
 
 initApp();
