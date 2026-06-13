@@ -2246,7 +2246,7 @@ function saveBeli(){
   const d={id:uid(),ref,supplier:sup,date:document.getElementById('bdat').value,items,total:tot,notes:document.getElementById('bnot').value};
   const bl=DB.get('pembelian');bl.push(d);DB.set('pembelian',bl);
   addBE({date:d.date,ref:d.ref,desc:`Pembelian dari ${sup} (${ref})`,debit:0,kredit:tot,akun:'Biaya Produksi',type:'pengeluaran',src:'pembelian',srcId:d.id});
-  closeM('bm');rBeliT();toast('Pembelian dicatat & masuk pembukuan ✅');
+  closeM('bm');rBeliT();rBuku();rDash();toast('Pembelian dicatat & masuk pembukuan ✅');
 }
 
 function rBeliT(){
@@ -2298,7 +2298,7 @@ function saveJurnal(){
     debit:Number(document.getElementById('jdb').value)||0,
     kredit:Number(document.getElementById('jkr').value)||0,
     akun:document.getElementById('jak').value,type:document.getElementById('jty').value,src:'manual'});
-  DB.set('pembukuan',buku);closeM('jm');rBuku();toast('Jurnal disimpan');
+  DB.set('pembukuan',buku);closeM('jm');rBuku();rDash();toast('Jurnal disimpan');
 }
 
 function rBuku(){
