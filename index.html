@@ -388,7 +388,7 @@ textarea{resize:vertical;min-height:68px}
 
 <!-- LOADING OVERLAY -->
 <div id="loading-overlay">
-  <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800">ERP<span style="color:var(--gold)">.</span></div>
+  <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800">HULYA<span style="color:var(--gold)">.</span></div>
   <div class="loading-spinner"></div>
   <div style="font-size:13px;color:var(--g500)">Memuat data dari cloud...</div>
 </div>
@@ -435,9 +435,9 @@ textarea{resize:vertical;min-height:68px}
     <div class="tb-ttl" id="tbtl">Dashboard</div>
     <div class="fl ic g8">
       <button class="mobile-home-btn" onclick="nav('dashboard')">Menu</button>
-      <span style="font-size:12px;color:var(--g500)" id="tbc"> Apparel</span>
-      <div id="top-logo" class="top-logo" aria-label="Logo  Apparel">
-        <img id="top-logo-src" alt="Logo  Apparel"/>
+      <span style="font-size:12px;color:var(--g500)" id="tbc">Hulya Apparel</span>
+      <div id="top-logo" class="top-logo" aria-label="Logo Hulya Apparel">
+        <img id="top-logo-src" alt="Logo Hulya Apparel"/>
         <span>H</span>
       </div>
     </div>
@@ -1103,9 +1103,9 @@ textarea{resize:vertical;min-height:68px}
 // Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 const firebaseConfig = {
   apiKey: "AIzaSyAApVFG3ewNZOniW_hA2KfgGPwvTq2GGVs",
-  authDomain: "app--apparel.firebaseapp.com",
-  projectId: "app--apparel",
-  storageBucket: "app--apparel.firebasestorage.app",
+  authDomain: "app-hulya-apparel.firebaseapp.com",
+  projectId: "app-hulya-apparel",
+  storageBucket: "app-hulya-apparel.firebasestorage.app",
   messagingSenderId: "1044928418355",
   appId: "1:1044928418355:web:4acabbc77f001f60f14946",
   measurementId: "G-8ZBZPQRRTF"
@@ -1532,8 +1532,8 @@ function rDash(){
     buku=buku.filter(b=>b.date>=startDate);
   }
 
-  document.getElementById('tbc').textContent=cfg.name||' Apparel';
-  document.getElementById('dsub').textContent=(cfg.name||' Apparel')+'  -  '+({all:'Semua Waktu',month:'Bulan Ini',week:'Minggu Ini'}[f]||'');
+  document.getElementById('tbc').textContent=cfg.name||'Hulya Apparel';
+  document.getElementById('dsub').textContent=(cfg.name||'Hulya Apparel')+'  -  '+({all:'Semua Waktu',month:'Bulan Ini',week:'Minggu Ini'}[f]||'');
   const pend=buku.filter(b=>b.type==='pendapatan').reduce((s,b)=>s+Number(b.debit||0),0);
   const kelu=buku.filter(b=>b.type==='pengeluaran').reduce((s,b)=>s+Number(b.kredit||0),0);
   const piut=invs.filter(i=>i.status==='pending'||i.status==='proses').reduce((s,i)=>s+Number(i.total||0),0);
@@ -1969,7 +1969,7 @@ function openProdFromPreview(){
 
 function buildInvHTML(doc,type='INVOICE'){
   const cfg=DB.gO('settings');
-  const cn=cfg.name||' Apparel';
+  const cn=cfg.name||'Hulya Apparel';
   const ca=cfg.address||'';
   const ct=cfg.telp||'';
   const ce=cfg.email||'';
@@ -2379,7 +2379,7 @@ function getCurrentShipDoc(type){
 function buildShippingLabelHTML(doc,type='inv'){
   const cfg=DB.gO('settings');
   const ship=docShip(doc);
-  const cn=cfg.name||' Apparel';
+  const cn=cfg.name||'Hulya Apparel';
   const totalQty=(doc.items||[]).reduce((s,it)=>s+Number(it.qty||0),0);
   return `<div class="ship-label">
     <div class="label-top">
@@ -2437,7 +2437,7 @@ function buildPackingLabelHTML(doc,type='inv'){
   </div>`;
 }
 
-function printHTML(content,title=' Apparel'){
+function printHTML(content,title='Hulya Apparel'){
   const pw=window.open('','_blank','width=700,height=800');
   pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${esc(title)}</title>
   <style>
@@ -2791,7 +2791,7 @@ function exportLapCSV(){
   const b=DB.get('pembukuan');
   const rows=[['Tanggal','Referensi','Keterangan','Akun','Debit','Kredit','Tipe','Sumber']];
   b.forEach(x=>rows.push([x.date,x.ref,x.desc,x.akun,x.debit||0,x.kredit||0,x.type,x.src||'manual']));
-  dlCSV(rows,'-laporan-keuangan.csv');toast('Laporan diexport');
+  dlCSV(rows,'hulya-laporan-keuangan.csv');toast('Laporan diexport');
 }
 
 // Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
@@ -2841,7 +2841,7 @@ function saveSettings(){
     dp:Number(document.getElementById('sdp').value)||70,terms:document.getElementById('str').value
   };
   DB.sO('settings',d);
-  document.getElementById('tbc').textContent=d.name||' Apparel';
+  document.getElementById('tbc').textContent=d.name||'Hulya Apparel';
   toast('Pengaturan disimpan ');
 }
 
@@ -2854,7 +2854,7 @@ function printDoc(containerId){
   printDocContent(el.innerHTML);
 }
 
-function printDocContent(content,title=' Apparel  -  Dokumen'){
+function printDocContent(content,title='Hulya Apparel  -  Dokumen'){
   const pw=window.open('','_blank','width=900,height=700');
   if(!pw){toast('Popup print diblokir browser. Izinkan popup untuk cetak PDF.','err');return;}
   pw.document.write(`<!DOCTYPE html><html><head>
@@ -3023,7 +3023,7 @@ function exportCSV(key){
   data.forEach(item=>rows.push(hd.map(h=>{
     const v=item[h];return Array.isArray(v)?v.map(i=>i.desc||'').join('; '):(v??'');
   })));
-  dlCSV(rows,`-${key}-${td()}.csv`);toast('Export CSV berhasil');
+  dlCSV(rows,`hulya-${key}-${td()}.csv`);toast('Export CSV berhasil');
 }
 
 function dlCSV(rows,fn){
@@ -3041,7 +3041,7 @@ function backupData(){
   });
   const blob=new Blob([JSON.stringify(all,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`-backup-${td()}.json`;a.click();
+  const a=document.createElement('a');a.href=url;a.download=`hulya-backup-${td()}.json`;a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
   toast('Backup berhasil didownload ');
 }
@@ -3106,7 +3106,7 @@ const WA_TMPLS={
     const cfg=DB.gO('settings');
     return `Halo ${d.customer},
 
-Terima kasih sudah memesan di *${cfg.name||' Apparel'}*!
+Terima kasih sudah memesan di *${cfg.name||'Hulya Apparel'}*!
 
 Berikut detail pesanan Anda:
 No. ${type==='po'?'PO':'Invoice'}: ${d.ref}
@@ -3116,13 +3116,13 @@ ${type==='inv'&&d.dpPct?'DP '+d.dpPct+'%: '+fRp(d.total*(d.dpPct/100))+'\n':''}
 Mohon konfirmasi pesanan Anda.
 
 Terima kasih.
-${cfg.name||' Apparel'}`;
+${cfg.name||'Hulya Apparel'}`;
   },
   tagihan:(d,type)=>{
     const cfg=DB.gO('settings');
     return `Halo ${d.customer},
 
-Berikut tagihan dari *${cfg.name||' Apparel'}*:
+Berikut tagihan dari *${cfg.name||'Hulya Apparel'}*:
 
 No. Invoice: ${d.ref}
 Tanggal: ${d.date}
@@ -3134,7 +3134,7 @@ Transfer ke ${cfg.bank||'-'} ${cfg.rekening||'-'}
 a/n ${cfg.atasnama||'-'}
 
 Mohon konfirmasi setelah transfer.
-${cfg.name||' Apparel'}`;
+${cfg.name||'Hulya Apparel'}`;
   },
   lunas:(d)=>{
     const cfg=DB.gO('settings');
@@ -3149,7 +3149,7 @@ Tanggal Lunas: ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'lon
 Terima kasih sudah mempercayai kami.
 Pesanan sedang kami proses dan akan segera kami kabari update produksinya.
 
-${cfg.name||' Apparel'}`;
+${cfg.name||'Hulya Apparel'}`;
   },
   followup:(d,type)=>{
     const cfg=DB.gO('settings');
@@ -3162,7 +3162,7 @@ Kami ingin mengingatkan bahwa ${type==='inv'?'tagihan *'+d.ref+'*':'order *'+d.r
 Apakah ada yang perlu kami bantu atau ada update dari pihak Anda?
 
 Terima kasih.
-${cfg.name||' Apparel'}`;
+${cfg.name||'Hulya Apparel'}`;
   },
   selesai:(d)=>{
     const cfg=DB.gO('settings');
@@ -3177,7 +3177,7 @@ Pesanan sudah melewati semua tahap produksi dan siap untuk dikirim atau diambil.
 
 Mohon konfirmasi untuk proses pengiriman/pengambilan.
 
-${cfg.name||' Apparel'}`;
+${cfg.name||'Hulya Apparel'}`;
   },
 
   // -- Template PO untuk Tim Produksi --
@@ -3548,3 +3548,7 @@ initApp();
 </script>
 </body>
 </html>
+
+
+
+
