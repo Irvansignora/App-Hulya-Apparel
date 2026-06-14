@@ -997,9 +997,6 @@ const DB = {
 
 // Load all data from Firestore on startup
 async function loadFromFirestore() {
-  const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Firestore timeout')), 8000)
-  );
   try {
     const promises = ALL_KEYS.map(async (key) => {
       const doc = await firestore.collection('app').doc(key).get();
@@ -1007,10 +1004,10 @@ async function loadFromFirestore() {
         _cache[key] = doc.data().data;
       }
     });
-    await Promise.race([Promise.all(promises), timeout]);
+    await Promise.all(promises);
   } catch (e) {
     console.error('Firestore load error:', e);
-    // tetap lanjut dengan data lokal / kosong
+    toast(' Gagal memuat data dari cloud. Cek koneksi internet.', 'err');
   }
 }
 
@@ -1147,9 +1144,9 @@ function renderCRMStats() {
   const totalRev = invs.filter(i => i.status === 'lunas').reduce((s, i) => s + Number(i.total || 0), 0);
 
   document.getElementById('crm-stats').innerHTML = `
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}</div><div class="sl">Total Customer</div><div class="sv">${custs.length}</div><div class="ss">Terdaftar di CRM</div></div>
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>}</div><div class="sl">Customer Aktif</div><div class="sv">${activeCount}</div><div class="ss">Transaksi 3 bulan terakhir</div></div>
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>}</div><div class="sl">Customer Baru</div><div class="sv">${newThisMonth}</div><div class="ss">Bulan ini</div></div>`;
+    <div class="sc"><div class="si">${icn('users')}</div><div class="sl">Total Customer</div><div class="sv">${custs.length}</div><div class="ss">Terdaftar di CRM</div></div>
+    <div class="sc"><div class="si">${icn('user-check')}</div><div class="sl">Customer Aktif</div><div class="sv">${activeCount}</div><div class="ss">Transaksi 3 bulan terakhir</div></div>
+    <div class="sc"><div class="si">${icn('sparkles')}</div><div class="sl">Customer Baru</div><div class="sv">${newThisMonth}</div><div class="ss">Bulan ini</div></div>`;
 }
 
 function renderCRMTable() {
@@ -1177,9 +1174,9 @@ function renderCRMTable() {
         <td><span class="chip">${cPOs.length}</span></td>
         <td style="font-weight:700;color:${rev > 0 ? 'var(--green)' : 'var(--g500)'}">${rev > 0 ? fRp(rev) : '-'}</td>
         <td style="white-space:nowrap;display:flex;gap:4px">
-          <button class="btn bg bs" onclick="viewCRMDetail('${c.id}')" title="Detail">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>}</button>
-          <button class="btn bg bs" onclick="openCRMModal('${c.id}')" title="Edit">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>}</button>
-          <button class="btn bg bs tred" onclick="delCRM('${c.id}')" title="Hapus">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>}</button>
+          <button class="btn bg bs" onclick="viewCRMDetail('${c.id}')" title="Detail">${icn('eye')}</button>
+          <button class="btn bg bs" onclick="openCRMModal('${c.id}')" title="Edit">${icn('pencil')}</button>
+          <button class="btn bg bs tred" onclick="delCRM('${c.id}')" title="Hapus">${icn('trash-2')}</button>
         </td>
       </tr>`;
     }).join('')}</tbody></table>` : emSt('users', 'Belum ada customer. Tambah customer baru atau buat Invoice/PO.');
@@ -1390,10 +1387,10 @@ function rDash(){
   const piut=invs.filter(i=>i.status==='pending'||i.status==='proses').reduce((s,i)=>s+Number(i.total||0),0);
   const laba=pend-kelu;
   document.getElementById('dstats').innerHTML=`
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>}</div><div class="sl">Total Pendapatan</div><div class="sv" style="color:var(--green)">${fRp(pend)}</div><div class="ss">Invoice terlunasi</div></div>
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>}</div><div class="sl">Piutang</div><div class="sv" style="color:var(--yellow)">${fRp(piut)}</div><div class="ss">Belum dibayar</div></div>
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>}</div><div class="sl">Total Pembelian</div><div class="sv" style="color:var(--red)">${fRp(kelu)}</div><div class="ss">Biaya tercatat</div></div>
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>}</div><div class="sl">Laba Bersih</div><div class="sv" style="color:${laba>=0?'var(--green)':'var(--red)'}">${fRp(laba)}</div><div class="ss">${laba>=0?'Profit':'Rugi'}</div></div>`;
+    <div class="sc"><div class="si">${icn('circle-dollar-sign')}</div><div class="sl">Total Pendapatan</div><div class="sv" style="color:var(--green)">${fRp(pend)}</div><div class="ss">Invoice terlunasi</div></div>
+    <div class="sc"><div class="si">${icn('clock')}</div><div class="sl">Piutang</div><div class="sv" style="color:var(--yellow)">${fRp(piut)}</div><div class="ss">Belum dibayar</div></div>
+    <div class="sc"><div class="si">${icn('shopping-cart')}</div><div class="sl">Total Pembelian</div><div class="sv" style="color:var(--red)">${fRp(kelu)}</div><div class="ss">Biaya tercatat</div></div>
+    <div class="sc"><div class="si">${icn('chart-column')}</div><div class="sl">Laba Bersih</div><div class="sv" style="color:${laba>=0?'var(--green)':'var(--red)'}">${fRp(laba)}</div><div class="ss">${laba>=0?'Profit':'Rugi'}</div></div>`;
   const rec=[...invs].sort((a,b)=>b.id>a.id?1:-1).slice(0,5);
   document.getElementById('dinv').innerHTML=rec.length
     ?`<div class="tw"><table><thead><tr><th>Ref</th><th>Pelanggan</th><th>Total</th><th>Status</th></tr></thead><tbody>
@@ -1407,7 +1404,7 @@ function rDash(){
     ?`<div class="tw"><table><thead><tr><th>Produk</th><th>Stok</th><th>Min</th></tr></thead><tbody>
       ${low.map(s=>`<tr><td>${esc(s.name)}</td><td style="color:var(--red);font-weight:700">${s.qty} ${esc(s.unit||'pcs')}</td><td>${s.minQty}</td></tr>`).join('')}
       </tbody></table></div>`
-    :`<div style="padding:20px;text-align:center;color:var(--green);font-weight:600">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>} Semua stok aman</div>`;
+    :`<div style="padding:20px;text-align:center;color:var(--green);font-weight:600">${icn('check-circle')} Semua stok aman</div>`;
   rChart(buku);
   chkStok(stoks);
 }
@@ -1523,8 +1520,8 @@ function buildStokOptions(selectedDesc='',selectedSku=''){
 
 function getStokBadge(qty,minQty){
   if(qty<=0)return`<span class="stok-badge stok-empty">Habis</span>`;
-  if(qty<=minQty)return`<span class="stok-badge stok-low">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>} Sisa ${qty}</span>`;
-  return`<span class="stok-badge stok-ok">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>} ${qty} pcs</span>`;
+  if(qty<=minQty)return`<span class="stok-badge stok-low">${icn('triangle-alert')} Sisa ${qty}</span>`;
+  return`<span class="stok-badge stok-ok">${icn('check')} ${qty} pcs</span>`;
 }
 
 function addII(d=null){
@@ -1747,18 +1744,18 @@ function rInvT(){
     <tbody>${invs.map(i=>`<tr>
       <td style="font-weight:700;color:var(--red);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevInv('${i.id}')">${esc(i.ref)}</td>
       <td>${esc(i.customer)}<br><small class="tgy">${esc(i.phone||'')}</small></td>
-      <td>${i.date}</td><td>${i.due||'-'}<br>${(()=>{const bc=getBuktiCount(i.id,'inv');return bc>0?`<small style="color:var(--accent)">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>} ${bc} bukti</small>`:''})()}</td>
+      <td>${i.date}</td><td>${i.due||'-'}<br>${(()=>{const bc=getBuktiCount(i.id,'inv');return bc>0?`<small style="color:var(--accent)">${icn('paperclip')} ${bc} bukti</small>`:''})()}</td>
       <td>${(()=>{const s=docShip(i);return `${esc(s.courier||'-')} ${s.service?'<br><small class="tgy">'+esc(s.service)+'</small>':''}${s.tracking?'<br><small style="color:var(--accent);font-weight:600">'+esc(s.tracking)+'</small>':''}<br><span class="chip">${shipStatusText(s.status)}</span>`})()}</td>
       <td style="font-weight:700">${fRp(i.total)}</td>
       <td><select class="ssel" onchange="updInvSt('${i.id}',this.value)">
         ${['pending','proses','lunas','batal'].map(s=>`<option value="${s}"${i.status===s?' selected':''}>${{pending:'Pending',proses:'Proses',lunas:'Lunas',batal:'Batal'}[s]}</option>`).join('')}
       </select></td>
       <td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap">
-        <button class="btn bg bs" onclick="prevInv('${i.id}')" title="Preview">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>}</button>
-        <button class="btn bwa bs" onclick="openWAModal('${i.id}','inv')" title="Kirim WA">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>}</button>
-        <button class="btn bg bs" style="color:var(--accent);border-color:var(--accent)" onclick="openBuktiModal('${i.id}','inv')" title="Bukti Bayar">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>}</button>
-        <button class="btn bg bs" onclick="openInvModal('${i.id}')">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>}</button>
-        <button class="btn bg bs tred" onclick="delInv('${i.id}')">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>}</button>
+        <button class="btn bg bs" onclick="prevInv('${i.id}')" title="Preview">${icn('eye')}</button>
+        <button class="btn bwa bs" onclick="openWAModal('${i.id}','inv')" title="Kirim WA">${icn('message-circle')}</button>
+        <button class="btn bg bs" style="color:var(--accent);border-color:var(--accent)" onclick="openBuktiModal('${i.id}','inv')" title="Bukti Bayar">${icn('paperclip')}</button>
+        <button class="btn bg bs" onclick="openInvModal('${i.id}')">${icn('pencil')}</button>
+        <button class="btn bg bs tred" onclick="delInv('${i.id}')">${icn('trash-2')}</button>
       </td>
     </tr>`).join('')}</tbody></table>`:emSt('receipt-text','Tidak ada invoice yang cocok');
 }
@@ -2186,18 +2183,18 @@ function rPOT(){
     <tbody>${pos.map(p=>`<tr>
       <td style="font-weight:700;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevPO('${p.id}')">${esc(p.ref)}</td>
       <td>${esc(p.customer)}<br><small class="tgy">${esc(p.phone||'')}</small></td><td>${p.date}</td>
-      <td>${p.due||'-'}<br>${(()=>{const pd=DB.gO('produksi')[p.id];if(!pd)return'';const d=Object.keys(pd.stages||{}).length;return d>0?`<small style="color:var(--accent)">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>} ${d}/5 tahap</small>`:''})()}</td>
+      <td>${p.due||'-'}<br>${(()=>{const pd=DB.gO('produksi')[p.id];if(!pd)return'';const d=Object.keys(pd.stages||{}).length;return d>0?`<small style="color:var(--accent)">${icn('factory')} ${d}/5 tahap</small>`:''})()}</td>
       <td>${(()=>{const s=docShip(p);return `${esc(s.courier||'-')} ${s.service?'<br><small class="tgy">'+esc(s.service)+'</small>':''}${s.tracking?'<br><small style="color:var(--accent);font-weight:600">'+esc(s.tracking)+'</small>':''}<br><span class="chip">${shipStatusText(s.status)}</span>`})()}</td>
       <td style="font-weight:700">${fRp(p.total)}</td>
       <td><select class="ssel" onchange="updPOSt('${p.id}',this.value)">
         ${['pending','proses','selesai','batal'].map(s=>`<option value="${s}"${p.status===s?' selected':''}>${{pending:'Pending',proses:'Proses',selesai:'Selesai',batal:'Batal'}[s]}</option>`).join('')}
       </select></td>
       <td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap">
-        <button class="btn bg bs" onclick="prevPO('${p.id}')" title="Preview">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>}</button>
-        <button class="btn bwa bs" onclick="openWAModal('${p.id}','po')" title="Kirim WA">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>}</button>
-        <button class="btn bg bs" style="color:var(--gold);border-color:var(--gold)" onclick="openProdModal('${p.id}')" title="Rekap Produksi">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>}</button>
-        <button class="btn bg bs" onclick="openPOModal('${p.id}')">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>}</button>
-        <button class="btn bg bs tred" onclick="delPO('${p.id}')">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>}</button>
+        <button class="btn bg bs" onclick="prevPO('${p.id}')" title="Preview">${icn('eye')}</button>
+        <button class="btn bwa bs" onclick="openWAModal('${p.id}','po')" title="Kirim WA">${icn('message-circle')}</button>
+        <button class="btn bg bs" style="color:var(--gold);border-color:var(--gold)" onclick="openProdModal('${p.id}')" title="Rekap Produksi">${icn('factory')}</button>
+        <button class="btn bg bs" onclick="openPOModal('${p.id}')">${icn('pencil')}</button>
+        <button class="btn bg bs tred" onclick="delPO('${p.id}')">${icn('trash-2')}</button>
       </td>
     </tr>`).join('')}</tbody></table>`:emSt('clipboard-list','Tidak ada PO');
 }
@@ -2395,8 +2392,8 @@ function rStokT(){
         <td style="font-weight:700;color:${mg>=30?'var(--green)':mg>0?'var(--yellow)':'var(--red)'}">${mg}%</td>
         <td style="white-space:nowrap">
           <button class="btn bg bs" onclick="adjStok('${s.id}')">± Stok</button>
-          <button class="btn bg bs" onclick="openStokModal('${s.id}')">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>}</button>
-          <button class="btn bg bs tred" onclick="delStok('${s.id}')">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>}</button>
+          <button class="btn bg bs" onclick="openStokModal('${s.id}')">${icn('pencil')}</button>
+          <button class="btn bg bs tred" onclick="delStok('${s.id}')">${icn('trash-2')}</button>
         </td>
       </tr>`;
     }).join('')}</tbody></table>`:emSt('package','Tidak ada produk yang cocok');
@@ -2468,7 +2465,7 @@ function rBeliT(){
       <td>${esc(b.supplier)}</td><td>${b.date}</td>
       <td style="font-weight:700;color:var(--red)">${fRp(b.total)}</td>
       <td class="tgy tsm">${esc(b.notes||'-')}</td>
-      <td><button class="btn bg bs tred" onclick="delBeli('${b.id}')">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>}</button></td>
+      <td><button class="btn bg bs tred" onclick="delBeli('${b.id}')">${icn('trash-2')}</button></td>
     </tr>`).join('')}</tbody></table>`:emSt('shopping-cart','Belum ada pembelian');
 }
 
@@ -2517,9 +2514,9 @@ function rBuku(){
   const tk=buku.reduce((s,b)=>s+Number(b.kredit||0),0);
   const lb=td2-tk;
   document.getElementById('bstat').innerHTML=`
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>}</div><div class="sl">Total Pendapatan</div><div class="sv" style="color:var(--green)">${fRp(td2)}</div><div class="ss">${buku.filter(b=>b.type==='pendapatan').length} transaksi</div></div>
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>}</div><div class="sl">Total Pengeluaran</div><div class="sv" style="color:var(--red)">${fRp(tk)}</div><div class="ss">${buku.filter(b=>b.type==='pengeluaran').length} transaksi</div></div>
-    <div class="sc"><div class="si">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>}</div><div class="sl">Laba Bersih</div><div class="sv" style="color:${lb>=0?'var(--green)':'var(--red)'}">${fRp(lb)}</div><div class="ss">${lb>=0?'Profit':'Rugi'}</div></div>`;
+    <div class="sc"><div class="si">${icn('trending-up')}</div><div class="sl">Total Pendapatan</div><div class="sv" style="color:var(--green)">${fRp(td2)}</div><div class="ss">${buku.filter(b=>b.type==='pendapatan').length} transaksi</div></div>
+    <div class="sc"><div class="si">${icn('trending-down')}</div><div class="sl">Total Pengeluaran</div><div class="sv" style="color:var(--red)">${fRp(tk)}</div><div class="ss">${buku.filter(b=>b.type==='pengeluaran').length} transaksi</div></div>
+    <div class="sc"><div class="si">${icn('gem')}</div><div class="sl">Laba Bersih</div><div class="sv" style="color:${lb>=0?'var(--green)':'var(--red)'}">${fRp(lb)}</div><div class="ss">${lb>=0?'Profit':'Rugi'}</div></div>`;
   rBukuT();
 }
 
@@ -2577,7 +2574,7 @@ function rLap(){
   document.getElementById('lapc').innerHTML=`
     <div class="g2 mb16">
       <div class="card">
-        <div class="ch"><div class="ct">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>} Laporan Laba Rugi ${yr}</div></div>
+        <div class="ch"><div class="ct">${icn('file-text')} Laporan Laba Rugi ${yr}</div></div>
         <div class="cb">
           <div class="sr"><span>Total Omzet / Pendapatan</span><span class="tgr tb2">${fRp(pend)}</span></div>
           <div class="sr"><span>Total HPP &amp; Biaya Produksi</span><span class="tred">${fRp(kelu)}</span></div>
@@ -2586,16 +2583,16 @@ function rLap(){
         </div>
       </div>
       <div class="card">
-        <div class="ch"><div class="ct">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>} Estimasi Pajak ${yr}</div></div>
+        <div class="ch"><div class="ct">${icn('landmark')} Estimasi Pajak ${yr}</div></div>
         <div class="cb">
           <div class="sr"><span>PPh Final UMKM (0,5% × omzet)</span><span class="tb2">${fRp(pphF)}</span></div>
           <div class="sr"><span>PPh 25 Badan (25% × laba)</span><span class="tgy">${fRp(pph25)}</span></div>
-          <div class="ibox mt12">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>} Angka estimasi. Gunakan DJP Online / konsultan pajak untuk pelaporan SPT yang akurat.</div>
+          <div class="ibox mt12">${icn('info')} Angka estimasi. Gunakan DJP Online / konsultan pajak untuk pelaporan SPT yang akurat.</div>
         </div>
       </div>
     </div>
     ${bln.length?`<div class="card mb16">
-      <div class="ch"><div class="ct">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>} Rekap Bulanan ${yr}</div></div>
+      <div class="ch"><div class="ct">${icn('calendar-days')} Rekap Bulanan ${yr}</div></div>
       <div class="tw"><table>
         <thead><tr><th>Bulan</th><th>Pendapatan</th><th>Pengeluaran</th><th>Laba</th></tr></thead>
         <tbody>${bln.map(b=>`<tr>
@@ -2614,7 +2611,7 @@ function rLap(){
       </table></div>
     </div>`:''}
     ${custRevenue.length?`<div class="card mb16">
-      <div class="ch"><div class="ct">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>} Revenue per Customer (Top 10)</div></div>
+      <div class="ch"><div class="ct">${icn('users')} Revenue per Customer (Top 10)</div></div>
       <div class="tw"><table>
         <thead><tr><th>Customer</th><th>Invoice Lunas</th><th>Total Revenue</th></tr></thead>
         <tbody>${custRevenue.map(c=>`<tr>
@@ -2625,7 +2622,7 @@ function rLap(){
       </table></div>
     </div>`:''}
     <div class="card mb16">
-      <div class="ch"><div class="ct">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>} Invoice Lunas ${yr} - ${iL.length} transaksi · ${fRp(totL)}</div></div>
+      <div class="ch"><div class="ct">${icn('receipt-text')} Invoice Lunas ${yr} - ${iL.length} transaksi · ${fRp(totL)}</div></div>
       <div class="tw"><table>
         <thead><tr><th>No. Invoice</th><th>Pelanggan</th><th>Tanggal</th><th>Total</th></tr></thead>
         <tbody>${iL.length?iL.map(i=>`<tr><td>${esc(i.ref)}</td><td>${esc(i.customer)}</td><td>${i.date}</td><td class="tb2">${fRp(i.total)}</td></tr>`).join('')
@@ -2634,7 +2631,7 @@ function rLap(){
       </table></div>
     </div>
     <div class="card">
-      <div class="ch"><div class="ct">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>} Daftar Pembelian / Biaya ${yr}</div></div>
+      <div class="ch"><div class="ct">${icn('shopping-cart')} Daftar Pembelian / Biaya ${yr}</div></div>
       <div class="tw"><table>
         <thead><tr><th>Referensi</th><th>Supplier</th><th>Tanggal</th><th>Total</th></tr></thead>
         <tbody>${bl.length?bl.map(b=>`<tr><td>${esc(b.ref)}</td><td>${esc(b.supplier)}</td><td>${b.date}</td><td style="font-weight:700;color:var(--red)">${fRp(b.total)}</td></tr>`).join('')
@@ -2685,7 +2682,7 @@ function upPayPrev(){
   const rk=document.getElementById('srk')?.value||'';
   const an=document.getElementById('san')?.value||'';
   const el=document.getElementById('spv');
-  if(el&&bk)el.innerHTML=`<div class="gbox">${<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>} Transfer ke: <b>${esc(bk)} ${esc(rk)}</b> a/n <b>${esc(an)}</b></div>`;
+  if(el&&bk)el.innerHTML=`<div class="gbox">${icn('credit-card')} Transfer ke: <b>${esc(bk)} ${esc(rk)}</b> a/n <b>${esc(an)}</b></div>`;
 }
 
 function saveSettings(){
@@ -3121,11 +3118,11 @@ function openWAModal(id,type){
   const destEl=document.getElementById('wa-dest-info');
   if(destEl){
     if(type==='po'){
-      destEl.innerHTML=<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>+' Ke: <b>Tim Produksi</b>';
-      document.getElementById('wa-send-btn').innerHTML=<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>+' Kirim ke Tim Produksi';
+      destEl.innerHTML=icn('factory')+' Ke: <b>Tim Produksi</b>';
+      document.getElementById('wa-send-btn').innerHTML=icn('message-circle')+' Kirim ke Tim Produksi';
     }else{
-      destEl.innerHTML=<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>+' Ke: <b>'+(_waDoc.customer||'Customer')+'</b>';
-      document.getElementById('wa-send-btn').innerHTML=<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>+' Buka WhatsApp';
+      destEl.innerHTML=icn('user')+' Ke: <b>'+(_waDoc.customer||'Customer')+'</b>';
+      document.getElementById('wa-send-btn').innerHTML=icn('message-circle')+' Buka WhatsApp';
     }
   }
   renderWAPreview();
@@ -3348,13 +3345,12 @@ async function initApp() {
     setupRealtimeSync();
   } catch (e) {
     console.error('Init error:', e);
-  } finally {
-    // Selalu sembunyikan loading overlay, apapun yang terjadi
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-      overlay.classList.add('done');
-      setTimeout(() => overlay.remove(), 500);
-    }
+  }
+  // Hide loading overlay
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) {
+    overlay.classList.add('done');
+    setTimeout(() => overlay.remove(), 500);
   }
   // Render
   rDash();
