@@ -148,6 +148,13 @@ textarea{resize:vertical;min-height:68px}
 .dpbox{background:var(--gold-light);border-radius:8px;padding:12px;font-size:12px;margin-top:10px;color:var(--g700);line-height:1.8;border-left:3px solid var(--gold)}
 .nd{width:7px;height:7px;background:var(--gold);border-radius:50%;display:inline-block;margin-left:4px;animation:pl 1.5s infinite}
 @keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
+.mobile-menu{display:none}
+.mobile-home-btn{display:none}
+.mobile-menu-card{border:none;background:var(--white);border-radius:10px;box-shadow:var(--sh);padding:14px;display:flex;align-items:center;gap:12px;text-align:left;color:var(--navy);font-family:inherit;cursor:pointer;min-height:74px;border:1px solid rgba(27,42,74,.06)}
+.mobile-menu-card .mic{width:38px;height:38px;border-radius:10px;background:var(--accent-light);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mobile-menu-card .mic svg{width:20px;height:20px;stroke-width:2}
+.mobile-menu-card b{font-size:13px;display:block;margin-bottom:2px}
+.mobile-menu-card span:last-child{font-size:11px;color:var(--g500);line-height:1.35}
 /* SETTINGS TABS */
 .stab{display:flex;gap:0;border-bottom:2px solid var(--g200);margin-bottom:20px}
 .stbtn{padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--g500);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
@@ -260,6 +267,85 @@ textarea{resize:vertical;min-height:68px}
 .loading-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+@media (max-width: 760px){
+  :root{--r:9px}
+  html,body{font-size:13px;background:#F3F7FC;overflow-x:hidden}
+  #app{display:block;min-height:100vh}
+  #sb{display:none}
+  #main{margin-left:0;min-height:100vh}
+  #tb{height:auto;min-height:56px;padding:10px 14px;border-top:none;border-bottom:1px solid var(--g200);gap:10px}
+  .tb-ttl{font-size:15px;line-height:1.25}
+  #tbc{display:none}
+  .mobile-home-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent-light);color:var(--accent-dark);border:1px solid rgba(58,175,212,.25);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+  #ct{padding:14px 12px 24px}
+  .sh2{margin-bottom:14px;gap:10px}
+  .st2{font-size:19px;line-height:1.2}
+  .sb2{font-size:12px;line-height:1.45}
+  .sh2>div:first-child{min-width:0}
+  .sh2>.fl,.sh2>button,.sh2>select{width:100%}
+  .sh2>.fl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .sh2>.fl .btn,.sh2>button,.sh2>select{justify-content:center;width:100%;min-height:39px}
+  .mobile-menu{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+  .mobile-menu-card:active{transform:scale(.99)}
+  .sg,.sg3,.g2{grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+  .sc{padding:14px 15px;border-top-width:2px}
+  .si{width:32px;height:32px;border-radius:8px}
+  .sv{font-size:20px}
+  .card{border-radius:9px;box-shadow:0 1px 3px rgba(27,42,74,.06),0 4px 12px rgba(27,42,74,.06)}
+  .ch{padding:12px 14px;align-items:flex-start}
+  .ct{font-size:13px}
+  .cb{padding:14px}
+  .fb{padding:12px;display:grid;grid-template-columns:1fr;gap:8px}
+  .fb input,.fb select{width:100%;min-width:0;height:39px}
+  .btn{min-height:38px;padding:8px 12px;justify-content:center}
+  .bs{min-height:32px;padding:6px 9px}
+  .tw{margin:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tw table{min-width:680px}
+  th,td{padding:10px 11px;font-size:12px}
+  .fg,.g2{grid-template-columns:1fr}
+  .fi.full{grid-column:auto}
+  input,select,textarea{font-size:16px;min-height:40px}
+  label{font-size:12px}
+  .mb{align-items:flex-end;padding:0;background:rgba(27,42,74,.46)}
+  .mo{max-width:none!important;width:100%;max-height:94vh;border-radius:16px 16px 0 0}
+  .mh{padding:13px 16px}
+  .mtt{font-size:14px;line-height:1.25}
+  .mc{width:32px;height:32px;font-size:18px}
+  .mbod{padding:16px}
+  .mf{padding:12px 16px;display:grid;grid-template-columns:1fr;gap:8px}
+  .mf .btn{width:100%}
+  .ir,.ih{grid-template-columns:1fr}
+  .ir-inv,.ih-inv{grid-template-columns:1fr;gap:7px}
+  .ih,.ih-inv{display:none}
+  .ir,.ir-inv{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:10px;margin-bottom:10px}
+  .itot{text-align:left;background:var(--white);border:1px solid var(--g200);border-radius:7px;padding:9px 10px}
+  .prod-sel-wrap{width:100%}
+  .ivp{padding:18px 14px;border-radius:10px;max-width:none;overflow-x:auto}
+  .ivtop,.ivpar,.ivfg{grid-template-columns:1fr;display:grid;gap:12px}
+  .ivmh,.ivmt td:first-child,.ivmt td:last-child{text-align:left}
+  .ivbn{font-size:20px}
+  .ivmh{font-size:22px}
+  .ivtbl{min-width:520px}
+  .ivtw{justify-content:stretch}
+  .stab{overflow-x:auto;gap:0}
+  .stbtn{white-space:nowrap;padding:10px 14px}
+  .ptab{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .ptbtn{border-radius:8px;padding:8px 10px}
+  .wa-msg{max-height:220px;font-size:13px}
+  .prod-stage{padding:10px;align-items:flex-start}
+  .prod-stage .ps-time{text-align:left;min-width:0}
+  .bukti-grid{grid-template-columns:repeat(2,1fr)}
+  .tw2{left:12px;right:12px;bottom:12px}
+  .tst{min-width:0;width:100%}
+}
+
+@media (max-width: 380px){
+  #ct{padding-left:10px;padding-right:10px}
+  .mobile-menu{grid-template-columns:1fr}
+  .sh2>.fl{grid-template-columns:1fr}
+  .ptab{grid-template-columns:1fr}
+}
+
 @media print{
   #sb,#tb,.np{display:none!important}
   #main{margin-left:0!important}
@@ -323,6 +409,7 @@ textarea{resize:vertical;min-height:68px}
   <div id="tb">
     <div class="tb-ttl" id="tbtl">Dashboard</div>
     <div class="fl ic g8">
+      <button class="mobile-home-btn" onclick="nav('dashboard')">Menu</button>
       <span style="font-size:12px;color:var(--g500)" id="tbc">Hulya Apparel</span>
       <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--navy) 0%,var(--accent) 100%);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:13px;box-shadow:0 2px 8px rgba(27,42,74,.3)">H</div>
     </div>
@@ -338,6 +425,40 @@ textarea{resize:vertical;min-height:68px}
           <option value="month" selected>Bulan Ini</option>
           <option value="week">Minggu Ini</option>
         </select>
+      </div>
+      <div class="mobile-menu">
+        <button class="mobile-menu-card" onclick="nav('crm')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></span>
+          <span><b>Customer</b><span>Data pelanggan dan riwayat</span></span>
+        </button>
+        <button class="mobile-menu-card" onclick="nav('invoice')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2"/><path d="M14 8H8"/><path d="M16 12H8"/></svg></span>
+          <span><b>Invoice</b><span>Tagihan dan pembayaran</span></span>
+        </button>
+        <button class="mobile-menu-card" onclick="nav('po')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/></svg></span>
+          <span><b>PO</b><span>Order sebelum produksi</span></span>
+        </button>
+        <button class="mobile-menu-card" onclick="nav('stok')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/></svg></span>
+          <span><b>Stok</b><span>Produk dan gudang</span></span>
+        </button>
+        <button class="mobile-menu-card" onclick="nav('pembelian')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+          <span><b>Pembelian</b><span>Bahan baku dan biaya</span></span>
+        </button>
+        <button class="mobile-menu-card" onclick="nav('pembukuan')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+          <span><b>Pembukuan</b><span>Jurnal otomatis dan manual</span></span>
+        </button>
+        <button class="mobile-menu-card" onclick="nav('laporan')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>
+          <span><b>Laporan</b><span>Keuangan dan pajak</span></span>
+        </button>
+        <button class="mobile-menu-card" onclick="nav('settings')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33"/></svg></span>
+          <span><b>Pengaturan</b><span>Profil dan data sistem</span></span>
+        </button>
       </div>
       <div class="sg" id="dstats"></div>
       <div class="g2 mb16">
