@@ -1998,7 +1998,13 @@ function buildInvHTML(doc,type='INVOICE'){
   
   const fmtRp = (val) => `<div style="display:flex;justify-content:space-between;"><span>Rp</span><span>${Number(val).toLocaleString('id-ID')}</span></div>`;
 
-  return `<div class="ivp" style="font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;padding:20px;border:1px solid #E5E7EB;border-radius:8px;">
+  return `<div class="ivp" style="font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;padding:20px;border:1px solid #E5E7EB;border-radius:8px;position:relative;overflow:hidden;">
+    ${isInv&&isLunas?`
+    <!-- STEMPEL LUNAS -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);pointer-events:none;z-index:10;opacity:0.13;border:8px solid #16A34A;border-radius:12px;padding:12px 28px;white-space:nowrap;">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:72px;font-weight:800;color:#16A34A;letter-spacing:4px;line-height:1;">LUNAS</div>
+    </div>
+    `:''}
     <!-- HEADER -->
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:30px;">
       <div style="flex:1;">
@@ -2913,6 +2919,7 @@ function downloadPDF(type){
     .bp2{background:var(--ybg);color:var(--yellow)}.bpr{background:var(--bbg);color:var(--blue)}
     .bl{background:var(--gbg);color:var(--green)}.bx{background:var(--g100);color:var(--g500)}
     .dpbox{background:#FEF5DC;border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:12px;border-left:3px solid var(--gold)}
+    .ivp{background:#fff;padding:36px 40px;max-width:720px;margin:0 auto;font-size:13px;line-height:1.6;position:relative;overflow:hidden}
   </style>${html}`;
   document.body.appendChild(wrapper);
   const opt={
@@ -2982,9 +2989,10 @@ function printDocContent(content,title='Hulya Apparel  -  Dokumen'){
       @page{size:A4;margin:10mm}
       @media print{
         html,body{background:#fff!important}
-        .ivp{border:none!important;border-radius:0!important;box-shadow:none!important}
+        .ivp{border:none!important;border-radius:0!important;box-shadow:none!important;position:relative!important;overflow:visible!important}
         .doc-item-table th{background:#1B2A4A!important;color:#fff!important}
         .doc-item-table td{background:#E8F2FC!important;color:#1A1A1A!important}
+        [style*="position:absolute"]{position:absolute!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
       }
     </style>
   </head><body>${content}</body></html>`);
