@@ -1228,8 +1228,35 @@ const firebaseConfig = {
   appId: "1:1044928418355:web:4acabbc77f001f60f14946",
   measurementId: "G-8ZBZPQRRTF"
 };
-firebase.initializeApp(firebaseConfig);
-const firestore = firebase.firestore();
+let firestore;
+let _fbInitFailed=false;
+try {
+  if (typeof firebase === 'undefined') throw new Error('Firebase SDK gagal dimuat (cek koneksi internet)');
+  firebase.initializeApp(firebaseConfig);
+  firestore = firebase.firestore();
+} catch (e) {
+  console.error('Firebase init error:', e);
+  _fbInitFailed = true;
+  // Stub biar DB.get/set/gO/sO tidak ikut crash - app tetap bisa dilihat (walau data cloud tidak masuk)
+  firestore = {
+    collection: () => ({
+      doc: () => ({
+        get: () => Promise.resolve({ exists: false, data: () => null }),
+        set: () => Promise.reject(e),
+        onSnapshot: (_, errCb) => { if (errCb) errCb(e); return () => {}; }
+      })
+    })
+  };
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) {
+    overlay.innerHTML = `
+      <div style="font-size:40px">⚠️</div>
+      <div style="font-size:16px;font-weight:700;text-align:center;padding:0 24px">Gagal terhubung ke server</div>
+      <div style="font-size:13px;color:#94a3b8;text-align:center;padding:0 24px;max-width:320px;line-height:1.5">Cek koneksi internet, lalu muat ulang. Kalau masih gagal, coba nonaktifkan ad-blocker / extension pemblokir script di browser.</div>
+      <button onclick="location.reload()" style="margin-top:14px;padding:10px 28px;border-radius:8px;border:none;background:#fff;color:#1B2A4A;font-weight:700;cursor:pointer">Coba Lagi</button>
+    `;
+  }
+}
 
 const _cache = {
   invoices: [],
@@ -1793,6 +1820,7 @@ function addII(d=null){
   const minQty=matchStok?.minQty??0;
   const badgeHTML=currentQty!==null?getStokBadge(currentQty,minQty):'';
   const hintHTML=matchStok?`<div class="stok-hint">SKU: ${esc(matchStok.sku||'-')}  -  ${esc(matchStok.unit||'pcs')}</div>`:'<div class="stok-hint" id="ii-hint-'+id+'"></div>';
+  const hasSizes=d?.sizes&&Object.values(d.sizes).some(v=>Number(v)>0);
 
   r.innerHTML=`
     <div style="display:flex;flex-direction:column">
@@ -1807,12 +1835,19 @@ function addII(d=null){
         ${hintHTML}
       </div>
       <input class="iid-manual" id="ii-manual-${id}" placeholder="Nama produk manual..." style="display:none;margin-top:4px;padding:6px 10px;border:1px solid var(--g300);border-radius:7px;font-size:13px" oninput="calcIT()"/>
+      <button type="button" id="ii-sz-toggle-${id}" onclick="toggleItemSizes('ii',${id})" style="margin-top:4px;align-self:flex-start;background:none;border:none;padding:0;font-size:11px;color:var(--accent);cursor:pointer;text-decoration:underline">${hasSizes?'- Sembunyikan Ukuran':'+ Breakdown Ukuran'}</button>
     </div>
     <input class="iiq" type="number" min="1" value="${d?.qty||1}" oninput="onInvQtyChange(${id})"/>
     <input class="iip" type="number" min="0" value="${d?.price||0}" oninput="calcIT()"/>
     <div class="itot" id="iit-${id}">${fRp((d?.qty||1)*(d?.price||0))}</div>
-    <button class="btn bg bs" onclick="this.closest('.ir-inv').remove();calcIT()" style="padding:4px 6px">&times;</button>`;
+    <button class="btn bg bs" onclick="const p=document.getElementById('ii-sizes-${id}');if(p)p.remove();this.closest('.ir-inv').remove();calcIT()" style="padding:4px 6px">&times;</button>`;
   document.getElementById('iitems').appendChild(r);
+  const sizeWrap=document.createElement('div');
+  sizeWrap.innerHTML=itemSizePanelHTML('ii',id,d?.sizes);
+  const panelEl=sizeWrap.firstElementChild;
+  if(hasSizes)panelEl.classList.remove('hide');
+  document.getElementById('iitems').appendChild(panelEl);
+  if(hasSizes)calcItemSizeHint('ii',id);
   if(d?.desc&&!matchStok){
     const sel=r.querySelector('.prod-sel');
     sel.value='__manual__';
@@ -1874,10 +1909,13 @@ function getII(){
       const opt=sel.options[sel.selectedIndex];
       skuRef=opt?.dataset?.sku||'';
     }
+    const rowId=r.id.replace('ii-','');
+    const sizes=getItemSizesFromRow('ii',rowId);
     return{
       desc,skuRef,
       qty:Number(r.querySelector('.iiq').value)||0,
-      price:Number(r.querySelector('.iip').value)||0
+      price:Number(r.querySelector('.iip').value)||0,
+      ...(sizes?{sizes}:{})
     };
   });
 }
@@ -2274,6 +2312,7 @@ function addPI(d=null){
   const minQty=matchStok?.minQty??0;
   const badgeHTML=currentQty!==null?getStokBadge(currentQty,minQty):'';
   const hintHTML=matchStok?`<div class="stok-hint">SKU: ${esc(matchStok.sku||'-')}  -  ${esc(matchStok.unit||'pcs')}</div>`:`<div class="stok-hint" id="pi-hint-${id}"></div>`;
+  const hasSizes=d?.sizes&&Object.values(d.sizes).some(v=>Number(v)>0);
 
   r.innerHTML=`
     <div style="display:flex;flex-direction:column">
@@ -2288,12 +2327,19 @@ function addPI(d=null){
         ${hintHTML}
       </div>
       <input class="pid-manual" id="pi-manual-${id}" placeholder="Nama produk manual..." style="display:none;margin-top:4px;padding:6px 10px;border:1px solid var(--g300);border-radius:7px;font-size:13px" oninput="calcPT()"/>
+      <button type="button" id="pi-sz-toggle-${id}" onclick="toggleItemSizes('pi',${id})" style="margin-top:4px;align-self:flex-start;background:none;border:none;padding:0;font-size:11px;color:var(--accent);cursor:pointer;text-decoration:underline">${hasSizes?'- Sembunyikan Ukuran':'+ Breakdown Ukuran'}</button>
     </div>
     <input class="piq" type="number" min="1" value="${d?.qty||1}" oninput="onPOQtyChange(${id})"/>
     <input class="pip" type="number" min="0" value="${d?.price||0}" oninput="calcPT()"/>
     <div class="itot">${fRp((d?.qty||1)*(d?.price||0))}</div>
-    <button class="btn bg bs" onclick="this.closest('.ir-inv').remove();calcPT()" style="padding:4px 6px">&times;</button>`;
+    <button class="btn bg bs" onclick="const p=document.getElementById('pi-sizes-${id}');if(p)p.remove();this.closest('.ir-inv').remove();calcPT()" style="padding:4px 6px">&times;</button>`;
   document.getElementById('pitems').appendChild(r);
+  const sizeWrap=document.createElement('div');
+  sizeWrap.innerHTML=itemSizePanelHTML('pi',id,d?.sizes);
+  const panelEl=sizeWrap.firstElementChild;
+  if(hasSizes)panelEl.classList.remove('hide');
+  document.getElementById('pitems').appendChild(panelEl);
+  if(hasSizes)calcItemSizeHint('pi',id);
   if(d?.desc&&!matchStok){
     const sel=r.querySelector('.prod-sel');
     sel.value='__manual__';
@@ -2379,7 +2425,9 @@ function getPOItems(){
       const opt=sel.options[sel.selectedIndex];
       skuRef=opt?.dataset?.sku||'';
     }
-    return{desc,skuRef,qty:Number(r.querySelector('.piq').value)||0,price:Number(r.querySelector('.pip').value)||0};
+    const rowId=r.id.replace('pi-','');
+    const sizes=getItemSizesFromRow('pi',rowId);
+    return{desc,skuRef,qty:Number(r.querySelector('.piq').value)||0,price:Number(r.querySelector('.pip').value)||0,...(sizes?{sizes}:{})};
   });
 }
 
@@ -3720,6 +3768,76 @@ function getBuktiCount(id,type){
   try{return JSON.parse(localStorage.getItem(getBuktiKey(id,type))||'[]').length}catch{return 0;}
 }
 
+//  FITUR 5b: BREAKDOWN UKURAN PER ITEM (Invoice & PO) - dipakai buat auto-isi SPK
+function itemSizePanelHTML(prefix,id,existingSizes){
+  existingSizes=existingSizes||{};
+  const inputs=SPK_SIZES.map(sz=>{
+    const v=existingSizes[sz]!==undefined&&existingSizes[sz]!==null&&existingSizes[sz]!==0?existingSizes[sz]:'';
+    return`<label style="display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--g500)">${sz}<input type="number" min="0" class="${prefix}-sz" data-size="${sz}" value="${v}" oninput="calcItemSizeHint('${prefix}',${id})" style="width:44px;padding:4px;text-align:center;border:1px solid var(--g300);border-radius:5px;font-size:12px"/></label>`;
+  }).join('');
+  return`<div class="ir-sizes hide" id="${prefix}-sizes-${id}" style="background:var(--g50);border:1px solid var(--g200);border-radius:8px;padding:10px 12px;margin:-4px 0 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
+    <span style="font-size:11px;font-weight:600;color:var(--g500);width:100%">Breakdown Ukuran (opsional, buat auto-isi SPK)</span>
+    ${inputs}
+    <span id="${prefix}-sz-hint-${id}" style="font-size:11px;color:var(--g500);width:100%"></span>
+  </div>`;
+}
+
+function toggleItemSizes(prefix,id){
+  const panel=document.getElementById(prefix+'-sizes-'+id);
+  if(!panel)return;
+  panel.classList.toggle('hide');
+  const btn=document.getElementById(prefix+'-sz-toggle-'+id);
+  if(btn)btn.textContent=panel.classList.contains('hide')?'+ Breakdown Ukuran':'- Sembunyikan Ukuran';
+  if(!panel.classList.contains('hide'))calcItemSizeHint(prefix,id);
+}
+
+function calcItemSizeHint(prefix,id){
+  const panel=document.getElementById(prefix+'-sizes-'+id);
+  if(!panel)return;
+  const total=SPK_SIZES.reduce((s,sz)=>s+Number(panel.querySelector(`[data-size="${sz}"]`)?.value||0),0);
+  const qtyEl=document.querySelector(`#${prefix}-${id} .${prefix==='ii'?'iiq':'piq'}`);
+  const qty=Number(qtyEl?.value||0);
+  const hint=document.getElementById(prefix+'-sz-hint-'+id);
+  if(!hint)return;
+  if(!qty){hint.innerHTML=`Total breakdown: <b>${total}</b>`;return;}
+  const diff=total-qty;
+  hint.innerHTML=`Total breakdown: <b>${total}</b> &nbsp;|&nbsp; Qty item: <b>${qty}</b> ${diff!==0?`<span style="color:${diff>0?'var(--yellow)':'var(--red)'}">(selisih ${diff>0?'+':''}${diff})</span>`:'<span style="color:var(--green)">(sesuai)</span>'}`;
+}
+
+function getItemSizesFromRow(prefix,id){
+  const panel=document.getElementById(prefix+'-sizes-'+id);
+  if(!panel)return null;
+  const sizes={};
+  let hasAny=false;
+  SPK_SIZES.forEach(sz=>{
+    const v=Number(panel.querySelector(`[data-size="${sz}"]`)?.value||0);
+    if(v>0)hasAny=true;
+    sizes[sz]=v;
+  });
+  return hasAny?sizes:null;
+}
+
+function aggregateItemSizes(items){
+  const agg={};
+  let has=false;
+  (items||[]).forEach(it=>{
+    if(!it.sizes)return;
+    SPK_SIZES.forEach(sz=>{
+      const v=Number(it.sizes[sz]||0);
+      if(v>0){has=true;agg[sz]=(agg[sz]||0)+v;}
+    });
+  });
+  return has?agg:null;
+}
+
+function toSPKSizesShape(aggSizes){
+  const out={};
+  SPK_SIZES.forEach(sz=>{
+    out[sz]={qty:aggSizes[sz]||0,lebar:SPK_SIZE_DEFAULTS[sz].lebar,panjang:SPK_SIZE_DEFAULTS[sz].panjang};
+  });
+  return out;
+}
+
 //  FITUR 5: SPK (SURAT PERINTAH KERJA) - generate langsung dari Invoice / PO
 const SPK_SIZES=['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
 const SPK_SIZE_DEFAULTS={
@@ -3829,7 +3947,11 @@ function openSPKModal(id,type){
   document.getElementById('spk-design').value=existing?existing.designNotes:'';
   document.getElementById('spk-note').value=existing?existing.note:(type==='po'&&doc.due?('Deadline '+idDate(doc.due)):'');
   _spkSourceQty=(doc.items||[]).reduce((s,it)=>s+Number(it.qty||0),0);
-  renderSPKSizeTable(existing?existing.sizes:{});
+  const aggSizes=aggregateItemSizes(doc.items);
+  renderSPKSizeTable(existing?existing.sizes:(aggSizes?toSPKSizesShape(aggSizes):{}));
+  if(!existing&&aggSizes){
+    document.getElementById('spk-info').innerHTML+=`<div style="margin-top:6px;color:var(--green);font-weight:600">Ukuran otomatis terisi dari breakdown item ${type==='inv'?'Invoice':'PO'} - cek ulang sebelum simpan.</div>`;
+  }
   const mocks=loadSPKMockups(type,id);
   _spkMockups={depan:mocks.depan||'',belakang:mocks.belakang||''};
   showSPKMockupPreview('depan',_spkMockups.depan);
@@ -3944,7 +4066,7 @@ function buildSPKHTML(spk,doc){
         <td style="padding:6px 10px;border-bottom:1px solid #1A1A1A;text-align:center;font-weight:700">PANJANG</td>
       </tr>
       ${sizeRows}
-      <tr><td colspan="5" style="padding:10px;font-weight:700;text-align:center;background:#F8FAFD;border-top:2px solid #1A1A1A;border-bottom:1px solid #1A1A1A">MOCKUP</td></tr>
+      <tr><td colspan="5" style="padding:10px;font-weight:700;text-align:center;background:#F8FAFD;border-top:2px solid #1A1A1A;border-bottom:1px solid #1A1A1A">MOKUP</td></tr>
       <tr>${mockBox('DEPAN',mocks.depan)}${mockBox('BELAKANG',mocks.belakang)}</tr>
       <tr>
         <td style="padding:10px;vertical-align:top;font-weight:700;border-top:2px solid #1A1A1A">Rincian Design</td>
@@ -4133,6 +4255,7 @@ function refreshItemDropdowns(){
 
 //  APP INIT  -  Load Firebase then render
 async function initApp() {
+  if (_fbInitFailed) return; // biarkan pesan error + tombol Coba Lagi tetap tampil
   try {
     await loadFromFirestore();
     setupRealtimeSync();
