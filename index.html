@@ -107,11 +107,11 @@ textarea{resize:vertical;min-height:68px}
 .mf{padding:13px 22px;border-top:1px solid var(--g100);display:flex;justify-content:flex-end;gap:10px;background:var(--g50);border-radius:0 0 14px 14px;position:sticky;bottom:0}
 /* ITEM ROWS */
 .ir{display:grid;grid-template-columns:2fr 80px 120px 110px 34px;gap:8px;align-items:center;margin-bottom:8px}
-.ir-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 32px;gap:8px;align-items:start;margin-bottom:10px}
+.ir-inv{display:grid;grid-template-columns:minmax(160px,2fr) 70px 60px 110px 95px 28px;gap:8px;align-items:start;margin-bottom:10px}
 .ir input{margin:0}
 .itot{font-weight:700;font-size:13px;text-align:right}
 .ih{display:grid;grid-template-columns:2fr 80px 120px 110px 34px;gap:8px;margin-bottom:6px;padding:0 2px}
-.ih-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 32px;gap:8px;margin-bottom:6px;padding:0 2px}
+.ih-inv{display:grid;grid-template-columns:minmax(160px,2fr) 70px 60px 110px 95px 28px;gap:8px;margin-bottom:6px;padding:0 2px}
 .ih-inv span{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
 .ih span{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
 /* SUMMARY */
@@ -243,9 +243,9 @@ textarea{resize:vertical;min-height:68px}
 .stok-hint{font-size:10px;color:var(--g500);margin-top:2px;padding-left:2px}
 .stok-warn-box{background:#FEF5DC;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--g700);margin-top:10px;line-height:1.7}
 /* Item row wider for dropdown */
-.ir-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 28px;gap:8px;align-items:start;margin-bottom:8px}
+.ir-inv{display:grid;grid-template-columns:minmax(160px,2fr) 70px 60px 110px 95px 28px;gap:8px;align-items:start;margin-bottom:8px}
 .ir-inv input{margin:0}
-.ih-inv{display:grid;grid-template-columns:minmax(180px,2fr) 70px 120px 100px 28px;gap:8px;margin-bottom:6px;padding:0 2px}
+.ih-inv{display:grid;grid-template-columns:minmax(160px,2fr) 70px 60px 110px 95px 28px;gap:8px;margin-bottom:6px;padding:0 2px}
 .ih-inv span{font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
 
 /*  */
@@ -417,6 +417,7 @@ textarea{resize:vertical;min-height:68px}
   <div class="ng"><div class="ng-lbl">Penjualan</div>
     <div class="ni" onclick="nav('invoice')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg></span>Invoice</div>
     <div class="ni" onclick="nav('po')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span>Purchase Order</div>
+    <div class="ni" onclick="nav('spk')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></span>SPK Produksi</div>
   </div>
   <div class="ng"><div class="ng-lbl">Operasional</div>
     <div class="ni" onclick="nav('stok')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>Stok &amp; Gudang<span id="snd"></span></div>
@@ -467,6 +468,10 @@ textarea{resize:vertical;min-height:68px}
         <button class="mobile-menu-card" onclick="nav('po')">
           <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/></svg></span>
           <span><b>PO</b><span>Order sebelum produksi</span></span>
+        </button>
+        <button class="mobile-menu-card" onclick="nav('spk')">
+          <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></span>
+          <span><b>SPK</b><span>Surat perintah kerja</span></span>
         </button>
         <button class="mobile-menu-card" onclick="nav('stok')">
           <span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/></svg></span>
@@ -572,6 +577,29 @@ textarea{resize:vertical;min-height:68px}
       </div>
     </div>
 
+    <!-- SPK -->
+    <div id="pg-spk" class="pg">
+      <div class="sh2">
+        <div><div class="st2">SPK Produksi</div><div class="sb2">Surat Perintah Kerja, dibuat otomatis dari Invoice / PO</div></div>
+        <div class="fl g8">
+          <button class="btn bg" onclick="exportCSV('spk')">Export CSV</button>
+          <button class="btn bp" onclick="openSPKPickModal()">Buat SPK</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="fb">
+          <input id="spk-s" placeholder="Cari No. SPK / pelanggan / dokumen sumber..." oninput="rSPKT()"/>
+          <select id="spk-f" onchange="rSPKT()">
+            <option value="">Semua Status</option>
+            <option value="pending">Belum Dikerjakan</option><option value="proses">Proses</option>
+            <option value="selesai">Selesai</option>
+          </select>
+        </div>
+        <div class="ibox mb16" style="margin:0 20px 16px">Klik tombol <b>SPK</b> pada baris Invoice atau PO untuk generate otomatis, atau gunakan tombol <b>Buat SPK</b> di atas untuk memilih dokumen sumber secara manual.</div>
+        <div class="tw" id="spkt"></div>
+      </div>
+    </div>
+
     <!-- STOK -->
     <div id="pg-stok" class="pg">
       <div class="sh2">
@@ -669,6 +697,7 @@ textarea{resize:vertical;min-height:68px}
           <div class="fi full"><label>Alamat</label><textarea id="sad" rows="2"></textarea></div>
           <div class="fi"><label>Telepon</label><input id="stp"/></div>
           <div class="fi"><label>Email</label><input id="sem" type="email"/></div>
+          <div class="fi"><label>Instagram</label><input id="sig" placeholder="hulyaprint_bandung"/></div>
           <div class="fi"><label>Nama Penandatangan</label><input id="ssi"/></div>
           <div class="fi"><label>NPWP (opsional)</label><input id="snp" placeholder="00.000.000.0-000.000"/></div>
           <div class="fi full">
@@ -760,6 +789,12 @@ textarea{resize:vertical;min-height:68px}
       <button class="ptbtn" onclick="setWATmpl('po_progress',this)">Minta Update</button>
       <button class="ptbtn" onclick="setWATmpl('po_urgent',this)">Urgent / Prioritas</button>
       <button class="ptbtn" onclick="setWATmpl('po_selesai',this)">Konfirmasi Selesai</button>
+    </div>
+    <div class="ptab hide" id="wa-tabs-spk">
+      <button class="ptbtn on" onclick="setWATmpl('spk_kirim',this)">Kirim SPK</button>
+    </div>
+    <div class="ptab hide" id="wa-tabs-kwitansi">
+      <button class="ptbtn on" onclick="setWATmpl('kwitansi_kirim',this)">Kirim Kwitansi</button>
     </div>
     <div class="wa-msg" id="wa-preview" contenteditable="true" spellcheck="false"></div>
     <div style="margin-top:12px;font-size:11px;color:var(--g500)">Pesan bisa diedit langsung di atas sebelum dikirim</div>
@@ -860,7 +895,7 @@ textarea{resize:vertical;min-height:68px}
       <div style="font-weight:700;font-size:13px">Item Produk</div>
       <button class="btn bg bs" onclick="addII()">Produk</button>
     </div>
-    <div class="ih-inv"><span>Produk / Deskripsi</span><span>Qty</span><span>Harga Satuan</span><span>Total</span><span></span></div>
+    <div class="ih-inv"><span>Produk / Deskripsi</span><span>Qty</span><span>Ukuran</span><span>Harga Satuan</span><span>Total</span><span></span></div>
     <div id="iitems"></div>
     <div class="div"></div>
     <div class="modal-split" style="display:flex;gap:16px;flex-wrap:wrap">
@@ -938,7 +973,7 @@ textarea{resize:vertical;min-height:68px}
       <div style="font-weight:700;font-size:13px">Item Order</div>
       <button class="btn bg bs" onclick="addPI()">Produk</button>
     </div>
-    <div class="ih-inv"><span>Produk / Deskripsi</span><span>Qty</span><span>Harga</span><span>Total</span><span></span></div>
+    <div class="ih-inv"><span>Produk / Deskripsi</span><span>Qty</span><span>Ukuran</span><span>Harga</span><span>Total</span><span></span></div>
     <div id="pitems"></div>
     <div class="div"></div>
     <div class="modal-split" style="display:flex;gap:16px;flex-wrap:wrap">
@@ -1057,8 +1092,8 @@ textarea{resize:vertical;min-height:68px}
     <div class="fl g8">
       <button class="btn bwa bs" id="pv-wa-btn" onclick="openWAFromPreview('inv')">WA</button>
       <button class="btn bg bs" id="pv-bukti-btn" onclick="openBuktiFromPreview('inv')" style="color:var(--accent);border-color:var(--accent)">Bukti</button>
-      <button class="btn bg bs" id="pv-spk-btn" onclick="openSPKFromPreview('inv')" style="color:var(--navy);border-color:var(--navy)">SPK</button>
-      <button class="btn bg bs" id="pv-kwitansi-btn" onclick="openKwitansiFromPreview()" style="color:var(--green);border-color:var(--green);display:none">Kwitansi</button>
+      <button class="btn bg bs" onclick="genSPK('invoice',_curInvId)" style="color:var(--gold);border-color:var(--gold)">SPK</button>
+      <button class="btn bg bs" id="pv-kwitansi-btn" onclick="genKwitansi(_curInvId)" style="color:var(--green);border-color:var(--green);display:none">Kwitansi</button>
       <button class="btn bg bs" onclick="printShippingLabel('inv')">Label</button>
       <button class="btn bg bs" onclick="printPackingLabel('inv')">Packing</button>
       <button class="btn bg bs" onclick="downloadPDF('inv')" style="color:var(--green);border-color:var(--green)">⬇ PDF</button>
@@ -1077,7 +1112,7 @@ textarea{resize:vertical;min-height:68px}
     <div class="fl g8">
       <button class="btn bwa bs" id="pv-po-wa-btn" onclick="openWAFromPreview('po')">WA</button>
       <button class="btn bg bs" id="pv-prod-btn" onclick="openProdFromPreview()" style="color:var(--gold);border-color:var(--gold)">Produksi</button>
-      <button class="btn bg bs" id="pv-po-spk-btn" onclick="openSPKFromPreview('po')" style="color:var(--navy);border-color:var(--navy)">SPK</button>
+      <button class="btn bg bs" onclick="genSPK('po',_curPOId)" style="color:var(--accent);border-color:var(--accent)">SPK</button>
       <button class="btn bg bs" onclick="printShippingLabel('po')">Label</button>
       <button class="btn bg bs" onclick="printPackingLabel('po')">Packing</button>
       <button class="btn bg bs" onclick="downloadPDF('po')" style="color:var(--green);border-color:var(--green)">⬇ PDF</button>
@@ -1089,88 +1124,91 @@ textarea{resize:vertical;min-height:68px}
 </div>
 </div>
 
-<!-- SPK FORM MODAL -->
-<div class="mb" id="spkm">
-<div class="mo" style="max-width:640px">
-  <div class="mh"><div class="mtt" id="spkmtt">Buat SPK (Surat Perintah Kerja)</div><button class="mc" onclick="closeM('spkm')">&times;</button></div>
+<!-- SPK PREVIEW MODAL -->
+<div class="mb" id="pvsm">
+<div class="mo" style="max-width:760px">
+  <div class="mh np"><div class="mtt">Preview SPK (Surat Perintah Kerja)</div>
+    <div class="fl g8">
+      <button class="btn bwa bs" onclick="openWAModal(_curSPKId,'spk')">WA</button>
+      <button class="btn bg bs" onclick="openSPKEditModal(_curSPKId)" style="color:var(--gold);border-color:var(--gold)">Edit</button>
+      <button class="btn bg bs" onclick="downloadPDF('spk')" style="color:var(--green);border-color:var(--green)">⬇ PDF</button>
+      <button class="btn bp bs" onclick="printDoc('pvsb')">Print / PDF</button>
+      <button class="mc" onclick="closeM('pvsm')">&times;</button>
+    </div>
+  </div>
+  <div class="mbod" id="pvsb"></div>
+</div>
+</div>
+
+<!-- SPK PICK MODAL (buat manual dari Invoice/PO) -->
+<div class="mb" id="spk-pick">
+<div class="mo" style="max-width:480px">
+  <div class="mh"><div class="mtt">Buat SPK dari Dokumen</div><button class="mc" onclick="closeM('spk-pick')">&times;</button></div>
   <div class="mbod">
-    <div id="spk-info" style="background:var(--g50);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px"></div>
     <div class="fg">
-      <div class="fi"><label>No. SPK</label><input id="spk-no" readonly style="background:var(--g50);color:var(--g500)"/></div>
-      <div class="fi"><label>Tanggal</label><input id="spk-tgl" type="date"/></div>
-      <div class="fi"><label>Nama CS</label><input id="spk-cs" placeholder="Nama customer service..."/></div>
-      <div class="fi"><label>Nama File</label><input id="spk-file" placeholder="Contoh: Tshirt Short Sleeve - Red..."/></div>
-      <div class="fi full"><label>Bahan</label><input id="spk-bahan" placeholder="Contoh: Cotton Combed 24S"/></div>
-    </div>
-    <div style="margin-top:16px">
-      <label style="font-size:12px;font-weight:600;color:var(--g700)">Rincian Size</label>
-      <div style="overflow-x:auto;margin-top:6px">
-        <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:420px">
-          <thead><tr>
-            <th style="text-align:left;padding:6px 8px;background:var(--g50);border:1px solid var(--g200)">Ukuran</th>
-            <th style="padding:6px 8px;background:var(--g50);border:1px solid var(--g200)">Pcs</th>
-            <th style="padding:6px 8px;background:var(--g50);border:1px solid var(--g200)">Lebar (CM)</th>
-            <th style="padding:6px 8px;background:var(--g50);border:1px solid var(--g200)">Panjang (CM)</th>
-          </tr></thead>
-          <tbody id="spk-sizes-body"></tbody>
-        </table>
+      <div class="fi full"><label>Sumber Dokumen</label>
+        <select id="spk-pick-type" onchange="renderSPKPickOptions()">
+          <option value="invoice">Invoice</option>
+          <option value="po">Purchase Order</option>
+        </select>
       </div>
-      <div id="spk-qty-hint" style="font-size:11px;color:var(--g500);margin-top:6px"></div>
-    </div>
-    <div class="fg" style="margin-top:16px">
-      <div class="fi full">
-        <label>Mockup Depan</label>
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <div id="spk-mock-depan-preview" style="width:110px;height:80px;border:2px dashed var(--g300);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--g50)">
-            <span style="font-size:11px;color:var(--g500);text-align:center">Belum ada<br>gambar</span>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <button class="btn bg bs" type="button" onclick="document.getElementById('spk-mock-depan-file').click()">Upload</button>
-            <button class="btn bg bs tred" type="button" onclick="removeSPKMockup('depan')">Hapus</button>
-            <input type="file" id="spk-mock-depan-file" accept="image/*" class="hide" onchange="handleSPKMockupUpload(event,'depan')"/>
-            <span style="font-size:11px;color:var(--g500)">PNG/JPG, maks 800KB</span>
-          </div>
-        </div>
+      <div class="fi full"><label>Pilih Dokumen</label>
+        <select id="spk-pick-doc"></select>
       </div>
-      <div class="fi full">
-        <label>Mockup Belakang</label>
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <div id="spk-mock-belakang-preview" style="width:110px;height:80px;border:2px dashed var(--g300);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--g50)">
-            <span style="font-size:11px;color:var(--g500);text-align:center">Belum ada<br>gambar</span>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <button class="btn bg bs" type="button" onclick="document.getElementById('spk-mock-belakang-file').click()">Upload</button>
-            <button class="btn bg bs tred" type="button" onclick="removeSPKMockup('belakang')">Hapus</button>
-            <input type="file" id="spk-mock-belakang-file" accept="image/*" class="hide" onchange="handleSPKMockupUpload(event,'belakang')"/>
-            <span style="font-size:11px;color:var(--g500)">PNG/JPG, maks 800KB</span>
-          </div>
-        </div>
-      </div>
-      <div class="fi full"><label>Rincian Design</label><textarea id="spk-design" rows="4" placeholder="- Bahan Combed 24S (Merah)&#10;- Sablon Plastisol&#10;1. Dada kiri 8 x 8 cm&#10;2. Punggung belakang logo sesuai mock up"></textarea></div>
-      <div class="fi full"><label>Note</label><input id="spk-note" placeholder="Contoh: Deadline Sabtu, 25 Juli 2026"/></div>
     </div>
-    <input type="hidden" id="spk-sourcetype"/>
-    <input type="hidden" id="spk-sourceid"/>
   </div>
   <div class="mf">
-    <button class="btn bg" onclick="closeM('spkm')">Batal</button>
-    <button class="btn bp" onclick="saveSPKAndPreview()">Simpan &amp; Preview</button>
+    <button class="btn bg" onclick="closeM('spk-pick')">Batal</button>
+    <button class="btn bp" onclick="generateSPKFromPick()">Generate SPK</button>
   </div>
 </div>
 </div>
 
-<!-- SPK PREVIEW MODAL -->
-<div class="mb" id="pvskm">
-<div class="mo" style="max-width:760px">
-  <div class="mh np"><div class="mtt">Preview SPK</div>
-    <div class="fl g8">
-      <button class="btn bg bs" onclick="editSPKFromPreview()">Edit</button>
-      <button class="btn bg bs" onclick="downloadSPKPDF()" style="color:var(--green);border-color:var(--green)">⬇ PDF</button>
-      <button class="btn bp bs" onclick="printSPKDoc()">Print / PDF</button>
-      <button class="mc" onclick="closeM('pvskm')">&times;</button>
+<!-- SPK EDIT MODAL -->
+<div class="mb" id="spkm">
+<div class="mo" style="max-width:740px">
+  <div class="mh"><div class="mtt">Edit Detail SPK</div><button class="mc" onclick="closeM('spkm')">&times;</button></div>
+  <div class="mbod">
+    <div id="spk-edit-info" style="background:var(--g50);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px"></div>
+    <div class="fg">
+      <div class="fi"><label>Target Selesai</label><input id="spk-due" type="date"/></div>
+      <div class="fi"><label>Status</label>
+        <select id="spk-status">
+          <option value="pending">Belum Dikerjakan</option><option value="proses">Proses</option><option value="selesai">Selesai</option>
+        </select>
+      </div>
+      <div class="fi full"><label>PIC / Bagian Produksi</label><input id="spk-pic" placeholder="Nama penanggung jawab produksi"/></div>
+      <div class="fi full"><label>Nama File / Desain</label><input id="spk-namafile" placeholder="Contoh: Tshirt Short Sleeve - Red DAPOER ROSSA"/></div>
+      <div class="fi full"><label>Bahan</label><input id="spk-bahan" placeholder="Contoh: Cotton Combed 24S"/></div>
+      <div class="fi full"><label>Rincian Design / Instruksi Kerja</label><textarea id="spk-notes" rows="3" placeholder="Contoh: Sablon Plastisol&#10;1. Dada kiri 8x8 cm&#10;2. Punggung belakang logo sesuai mockup"></textarea></div>
+      <div class="fi full">
+        <label>Rincian Size (qty / lebar / panjang bisa diedit manual)</label>
+        <table id="spk-size-table" style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;table-layout:fixed">
+          <colgroup><col style="width:22%"><col style="width:22%"><col style="width:22%"><col style="width:22%"><col style="width:12%"></colgroup>
+          <thead><tr>
+            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #E5E7EB">Ukuran</th>
+            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #E5E7EB">Qty (Pcs)</th>
+            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #E5E7EB">Lebar (CM)</th>
+            <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #E5E7EB">Panjang (CM)</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="spk-size-tbody"></tbody>
+        </table>
+        <button type="button" class="btn bg bs" style="margin-top:6px" onclick="addSPKSizeRow()">+ Tambah Ukuran</button>
+      </div>
+      <div class="fi"><label>Mockup Depan</label><input id="spk-mockup-front" type="file" accept="image/*" onchange="handleMockupUpload(event,'front')"/>
+        <div id="spk-mockup-front-prev" style="margin-top:6px"></div>
+      </div>
+      <div class="fi"><label>Mockup Belakang</label><input id="spk-mockup-back" type="file" accept="image/*" onchange="handleMockupUpload(event,'back')"/>
+        <div id="spk-mockup-back-prev" style="margin-top:6px"></div>
+      </div>
     </div>
+    <input type="hidden" id="spk-eid"/>
   </div>
-  <div class="mbod" id="pvskb"></div>
+  <div class="mf">
+    <button class="btn bg" onclick="syncSPKFromSource()">Sinkron Ulang dari Sumber</button>
+    <button class="btn bp" onclick="saveSPKEdit()">Simpan</button>
+  </div>
 </div>
 </div>
 
@@ -1179,8 +1217,9 @@ textarea{resize:vertical;min-height:68px}
 <div class="mo" style="max-width:640px">
   <div class="mh np"><div class="mtt">Preview Kwitansi</div>
     <div class="fl g8">
-      <button class="btn bg bs" onclick="downloadKwitansiPDF()" style="color:var(--green);border-color:var(--green)">⬇ PDF</button>
-      <button class="btn bp bs" onclick="printKwitansiDoc()">Print / PDF</button>
+      <button class="btn bwa bs" onclick="openWAModal(_curKwitansiId,'kwitansi')">WA</button>
+      <button class="btn bg bs" onclick="downloadPDF('kwitansi')" style="color:var(--green);border-color:var(--green)">⬇ PDF</button>
+      <button class="btn bp bs" onclick="printDoc('pvkb')">Print / PDF</button>
       <button class="mc" onclick="closeM('pvkm')">&times;</button>
     </div>
   </div>
@@ -1228,54 +1267,28 @@ const firebaseConfig = {
   appId: "1:1044928418355:web:4acabbc77f001f60f14946",
   measurementId: "G-8ZBZPQRRTF"
 };
-let firestore;
-let _fbInitFailed=false;
-try {
-  if (typeof firebase === 'undefined') throw new Error('Firebase SDK gagal dimuat (cek koneksi internet)');
-  firebase.initializeApp(firebaseConfig);
-  firestore = firebase.firestore();
-} catch (e) {
-  console.error('Firebase init error:', e);
-  _fbInitFailed = true;
-  // Stub biar DB.get/set/gO/sO tidak ikut crash - app tetap bisa dilihat (walau data cloud tidak masuk)
-  firestore = {
-    collection: () => ({
-      doc: () => ({
-        get: () => Promise.resolve({ exists: false, data: () => null }),
-        set: () => Promise.reject(e),
-        onSnapshot: (_, errCb) => { if (errCb) errCb(e); return () => {}; }
-      })
-    })
-  };
-  const overlay = document.getElementById('loading-overlay');
-  if (overlay) {
-    overlay.innerHTML = `
-      <div style="font-size:40px">⚠️</div>
-      <div style="font-size:16px;font-weight:700;text-align:center;padding:0 24px">Gagal terhubung ke server</div>
-      <div style="font-size:13px;color:#94a3b8;text-align:center;padding:0 24px;max-width:320px;line-height:1.5">Cek koneksi internet, lalu muat ulang. Kalau masih gagal, coba nonaktifkan ad-blocker / extension pemblokir script di browser.</div>
-      <button onclick="location.reload()" style="margin-top:14px;padding:10px 28px;border-radius:8px;border:none;background:#fff;color:#1B2A4A;font-weight:700;cursor:pointer">Coba Lagi</button>
-    `;
-  }
-}
+firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore();
 
 const _cache = {
   invoices: [],
   pos: [],
+  spk: [],
+  kwitansi: [],
   stok: [],
   pembelian: [],
   pembukuan: [],
   customers: [],
   settings: {},
-  produksi: {},
-  spk: {}
+  produksi: {}
 };
 
-const COLLECTIONS = ['invoices','pos','stok','pembelian','pembukuan','customers'];
-const OBJECTS = ['settings','produksi','spk'];
+const COLLECTIONS = ['invoices','pos','spk','kwitansi','stok','pembelian','pembukuan','customers'];
+const OBJECTS = ['settings','produksi'];
 const ALL_KEYS = [...COLLECTIONS, ...OBJECTS];
 
 const DB = {
-  get(k) { return _cache[k] || []; },
+  get(k) { return Array.isArray(_cache[k]) ? _cache[k] : []; },
   set(k, v) {
     _cache[k] = v;
     firestore.collection('app').doc(k).set({ data: v }).catch(e => console.error('Firestore write error:', k, e));
@@ -1296,7 +1309,9 @@ async function loadFromFirestore() {
     const promises = ALL_KEYS.map(async (key) => {
       const doc = await firestore.collection('app').doc(key).get();
       if (doc.exists && doc.data()?.data !== undefined) {
-        _cache[key] = doc.data().data;
+        let val = doc.data().data;
+        if (COLLECTIONS.includes(key) && !Array.isArray(val)) val = [];
+        _cache[key] = val;
       }
     });
     await Promise.race([Promise.all(promises), timeout]);
@@ -1334,6 +1349,7 @@ function onDataSync() {
     crm: () => { renderCRMStats(); renderCRMTable(); },
     invoice: rInvT,
     po: rPOT,
+    spk: rSPKT,
     stok: rStokT,
     pembelian: rBeliT,
     pembukuan: rBuku,
@@ -1394,13 +1410,14 @@ function nav(page){
   document.querySelectorAll('.ni').forEach(n=>{
     if(n.getAttribute('onclick')?.includes("'"+page+"'"))n.classList.add('on');
   });
-  const T={dashboard:'Dashboard',crm:'Customer (CRM)',invoice:'Invoice',po:'Purchase Order',stok:'Stok & Gudang',
+  const T={dashboard:'Dashboard',crm:'Customer (CRM)',invoice:'Invoice',po:'Purchase Order',spk:'SPK Produksi',stok:'Stok & Gudang',
     pembelian:'Pembelian',pembukuan:'Pembukuan',laporan:'Laporan Pajak',settings:'Pengaturan'};
   document.getElementById('tbtl').textContent=T[page]||page;
   if(page==='dashboard')rDash();
   if(page==='crm'){renderCRMStats();renderCRMTable();}
   if(page==='invoice')rInvT();
   if(page==='po')rPOT();
+  if(page==='spk')rSPKT();
   if(page==='stok')rStokT();
   if(page==='pembelian')rBeliT();
   if(page==='pembukuan')rBuku();
@@ -1820,7 +1837,6 @@ function addII(d=null){
   const minQty=matchStok?.minQty??0;
   const badgeHTML=currentQty!==null?getStokBadge(currentQty,minQty):'';
   const hintHTML=matchStok?`<div class="stok-hint">SKU: ${esc(matchStok.sku||'-')}  -  ${esc(matchStok.unit||'pcs')}</div>`:'<div class="stok-hint" id="ii-hint-'+id+'"></div>';
-  const hasSizes=d?.sizes&&Object.values(d.sizes).some(v=>Number(v)>0);
 
   r.innerHTML=`
     <div style="display:flex;flex-direction:column">
@@ -1835,19 +1851,13 @@ function addII(d=null){
         ${hintHTML}
       </div>
       <input class="iid-manual" id="ii-manual-${id}" placeholder="Nama produk manual..." style="display:none;margin-top:4px;padding:6px 10px;border:1px solid var(--g300);border-radius:7px;font-size:13px" oninput="calcIT()"/>
-      <button type="button" id="ii-sz-toggle-${id}" onclick="toggleItemSizes('ii',${id})" style="margin-top:4px;align-self:flex-start;background:none;border:none;padding:0;font-size:11px;color:var(--accent);cursor:pointer;text-decoration:underline">${hasSizes?'- Sembunyikan Ukuran':'+ Breakdown Ukuran'}</button>
     </div>
     <input class="iiq" type="number" min="1" value="${d?.qty||1}" oninput="onInvQtyChange(${id})"/>
+    <input class="iis" placeholder="M/L/XL.." value="${esc(d?.size||'')}"/>
     <input class="iip" type="number" min="0" value="${d?.price||0}" oninput="calcIT()"/>
     <div class="itot" id="iit-${id}">${fRp((d?.qty||1)*(d?.price||0))}</div>
-    <button class="btn bg bs" onclick="const p=document.getElementById('ii-sizes-${id}');if(p)p.remove();this.closest('.ir-inv').remove();calcIT()" style="padding:4px 6px">&times;</button>`;
+    <button class="btn bg bs" onclick="this.closest('.ir-inv').remove();calcIT()" style="padding:4px 6px">&times;</button>`;
   document.getElementById('iitems').appendChild(r);
-  const sizeWrap=document.createElement('div');
-  sizeWrap.innerHTML=itemSizePanelHTML('ii',id,d?.sizes);
-  const panelEl=sizeWrap.firstElementChild;
-  if(hasSizes)panelEl.classList.remove('hide');
-  document.getElementById('iitems').appendChild(panelEl);
-  if(hasSizes)calcItemSizeHint('ii',id);
   if(d?.desc&&!matchStok){
     const sel=r.querySelector('.prod-sel');
     sel.value='__manual__';
@@ -1909,13 +1919,11 @@ function getII(){
       const opt=sel.options[sel.selectedIndex];
       skuRef=opt?.dataset?.sku||'';
     }
-    const rowId=r.id.replace('ii-','');
-    const sizes=getItemSizesFromRow('ii',rowId);
     return{
       desc,skuRef,
       qty:Number(r.querySelector('.iiq').value)||0,
-      price:Number(r.querySelector('.iip').value)||0,
-      ...(sizes?{sizes}:{})
+      size:r.querySelector('.iis')?.value||'',
+      price:Number(r.querySelector('.iip').value)||0
     };
   });
 }
@@ -2050,8 +2058,8 @@ function rInvT(){
         <button class="btn bg bs" onclick="prevInv('${i.id}')" title="Preview"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
         <button class="btn bwa bs" onclick="openWAModal('${i.id}','inv')" title="Kirim WA"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></button>
         <button class="btn bg bs" style="color:var(--accent);border-color:var(--accent)" onclick="openBuktiModal('${i.id}','inv')" title="Bukti Bayar"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
-        <button class="btn bg bs" style="color:var(--navy);border-color:var(--navy)" onclick="openSPKModal('${i.id}','inv')" title="Buat SPK"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></button>
-        ${i.status==='lunas'?`<button class="btn bg bs" style="color:var(--green);border-color:var(--green)" onclick="prevKwitansi('${i.id}')" title="Kwitansi"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg></button>`:''}
+        <button class="btn bg bs" style="color:var(--gold);border-color:var(--gold)" onclick="genSPK('invoice','${i.id}')" title="Buat SPK"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></button>
+        ${i.status==='lunas'?`<button class="btn bg bs" style="color:var(--green);border-color:var(--green)" onclick="genKwitansi('${i.id}')" title="Buat Kwitansi"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="m9 12 2 2 4-4"/></svg></button>`:''}
         <button class="btn bg bs" onclick="openInvModal('${i.id}')"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
         <button class="btn bg bs tred" onclick="delInv('${i.id}')"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
       </td>
@@ -2065,14 +2073,14 @@ function updInvSt(id,st){
   createPOFromInvoice(inv);
   if(st==='lunas'&&old!=='lunas'){
     addBE({date:td(),ref:inv.ref,desc:`Pendapatan Invoice ${inv.ref}  -  ${inv.customer}`,debit:inv.total,kredit:0,akun:'Pendapatan Usaha',type:'pendapatan',src:'invoice',srcId:inv.id});
-    rDash();
-    toast('Invoice lunas masuk pembukuan');
+    rInvT();rDash();
+    toast('Invoice lunas masuk pembukuan. Kwitansi siap dibuat.');
   }else if(old==='lunas'&&st!=='lunas'){
     DB.set('pembukuan', DB.get('pembukuan').filter(b => !(b.src === 'invoice' && b.srcId === id)));
-    rDash();
+    rInvT();rDash();
     toast('Status diperbarui & ditarik dari pembukuan');
   }else{
-    rDash();
+    rInvT();rDash();
     toast('Status diperbarui');
   }
 }
@@ -2100,8 +2108,8 @@ function prevInv(id){
   const inv=DB.get('invoices').find(i=>i.id===id);if(!inv)return;
   _curInvId=id;
   document.getElementById('pvib').innerHTML=buildInvHTML(inv,'INVOICE');
-  const kBtn=document.getElementById('pv-kwitansi-btn');
-  if(kBtn)kBtn.style.display=inv.status==='lunas'?'':'none';
+  const kbtn=document.getElementById('pv-kwitansi-btn');
+  if(kbtn)kbtn.style.display=inv.status==='lunas'?'inline-flex':'none';
   openM('pvim');
 }
 function openWAFromPreview(type){
@@ -2201,7 +2209,7 @@ function buildInvHTML(doc,type='INVOICE'){
         ${(doc.items||[]).map((it,i)=>`
         <tr style="background:${tableBodyBg};color:${tableText};">
           <td style="background:${tableBodyBg};color:${tableText};padding:10px;text-align:center;border-right:2px solid ${tableBorder};border-bottom:2px solid ${tableBorder};font-weight:700;">${i+1}</td>
-          <td style="background:${tableBodyBg};color:${tableText};padding:10px;border-right:2px solid ${tableBorder};border-bottom:2px solid ${tableBorder};font-weight:600;">${esc(it.desc)}</td>
+          <td style="background:${tableBodyBg};color:${tableText};padding:10px;border-right:2px solid ${tableBorder};border-bottom:2px solid ${tableBorder};font-weight:600;">${esc(it.desc)}${it.size?` <span style="font-weight:500;font-size:11px;opacity:.75">(Ukuran: ${esc(it.size)})</span>`:''}</td>
           <td style="background:${tableBodyBg};color:${tableText};padding:10px;text-align:center;border-right:2px solid ${tableBorder};border-bottom:2px solid ${tableBorder};">${it.qty}</td>
           <td style="background:${tableBodyBg};color:${tableText};padding:10px;border-right:2px solid ${tableBorder};border-bottom:2px solid ${tableBorder};">${fmtRp(it.price)}</td>
           <td style="background:${tableBodyBg};color:${tableText};padding:10px;border-bottom:2px solid ${tableBorder};">${fmtRp(it.qty*it.price)}</td>
@@ -2312,7 +2320,6 @@ function addPI(d=null){
   const minQty=matchStok?.minQty??0;
   const badgeHTML=currentQty!==null?getStokBadge(currentQty,minQty):'';
   const hintHTML=matchStok?`<div class="stok-hint">SKU: ${esc(matchStok.sku||'-')}  -  ${esc(matchStok.unit||'pcs')}</div>`:`<div class="stok-hint" id="pi-hint-${id}"></div>`;
-  const hasSizes=d?.sizes&&Object.values(d.sizes).some(v=>Number(v)>0);
 
   r.innerHTML=`
     <div style="display:flex;flex-direction:column">
@@ -2327,19 +2334,13 @@ function addPI(d=null){
         ${hintHTML}
       </div>
       <input class="pid-manual" id="pi-manual-${id}" placeholder="Nama produk manual..." style="display:none;margin-top:4px;padding:6px 10px;border:1px solid var(--g300);border-radius:7px;font-size:13px" oninput="calcPT()"/>
-      <button type="button" id="pi-sz-toggle-${id}" onclick="toggleItemSizes('pi',${id})" style="margin-top:4px;align-self:flex-start;background:none;border:none;padding:0;font-size:11px;color:var(--accent);cursor:pointer;text-decoration:underline">${hasSizes?'- Sembunyikan Ukuran':'+ Breakdown Ukuran'}</button>
     </div>
     <input class="piq" type="number" min="1" value="${d?.qty||1}" oninput="onPOQtyChange(${id})"/>
+    <input class="pis" placeholder="M/L/XL.." value="${esc(d?.size||'')}"/>
     <input class="pip" type="number" min="0" value="${d?.price||0}" oninput="calcPT()"/>
     <div class="itot">${fRp((d?.qty||1)*(d?.price||0))}</div>
-    <button class="btn bg bs" onclick="const p=document.getElementById('pi-sizes-${id}');if(p)p.remove();this.closest('.ir-inv').remove();calcPT()" style="padding:4px 6px">&times;</button>`;
+    <button class="btn bg bs" onclick="this.closest('.ir-inv').remove();calcPT()" style="padding:4px 6px">&times;</button>`;
   document.getElementById('pitems').appendChild(r);
-  const sizeWrap=document.createElement('div');
-  sizeWrap.innerHTML=itemSizePanelHTML('pi',id,d?.sizes);
-  const panelEl=sizeWrap.firstElementChild;
-  if(hasSizes)panelEl.classList.remove('hide');
-  document.getElementById('pitems').appendChild(panelEl);
-  if(hasSizes)calcItemSizeHint('pi',id);
   if(d?.desc&&!matchStok){
     const sel=r.querySelector('.prod-sel');
     sel.value='__manual__';
@@ -2425,9 +2426,7 @@ function getPOItems(){
       const opt=sel.options[sel.selectedIndex];
       skuRef=opt?.dataset?.sku||'';
     }
-    const rowId=r.id.replace('pi-','');
-    const sizes=getItemSizesFromRow('pi',rowId);
-    return{desc,skuRef,qty:Number(r.querySelector('.piq').value)||0,price:Number(r.querySelector('.pip').value)||0,...(sizes?{sizes}:{})};
+    return{desc,skuRef,qty:Number(r.querySelector('.piq').value)||0,size:r.querySelector('.pis')?.value||'',price:Number(r.querySelector('.pip').value)||0};
   });
 }
 
@@ -2510,7 +2509,7 @@ function rPOT(){
         <button class="btn bg bs" onclick="prevPO('${p.id}')" title="Preview"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
         <button class="btn bwa bs" onclick="openWAModal('${p.id}','po')" title="Kirim WA"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></button>
         <button class="btn bg bs" style="color:var(--gold);border-color:var(--gold)" onclick="openProdModal('${p.id}')" title="Rekap Produksi"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg></button>
-        <button class="btn bg bs" style="color:var(--navy);border-color:var(--navy)" onclick="openSPKModal('${p.id}','po')" title="Buat SPK"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></button>
+        <button class="btn bg bs" style="color:var(--accent);border-color:var(--accent)" onclick="genSPK('po','${p.id}')" title="Buat SPK"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></button>
         <button class="btn bg bs" onclick="openPOModal('${p.id}')"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
         <button class="btn bg bs tred" onclick="delPO('${p.id}')"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
       </td>
@@ -2540,6 +2539,478 @@ function prevPO(id){
   _curPOId=id;
   document.getElementById('pvpb').innerHTML=buildInvHTML(po,'PURCHASE ORDER');
   openM('pvpm');
+}
+
+const SPK_SIZE_CHART=[
+  {code:'XS',lebar:44,panjang:66},
+  {code:'S',lebar:47,panjang:69},
+  {code:'M',lebar:50,panjang:72},
+  {code:'L',lebar:53,panjang:75},
+  {code:'XL',lebar:56,panjang:78},
+  {code:'2XL',lebar:59,panjang:81},
+  {code:'3XL',lebar:62,panjang:84},
+  {code:'4XL',lebar:65,panjang:87},
+  {code:'5XL',lebar:68,panjang:90}
+];
+
+function computeDefaultSizeChart(items){
+  const qtyBySize={};
+  const extraSizes=[];
+  (items||[]).forEach(it=>{
+    const key=(it.size||'').toString().trim().toUpperCase();
+    if(!key)return;
+    const known=SPK_SIZE_CHART.find(s=>s.code===key);
+    if(known)qtyBySize[key]=(qtyBySize[key]||0)+Number(it.qty||0);
+    else{
+      const idx=extraSizes.findIndex(e=>e.code===key);
+      if(idx>-1)extraSizes[idx].qty+=Number(it.qty||0);
+      else extraSizes.push({code:key,qty:Number(it.qty||0),lebar:'',panjang:''});
+    }
+  });
+  return [...SPK_SIZE_CHART.map(s=>({code:s.code,qty:qtyBySize[s.code]||0,lebar:s.lebar,panjang:s.panjang})),...extraSizes];
+}
+
+//  SPK (SURAT PERINTAH KERJA)  -  generate langsung dari Invoice / PO
+let _curSPKId=null;
+let _curKwitansiId=null;
+
+function findSPKSource(sourceType,sourceId){
+  return sourceType==='invoice'
+    ?DB.get('invoices').find(i=>i.id===sourceId)
+    :DB.get('pos').find(p=>p.id===sourceId);
+}
+
+// Ambil catatan produksi terbaik dari dokumen sumber. Invoice sendiri tidak
+// punya field "catatan produksi" (field notes-nya untuk info pembayaran),
+// jadi kalau sumbernya invoice kita coba pakai catatan dari PO yang sudah
+// otomatis dibuat dari invoice tsb (lihat createPOFromInvoice).
+function bestProdNotes(sourceType,sourceId,doc){
+  if(sourceType==='po')return doc.notes||'';
+  const linkedPO=DB.get('pos').find(p=>p.invoiceId===sourceId);
+  return linkedPO?.notes||'';
+}
+
+function genSPK(sourceType,sourceId){
+  if(!sourceId){toast('Dokumen sumber tidak ditemukan','err');return;}
+  const doc=findSPKSource(sourceType,sourceId);
+  if(!doc){toast('Dokumen sumber tidak ditemukan','err');return;}
+  if(!(doc.items||[]).some(it=>it.desc)){toast('Dokumen ini belum punya item produk','err');return;}
+  let all=DB.get('spk');
+  const exists=all.find(s=>s.sourceType===sourceType&&s.sourceId===sourceId);
+  const data={
+    id:exists?exists.id:uid(),
+    ref:exists?exists.ref:autoRef('SPK'),
+    sourceType,sourceId,sourceRef:doc.ref,
+    customer:doc.customer,phone:doc.phone||'',
+    date:exists?exists.date:td(),
+    due:exists&&exists.due?exists.due:(doc.due||''),
+    items:(doc.items||[]).map(it=>({...it})),
+    total:doc.total||0,
+    pic:exists?.pic||'',
+    notes:exists?.notes!==undefined?exists.notes:bestProdNotes(sourceType,sourceId,doc),
+    status:exists?.status||'pending',
+    namaFile:exists?.namaFile!==undefined?exists.namaFile:((doc.items||[])[0]?.desc||''),
+    bahan:exists?.bahan||'',
+    mockupFront:exists?.mockupFront||'',
+    mockupBack:exists?.mockupBack||'',
+    sizeChart:exists?.sizeChart&&exists.sizeChart.length?exists.sizeChart:computeDefaultSizeChart(doc.items||[])
+  };
+  all=exists?all.map(s=>s.id===exists.id?data:s):[...all,data];
+  DB.set('spk',all);
+  if(document.getElementById('pg-spk')?.classList.contains('on'))rSPKT();
+  toast(exists?'SPK diperbarui dari sumber terbaru':'SPK berhasil dibuat dari '+(sourceType==='invoice'?'Invoice':'PO'));
+  prevSPK(data.id);
+}
+
+function prevSPK(id){
+  const spk=DB.get('spk').find(s=>s.id===id);if(!spk)return;
+  _curSPKId=id;
+  closeM('pvim');closeM('pvpm');
+  document.getElementById('pvsb').innerHTML=buildSPKHTML(spk);
+  openM('pvsm');
+}
+
+function fmtSPKDate(dstr){
+  if(!dstr)return '';
+  const d=new Date(dstr+'T00:00:00');
+  if(isNaN(d))return dstr;
+  const hari=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()];
+  const bln=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][d.getMonth()];
+  return `${hari}, ${d.getDate()} ${bln} ${d.getFullYear()}`;
+}
+
+function buildSPKHTML(doc){
+  const cfg=DB.gO('settings');
+  const cn=cfg.name||'Hulya Apparel';
+  const ca=cfg.address||'';
+  const ct=cfg.telp||'';
+  const ig=cfg.instagram||'';
+
+  const chart=(doc.sizeChart&&doc.sizeChart.length)?doc.sizeChart:computeDefaultSizeChart(doc.items||[]);
+  const sizeRows=chart.map(s=>`
+    <tr>
+      <td style="padding:6px 10px;text-align:center;border:1px solid #1A1A1A;font-weight:600;">${esc(s.code)}</td>
+      <td style="padding:6px 10px;text-align:center;border:1px solid #1A1A1A;">${s.qty?s.qty+' Pcs':'-'}</td>
+      <td style="padding:6px 10px;text-align:center;border:1px solid #1A1A1A;">${s.lebar?s.lebar+' CM':'-'}</td>
+      <td style="padding:6px 10px;text-align:center;border:1px solid #1A1A1A;">${s.panjang?s.panjang+' CM':'-'}</td>
+    </tr>`).join('');
+
+  const mockupCell=(data,label)=>data
+    ?`<img src="${data}" style="max-width:100%;max-height:260px;object-fit:contain;"/>`
+    :`<div style="color:#9CA3AF;font-size:12px;padding:40px 10px;">${label} belum diupload</div>`;
+
+  const footerBits=[ct,ig?'@'+esc(ig).replace(/^@/,''):'',ca].filter(Boolean);
+
+  return `<div class="ivp" style="font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;padding:24px;border:1px solid #E5E7EB;border-radius:8px;position:relative;overflow:hidden;">
+    <!-- BRAND -->
+    <div style="text-align:right;margin-bottom:16px;">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;letter-spacing:.5px;color:var(--navy);">${esc(cn).toUpperCase()}.</div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;border:1px solid #1A1A1A;">
+      <tr><td colspan="3" style="text-align:center;font-weight:700;font-size:15px;letter-spacing:2px;padding:8px;border:1px solid #1A1A1A;border-bottom:2px solid #1A1A1A;">Surat Perintah Kerja</td></tr>
+
+      <tr><td style="padding:6px 10px;border:1px solid #1A1A1A;width:130px;">NO</td><td style="padding:6px 10px;border:1px solid #1A1A1A;width:20px;text-align:center;">:</td><td style="padding:6px 10px;border:1px solid #1A1A1A;">${esc(doc.ref)}</td></tr>
+      <tr><td style="padding:6px 10px;border:1px solid #1A1A1A;">TGL</td><td style="padding:6px 10px;border:1px solid #1A1A1A;text-align:center;">:</td><td style="padding:6px 10px;border:1px solid #1A1A1A;">${fmtSPKDate(doc.date)||doc.date}</td></tr>
+      <tr><td style="padding:6px 10px;border:1px solid #1A1A1A;">NAMA CS</td><td style="padding:6px 10px;border:1px solid #1A1A1A;text-align:center;">:</td><td style="padding:6px 10px;border:1px solid #1A1A1A;">${esc(doc.customer||'-')}</td></tr>
+      <tr><td style="padding:6px 10px;border:1px solid #1A1A1A;vertical-align:top;">NAMA FILE</td><td style="padding:6px 10px;border:1px solid #1A1A1A;text-align:center;vertical-align:top;">:</td><td style="padding:6px 10px;border:1px solid #1A1A1A;font-weight:700;">${esc(doc.namaFile||'-')}</td></tr>
+      <tr><td style="padding:6px 10px;border:1px solid #1A1A1A;">BAHAN</td><td style="padding:6px 10px;border:1px solid #1A1A1A;text-align:center;">:</td><td style="padding:6px 10px;border:1px solid #1A1A1A;">${esc(doc.bahan||'-')}</td></tr>
+
+      <tr>
+        <td style="padding:6px 10px;border:1px solid #1A1A1A;font-weight:700;">RINCIAN SIZE</td>
+        <td colspan="2" style="padding:0;border:1px solid #1A1A1A;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <tr><td style="padding:6px 10px;text-align:center;border:1px solid #1A1A1A;font-weight:700;background:#F3F4F6;">UKURAN</td><td style="padding:6px 10px;text-align:center;border:1px solid #1A1A1A;font-weight:700;background:#F3F4F6;">QTY</td><td style="padding:6px 10px;text-align:center;border:1px solid #1A1A1A;font-weight:700;background:#F3F4F6;">LEBAR</td><td style="padding:6px 10px;text-align:center;border:1px solid #1A1A1A;font-weight:700;background:#F3F4F6;">PANJANG</td></tr>
+            ${sizeRows}
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:6px 10px;border:1px solid #1A1A1A;font-weight:700;">MOCKUP</td>
+        <td colspan="2" style="padding:0;border:1px solid #1A1A1A;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:6px 10px;text-align:center;font-weight:700;border:1px solid #1A1A1A;background:#F3F4F6;width:50%;">DEPAN</td>
+              <td style="padding:6px 10px;text-align:center;font-weight:700;border:1px solid #1A1A1A;background:#F3F4F6;width:50%;">BELAKANG</td>
+            </tr>
+            <tr>
+              <td style="padding:14px;text-align:center;border:1px solid #1A1A1A;">${mockupCell(doc.mockupFront,'Mockup depan')}</td>
+              <td style="padding:14px;text-align:center;border:1px solid #1A1A1A;">${mockupCell(doc.mockupBack,'Mockup belakang')}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:6px 10px;border:1px solid #1A1A1A;font-weight:700;vertical-align:top;">Rincian Design</td>
+        <td style="padding:6px 10px;border:1px solid #1A1A1A;text-align:center;vertical-align:top;">:</td>
+        <td style="padding:6px 10px;border:1px solid #1A1A1A;line-height:1.7;">${doc.notes?esc(doc.notes).replace(/\n/g,'<br>'):'-'}</td>
+      </tr>
+
+      <tr>
+        <td style="padding:10px;border:1px solid #1A1A1A;font-weight:700;color:#DC2626;vertical-align:top;">Note</td>
+        <td style="padding:10px;border:1px solid #1A1A1A;text-align:center;vertical-align:top;color:#DC2626;font-weight:700;">:</td>
+        <td style="padding:10px;border:1px solid #1A1A1A;color:#DC2626;font-weight:700;min-height:40px;">${doc.due?'Deadline '+fmtSPKDate(doc.due):'-'}</td>
+      </tr>
+    </table>
+
+    <!-- FOOTER -->
+    <div style="display:flex;justify-content:space-between;gap:10px;margin-top:18px;font-size:11px;color:#374151;flex-wrap:wrap;">
+      ${footerBits.map(b=>`<div>${b}</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function rSPKT(){
+  let all=DB.get('spk');
+  const q=(document.getElementById('spk-s')?.value||'').toLowerCase();
+  const f=document.getElementById('spk-f')?.value||'';
+  if(q)all=all.filter(s=>(s.ref+s.customer+(s.sourceRef||'')).toLowerCase().includes(q));
+  if(f)all=all.filter(s=>(s.status||'pending')===f);
+  all=[...all].reverse();
+  const stTxt={pending:'Belum Dikerjakan',proses:'Proses',selesai:'Selesai'};
+  const stCls={pending:'bp2',proses:'bpr',selesai:'bl'};
+  document.getElementById('spkt').innerHTML=all.length?`<table>
+    <thead><tr><th>No. SPK</th><th>Sumber</th><th>Pelanggan</th><th>Tanggal</th><th>Target</th><th>Item</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody>${all.map(s=>`<tr>
+      <td style="font-weight:700;color:var(--gold-dark);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevSPK('${s.id}')">${esc(s.ref)}</td>
+      <td><span class="chip">${s.sourceType==='invoice'?'Invoice':'PO'}</span><br><small class="tgy">${esc(s.sourceRef||'-')}</small></td>
+      <td>${esc(s.customer)}<br><small class="tgy">${esc(s.phone||'')}</small></td>
+      <td>${s.date}</td><td>${s.due||'-'}</td>
+      <td>${(s.items||[]).reduce((a,it)=>a+Number(it.qty||0),0)} pcs</td>
+      <td><select class="ssel" onchange="updSPKSt('${s.id}',this.value)">
+        ${['pending','proses','selesai'].map(v=>`<option value="${v}"${(s.status||'pending')===v?' selected':''}>${stTxt[v]}</option>`).join('')}
+      </select></td>
+      <td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn bg bs" onclick="prevSPK('${s.id}')" title="Preview"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button class="btn bwa bs" onclick="openWAModal('${s.id}','spk')" title="Kirim WA"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></button>
+        <button class="btn bg bs" onclick="openSPKEditModal('${s.id}')"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
+        <button class="btn bg bs tred" onclick="delSPK('${s.id}')"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+      </td>
+    </tr>`).join('')}</tbody></table>`:emSt('clipboard-list','Belum ada SPK. Klik tombol SPK pada Invoice/PO, atau tombol Buat SPK di atas.');
+}
+
+function updSPKSt(id,st){
+  DB.set('spk',DB.get('spk').map(s=>s.id===id?{...s,status:st}:s));
+  toast('Status SPK diperbarui');
+}
+
+function delSPK(id){
+  if(!confirm('Hapus SPK ini?'))return;
+  DB.set('spk',DB.get('spk').filter(s=>s.id!==id));
+  rSPKT();toast('SPK dihapus');
+}
+
+function openSPKEditModal(id){
+  const s=DB.get('spk').find(x=>x.id===id);if(!s)return;
+  closeM('pvsm');
+  document.getElementById('spk-eid').value=id;
+  document.getElementById('spk-edit-info').innerHTML=`<b>${esc(s.ref)}</b> &nbsp;-&nbsp; ${esc(s.customer)} &nbsp;-&nbsp; <span style="color:var(--g500)">Sumber: ${s.sourceType==='invoice'?'Invoice':'PO'} ${esc(s.sourceRef||'-')}</span>`;
+  document.getElementById('spk-due').value=s.due||'';
+  document.getElementById('spk-status').value=s.status||'pending';
+  document.getElementById('spk-pic').value=s.pic||'';
+  document.getElementById('spk-notes').value=s.notes||'';
+  document.getElementById('spk-namafile').value=s.namaFile||'';
+  document.getElementById('spk-bahan').value=s.bahan||'';
+  renderSPKSizeTable((s.sizeChart&&s.sizeChart.length)?s.sizeChart:computeDefaultSizeChart(s.items||[]));
+  document.getElementById('spk-mockup-front').value='';
+  document.getElementById('spk-mockup-back').value='';
+  _spkMockupTemp={front:s.mockupFront||'',back:s.mockupBack||''};
+  showMockupPreview('front',_spkMockupTemp.front);
+  showMockupPreview('back',_spkMockupTemp.back);
+  openM('spkm');
+}
+
+let _spkMockupTemp={front:'',back:''};
+
+function renderSPKSizeTable(rows){
+  const tb=document.getElementById('spk-size-tbody');
+  tb.innerHTML=rows.map((r,i)=>spkSizeRowHTML(r,i)).join('');
+}
+
+function spkSizeRowHTML(r,i){
+  return `<tr data-idx="${i}">
+    <td style="padding:4px 6px;border-bottom:1px solid #F3F4F6"><input class="spk-sz-code" value="${esc(r.code||'')}" style="width:100%;box-sizing:border-box"/></td>
+    <td style="padding:4px 6px;border-bottom:1px solid #F3F4F6"><input class="spk-sz-qty" type="number" min="0" value="${r.qty||0}" style="width:100%;box-sizing:border-box"/></td>
+    <td style="padding:4px 6px;border-bottom:1px solid #F3F4F6"><input class="spk-sz-lebar" type="number" min="0" value="${r.lebar||''}" style="width:100%;box-sizing:border-box"/></td>
+    <td style="padding:4px 6px;border-bottom:1px solid #F3F4F6"><input class="spk-sz-panjang" type="number" min="0" value="${r.panjang||''}" style="width:100%;box-sizing:border-box"/></td>
+    <td style="padding:4px 6px;border-bottom:1px solid #F3F4F6;text-align:center"><button type="button" class="btn bg bs tred" onclick="this.closest('tr').remove()" title="Hapus baris">&times;</button></td>
+  </tr>`;
+}
+
+function addSPKSizeRow(){
+  const tb=document.getElementById('spk-size-tbody');
+  const i=tb.querySelectorAll('tr').length;
+  tb.insertAdjacentHTML('beforeend',spkSizeRowHTML({code:'',qty:0,lebar:'',panjang:''},i));
+}
+
+function readSPKSizeTable(){
+  return [...document.querySelectorAll('#spk-size-tbody tr')].map(tr=>({
+    code:tr.querySelector('.spk-sz-code').value.trim().toUpperCase(),
+    qty:Number(tr.querySelector('.spk-sz-qty').value)||0,
+    lebar:tr.querySelector('.spk-sz-lebar').value?Number(tr.querySelector('.spk-sz-lebar').value):'',
+    panjang:tr.querySelector('.spk-sz-panjang').value?Number(tr.querySelector('.spk-sz-panjang').value):''
+  })).filter(r=>r.code);
+}
+
+function showMockupPreview(side,data){
+  const el=document.getElementById('spk-mockup-'+side+'-prev');
+  if(!el)return;
+  el.innerHTML=data?`<div style="position:relative;display:inline-block"><img src="${data}" style="max-height:80px;max-width:120px;object-fit:contain;border:1px solid #E5E7EB;border-radius:6px"/><button type="button" onclick="removeMockup('${side}')" style="position:absolute;top:-6px;right:-6px;background:#DC2626;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1">&times;</button></div>`:'';
+}
+
+function removeMockup(side){
+  _spkMockupTemp[side]='';
+  document.getElementById('spk-mockup-'+side).value='';
+  showMockupPreview(side,'');
+}
+
+function handleMockupUpload(e,side){
+  const file=e.target.files[0];if(!file)return;
+  const img=new Image();
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    img.onload=()=>{
+      const maxDim=600;
+      let w=img.width,h=img.height;
+      if(w>h&&w>maxDim){h=Math.round(h*maxDim/w);w=maxDim;}
+      else if(h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const data=canvas.toDataURL('image/jpeg',0.75);
+      _spkMockupTemp[side]=data;
+      showMockupPreview(side,data);
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+function saveSPKEdit(){
+  const id=document.getElementById('spk-eid').value;
+  let all=DB.get('spk');
+  const idx=all.findIndex(s=>s.id===id);if(idx<0)return;
+  all[idx]={...all[idx],
+    due:document.getElementById('spk-due').value,
+    status:document.getElementById('spk-status').value,
+    pic:document.getElementById('spk-pic').value,
+    notes:document.getElementById('spk-notes').value,
+    namaFile:document.getElementById('spk-namafile').value,
+    bahan:document.getElementById('spk-bahan').value,
+    sizeChart:readSPKSizeTable(),
+    mockupFront:_spkMockupTemp.front,
+    mockupBack:_spkMockupTemp.back
+  };
+  DB.set('spk',all);
+  closeM('spkm');rSPKT();toast('Detail SPK disimpan');
+  prevSPK(id);
+}
+
+function syncSPKFromSource(){
+  const id=document.getElementById('spk-eid').value;
+  const s=DB.get('spk').find(x=>x.id===id);if(!s)return;
+  const doc=findSPKSource(s.sourceType,s.sourceId);
+  if(!doc){toast('Dokumen sumber sudah tidak ada','err');return;}
+  document.getElementById('spk-due').value=doc.due||s.due||'';
+  let all=DB.get('spk');
+  all=all.map(x=>x.id===id?{...x,customer:doc.customer,phone:doc.phone||'',items:(doc.items||[]).map(it=>({...it})),total:doc.total||0,sourceRef:doc.ref}:x);
+  DB.set('spk',all);
+  toast('Item, pelanggan & total disinkronkan ulang dari sumber');
+}
+
+function openSPKPickModal(){
+  document.getElementById('spk-pick-type').value='invoice';
+  renderSPKPickOptions();
+  openM('spk-pick');
+}
+
+function renderSPKPickOptions(){
+  const type=document.getElementById('spk-pick-type').value;
+  const docs=type==='invoice'?DB.get('invoices'):DB.get('pos');
+  const sel=document.getElementById('spk-pick-doc');
+  sel.innerHTML=docs.length
+    ?docs.map(d=>`<option value="${d.id}">${esc(d.ref)}  -  ${esc(d.customer)}</option>`).join('')
+    :`<option value="">Tidak ada dokumen</option>`;
+}
+
+function generateSPKFromPick(){
+  const type=document.getElementById('spk-pick-type').value;
+  const id=document.getElementById('spk-pick-doc').value;
+  if(!id){toast('Pilih dokumen terlebih dahulu','err');return;}
+  closeM('spk-pick');
+  genSPK(type,id);
+}
+
+//  KWITANSI  -  generate otomatis saat invoice berstatus lunas
+function ensureKwitansi(invoiceId){
+  const inv=DB.get('invoices').find(i=>i.id===invoiceId);
+  if(!inv)return null;
+  let all=DB.get('kwitansi');
+  const exists=all.find(k=>k.invoiceId===invoiceId);
+  const data={
+    id:exists?exists.id:uid(),
+    ref:exists?exists.ref:autoRef('KW'),
+    invoiceId,invoiceRef:inv.ref,
+    customer:inv.customer,phone:inv.phone||'',
+    date:exists?exists.date:td(),
+    amount:inv.total,
+    notes:exists?.notes!==undefined?exists.notes:`Pelunasan ${inv.ref} - ${(inv.items||[]).map(it=>it.desc).filter(Boolean).join(', ')}`
+  };
+  all=exists?all.map(k=>k.id===exists.id?data:k):[...all,data];
+  DB.set('kwitansi',all);
+  return data;
+}
+
+function genKwitansi(invoiceId){
+  const inv=DB.get('invoices').find(i=>i.id===invoiceId);
+  if(!inv){toast('Invoice tidak ditemukan','err');return;}
+  if(inv.status!=='lunas'){toast('Kwitansi hanya bisa dibuat untuk invoice berstatus Lunas','err');return;}
+  const k=ensureKwitansi(invoiceId);
+  if(!k)return;
+  toast('Kwitansi siap dicetak');
+  prevKwitansi(k.id);
+}
+
+function prevKwitansi(id){
+  const k=DB.get('kwitansi').find(x=>x.id===id);if(!k)return;
+  _curKwitansiId=id;
+  _curInvId=k.invoiceId;
+  closeM('pvim');
+  document.getElementById('pvkb').innerHTML=buildKwitansiHTML(k);
+  openM('pvkm');
+}
+
+const _terbilangSatuan=['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
+function terbilang(n){
+  n=Math.floor(Math.abs(Number(n)||0));
+  if(n<12)return _terbilangSatuan[n];
+  if(n<20)return terbilang(n-10)+' belas';
+  if(n<100)return terbilang(Math.floor(n/10))+' puluh'+(n%10?' '+terbilang(n%10):'');
+  if(n<200)return 'seratus'+(n%100?' '+terbilang(n%100):'');
+  if(n<1000)return terbilang(Math.floor(n/100))+' ratus'+(n%100?' '+terbilang(n%100):'');
+  if(n<2000)return 'seribu'+(n%1000?' '+terbilang(n%1000):'');
+  if(n<1000000)return terbilang(Math.floor(n/1000))+' ribu'+(n%1000?' '+terbilang(n%1000):'');
+  if(n<1000000000)return terbilang(Math.floor(n/1000000))+' juta'+(n%1000000?' '+terbilang(n%1000000):'');
+  return terbilang(Math.floor(n/1000000000))+' miliar'+(n%1000000000?' '+terbilang(n%1000000000):'');
+}
+function terbilangRupiah(n){
+  n=Math.floor(Math.abs(Number(n)||0));
+  if(n===0)return 'Nol rupiah';
+  const t=terbilang(n).trim().replace(/\s+/g,' ');
+  return (t.charAt(0).toUpperCase()+t.slice(1))+' rupiah';
+}
+
+function buildKwitansiHTML(doc){
+  const cfg=DB.gO('settings');
+  const cn=cfg.name||'Hulya Apparel';
+  const ca=cfg.address||'';
+  const sg=cfg.signer||'';
+  const logoData=localStorage.getItem('h_logo')||'';
+  const ttdData=localStorage.getItem('h_ttd')||'';
+  const logoHTML=logoData
+    ?`<img src="${logoData}" style="max-height:70px;max-width:160px;object-fit:contain;display:block;margin-bottom:8px"/>`
+    :`<div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--navy);margin-bottom:8px">${esc(cn)}</div>`;
+
+  return `<div class="ivp" style="font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;padding:24px;border:1px solid #E5E7EB;border-radius:8px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);pointer-events:none;z-index:10;opacity:0.13;border:8px solid #16A34A;border-radius:12px;padding:12px 28px;white-space:nowrap;">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:60px;font-weight:800;color:#16A34A;letter-spacing:4px;line-height:1;">LUNAS</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+      <div>${logoHTML}<div style="font-size:11px;color:#6B7280;line-height:1.6;max-width:260px;">${esc(ca).replace(/\n/g,'<br>')}</div></div>
+      <div style="text-align:right;">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;letter-spacing:2px;color:var(--navy)">KWITANSI</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">No. ${esc(doc.ref)}</div>
+      </div>
+    </div>
+    <div class="ivsep" style="height:2px;background:linear-gradient(90deg,var(--accent),var(--gold),transparent);margin:14px 0 22px;border:none"></div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+      <tbody>
+        <tr><td style="padding:7px 4px;color:#6B7280;width:170px;vertical-align:top;">Sudah terima dari</td><td style="padding:7px 4px;">:</td><td style="padding:7px 4px;font-weight:700;">${esc(doc.customer)}</td></tr>
+        <tr><td style="padding:7px 4px;color:#6B7280;vertical-align:top;">Uang sejumlah</td><td style="padding:7px 4px;vertical-align:top;">:</td><td style="padding:7px 4px;font-weight:700;font-style:italic;">${esc(terbilangRupiah(doc.amount))}</td></tr>
+        <tr><td style="padding:7px 4px;color:#6B7280;vertical-align:top;">Untuk pembayaran</td><td style="padding:7px 4px;vertical-align:top;">:</td><td style="padding:7px 4px;">${esc(doc.notes||('Pelunasan '+doc.invoiceRef)).replace(/\n/g,'<br>')}</td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:28px;">
+      <div style="border:2px solid var(--navy);border-radius:8px;padding:12px 26px;text-align:center;">
+        <div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;">Jumlah</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--navy);">Rp ${Number(doc.amount).toLocaleString('id-ID')}</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;">
+      <div style="text-align:center;min-width:180px;">
+        <div style="font-size:12px;color:#4B5563;margin-bottom:4px;">${doc.date}</div>
+        <div style="height:65px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;">
+          ${ttdData?`<img src="${ttdData}" style="max-height:65px;max-width:140px;object-fit:contain;"/>`:'<div style="height:50px"></div>'}
+        </div>
+        <div style="border-bottom:1px solid #1A1A1A;width:160px;margin:0 auto 6px;"></div>
+        <div style="font-size:11px;color:#6B7280;">Yang Menerima</div>
+        <div style="font-weight:700;font-size:13px;color:#1A1A1A;">${esc(sg)}</div>
+      </div>
+    </div>
+  </div>`;
 }
 
 function getCurrentShipDoc(type){
@@ -2599,8 +3070,8 @@ function buildPackingLabelHTML(doc,type='inv'){
       <b>${esc(doc.customer)}</b><br>${esc(doc.phone||'-')}<br>${esc(ship.address||'-').replace(/\n/g,'<br>')}
     </div>
     <table>
-      <thead><tr><th>Item</th><th>Qty</th><th>QC</th></tr></thead>
-      <tbody>${(doc.items||[]).map(it=>`<tr><td>${esc(it.desc)}</td><td>${it.qty}</td><td class="box">&#9633;</td></tr>`).join('')}</tbody>
+      <thead><tr><th>Item</th><th>Ukuran</th><th>Qty</th><th>QC</th></tr></thead>
+      <tbody>${(doc.items||[]).map(it=>`<tr><td>${esc(it.desc)}</td><td>${esc(it.size||'-')}</td><td>${it.qty}</td><td class="box">&#9633;</td></tr>`).join('')}</tbody>
     </table>
     <div class="checks">
       <span>&#9633; Item lengkap</span><span>&#9633; QC rapi</span><span>&#9633; Packing aman</span><span>&#9633; Label ditempel</span>
@@ -2973,6 +3444,7 @@ function rSet(){
   document.getElementById('sad').value=s.address||'';
   document.getElementById('stp').value=s.telp||'';
   document.getElementById('sem').value=s.email||'';
+  document.getElementById('sig').value=s.instagram||'';
   document.getElementById('ssi').value=s.signer||'';
   document.getElementById('snp').value=s.npwp||'';
   document.getElementById('sbk').value=s.bank||'';
@@ -2998,7 +3470,7 @@ function saveSettings(){
   const d={
     name:document.getElementById('sn').value,tagline:document.getElementById('stg').value,
     address:document.getElementById('sad').value,telp:document.getElementById('stp').value,
-    email:document.getElementById('sem').value,signer:document.getElementById('ssi').value,
+    email:document.getElementById('sem').value,instagram:document.getElementById('sig').value,signer:document.getElementById('ssi').value,
     npwp:document.getElementById('snp').value,bank:document.getElementById('sbk').value,
     rekening:document.getElementById('srk').value,atasnama:document.getElementById('san').value,
     dp:Number(document.getElementById('sdp').value)||70,terms:document.getElementById('str').value
@@ -3016,17 +3488,25 @@ function printDoc(containerId){
 }
 
 function downloadPDF(type){
-  let doc=null,label='';
+  let doc=null,label='',html='';
   if(type==='inv'&&_curInvId){
     doc=DB.get('invoices').find(i=>i.id===_curInvId);
     label='Invoice';
+    if(doc)html=buildInvHTML(doc,'INVOICE');
   } else if(type==='po'&&_curPOId){
     doc=DB.get('pos').find(p=>p.id===_curPOId);
     label='PO';
+    if(doc)html=buildInvHTML(doc,'PURCHASE ORDER');
+  } else if(type==='spk'&&_curSPKId){
+    doc=DB.get('spk').find(s=>s.id===_curSPKId);
+    label='SPK';
+    if(doc)html=buildSPKHTML(doc);
+  } else if(type==='kwitansi'&&_curKwitansiId){
+    doc=DB.get('kwitansi').find(k=>k.id===_curKwitansiId);
+    label='Kwitansi';
+    if(doc)html=buildKwitansiHTML(doc);
   }
   if(!doc){toast('Dokumen tidak ditemukan','err');return;}
-  const docType=type==='inv'?'INVOICE':'PURCHASE ORDER';
-  const html=buildInvHTML(doc,docType);
   const ref=doc.ref||doc.id||'dokumen';
   const filename=`${label}-${ref}.pdf`;
   toast('Menyiapkan PDF...');
@@ -3367,7 +3847,7 @@ function emSt(ic,msg){
 function autoRef(pfx){
   const n=new Date();
   const ym=n.getFullYear()+String(n.getMonth()+1).padStart(2,'0');
-  const all=pfx==='INV'?DB.get('invoices'):pfx==='PO'?DB.get('pos'):DB.get('pembelian');
+  const all=pfx==='INV'?DB.get('invoices'):pfx==='PO'?DB.get('pos'):pfx==='SPK'?DB.get('spk'):pfx==='KW'?DB.get('kwitansi'):DB.get('pembelian');
   return`${pfx}/${ym}/${String(all.length+1).padStart(4,'0')}`;
 }
 
@@ -3535,39 +4015,75 @@ Checklist sebelum konfirmasi:
 Balas dengan *SELESAI* jika sudah oke.
 
 ${cfg.name||'Hulya Apparel'}`;
+  },
+
+  spk_kirim:(d)=>{
+    const cfg=DB.gO('settings');
+    const itemList=(d.items||[]).map((it,i)=>(i+1)+'. '+it.desc+(it.size?' (Ukuran: '+it.size+')':'')+' - *'+it.qty+' pcs*').join('\n');
+    return `*SURAT PERINTAH KERJA*
+${cfg.name||'Hulya Apparel'}
+
+No. SPK: ${d.ref}
+Mengacu Pada: ${d.sourceType==='invoice'?'Invoice':'PO'} ${d.sourceRef||'-'}
+Customer: ${d.customer}
+Target Selesai: ${d.due||'-'}
+${d.pic?'PIC Produksi: '+d.pic+'\n':''}
+*ITEM PRODUKSI:*
+${itemList}
+${d.notes?'\nInstruksi Kerja:\n'+d.notes+'\n':''}
+Mohon segera dikerjakan sesuai spesifikasi & target. Konfirmasi penerimaan SPK ini.
+
+${cfg.name||'Hulya Apparel'}`;
+  },
+
+  kwitansi_kirim:(d)=>{
+    const cfg=DB.gO('settings');
+    return `Halo ${d.customer},
+
+Terima kasih, pembayaran Anda sudah kami terima dan kwitansi sudah kami terbitkan.
+
+No. Kwitansi: ${d.ref}
+No. Invoice: ${d.invoiceRef||'-'}
+Jumlah: *${fRp(d.amount)}*
+Tanggal: ${d.date}
+
+Kwitansi ini adalah bukti sah pembayaran lunas. Simpan sebagai arsip Anda.
+
+Terima kasih sudah mempercayai kami.
+${cfg.name||'Hulya Apparel'}`;
   }
 };
 
 let _waDoc=null,_waType='inv',_waTmpl='konfirmasi';
 
+const WA_DOC_GETTERS={inv:()=>DB.get('invoices'),po:()=>DB.get('pos'),spk:()=>DB.get('spk'),kwitansi:()=>DB.get('kwitansi')};
+const WA_TAB_IDS=['wa-tabs-inv','wa-tabs-po','wa-tabs-spk','wa-tabs-kwitansi'];
+const WA_TAB_BY_TYPE={inv:'wa-tabs-inv',po:'wa-tabs-po',spk:'wa-tabs-spk',kwitansi:'wa-tabs-kwitansi'};
+const WA_DEFAULT_TMPL={inv:'konfirmasi',po:'po_instruksi',spk:'spk_kirim',kwitansi:'kwitansi_kirim'};
+
 function openWAModal(id,type){
   _waType=type;
-  const docs=type==='inv'?DB.get('invoices'):DB.get('pos');
+  const docs=(WA_DOC_GETTERS[type]||WA_DOC_GETTERS.inv)();
   _waDoc=docs.find(d=>d.id===id);
   if(!_waDoc)return;
   document.getElementById('wa-phone').value=_waDoc.phone||'';
   document.getElementById('wa-docid').value=id;
   document.getElementById('wa-doctype').value=type;
   // Switch tab sets based on type
-  const tabsInv=document.getElementById('wa-tabs-inv');
-  const tabsPO=document.getElementById('wa-tabs-po');
-  if(type==='po'){
-    tabsInv.classList.add('hide');
-    tabsPO.classList.remove('hide');
-    tabsPO.querySelectorAll('.ptbtn').forEach(b=>b.classList.remove('on'));
-    tabsPO.querySelector('.ptbtn').classList.add('on');
-    _waTmpl='po_instruksi';
-  }else{
-    tabsPO.classList.add('hide');
-    tabsInv.classList.remove('hide');
-    tabsInv.querySelectorAll('.ptbtn').forEach(b=>b.classList.remove('on'));
-    tabsInv.querySelector('.ptbtn').classList.add('on');
-    _waTmpl='konfirmasi';
-  }
+  const activeTabId=WA_TAB_BY_TYPE[type]||'wa-tabs-inv';
+  WA_TAB_IDS.forEach(tid=>{
+    const el=document.getElementById(tid);if(!el)return;
+    if(tid===activeTabId){
+      el.classList.remove('hide');
+      el.querySelectorAll('.ptbtn').forEach(b=>b.classList.remove('on'));
+      el.querySelector('.ptbtn')?.classList.add('on');
+    }else el.classList.add('hide');
+  });
+  _waTmpl=WA_DEFAULT_TMPL[type]||'konfirmasi';
   // Update dest info label
   const destEl=document.getElementById('wa-dest-info');
   if(destEl){
-    if(type==='po'){
+    if(type==='po'||type==='spk'){
       destEl.innerHTML=`<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>`+' Ke: <b>Tim Produksi</b>';
       document.getElementById('wa-send-btn').innerHTML=`<svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`+' Kirim ke Tim Produksi';
     }else{
@@ -3581,7 +4097,7 @@ function openWAModal(id,type){
 
 function setWATmpl(tmpl,btn){
   _waTmpl=tmpl;
-  const activeTabSet=_waType==='po'?'wa-tabs-po':'wa-tabs-inv';
+  const activeTabSet=WA_TAB_BY_TYPE[_waType]||'wa-tabs-inv';
   document.querySelectorAll('#'+activeTabSet+' .ptbtn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   renderWAPreview();
@@ -3601,9 +4117,9 @@ function getWAMsg(){
 function sendWA(){
   const phone=(document.getElementById('wa-phone').value||'').replace(/\D/g,'');
   const msg=getWAMsg();
-  const isPO=_waType==='po';
+  const isInternal=_waType==='po'||_waType==='spk';
   if(!phone){
-    toast(isPO?'Nomor HP tim produksi belum ada. Gunakan tombol Copy saja ya.':'Nomor HP customer tidak ada. Edit invoice/PO dulu ya.','err');
+    toast(isInternal?'Nomor HP tim produksi belum ada. Gunakan tombol Copy saja ya.':'Nomor HP customer tidak ada. Edit invoice/PO dulu ya.','err');
     return;
   }
   const url=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
@@ -3768,477 +4284,6 @@ function getBuktiCount(id,type){
   try{return JSON.parse(localStorage.getItem(getBuktiKey(id,type))||'[]').length}catch{return 0;}
 }
 
-//  FITUR 5b: BREAKDOWN UKURAN PER ITEM (Invoice & PO) - dipakai buat auto-isi SPK
-function itemSizePanelHTML(prefix,id,existingSizes){
-  existingSizes=existingSizes||{};
-  const inputs=SPK_SIZES.map(sz=>{
-    const v=existingSizes[sz]!==undefined&&existingSizes[sz]!==null&&existingSizes[sz]!==0?existingSizes[sz]:'';
-    return`<label style="display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--g500)">${sz}<input type="number" min="0" class="${prefix}-sz" data-size="${sz}" value="${v}" oninput="calcItemSizeHint('${prefix}',${id})" style="width:44px;padding:4px;text-align:center;border:1px solid var(--g300);border-radius:5px;font-size:12px"/></label>`;
-  }).join('');
-  return`<div class="ir-sizes hide" id="${prefix}-sizes-${id}" style="background:var(--g50);border:1px solid var(--g200);border-radius:8px;padding:10px 12px;margin:-4px 0 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
-    <span style="font-size:11px;font-weight:600;color:var(--g500);width:100%">Breakdown Ukuran (opsional, buat auto-isi SPK)</span>
-    ${inputs}
-    <span id="${prefix}-sz-hint-${id}" style="font-size:11px;color:var(--g500);width:100%"></span>
-  </div>`;
-}
-
-function toggleItemSizes(prefix,id){
-  const panel=document.getElementById(prefix+'-sizes-'+id);
-  if(!panel)return;
-  panel.classList.toggle('hide');
-  const btn=document.getElementById(prefix+'-sz-toggle-'+id);
-  if(btn)btn.textContent=panel.classList.contains('hide')?'+ Breakdown Ukuran':'- Sembunyikan Ukuran';
-  if(!panel.classList.contains('hide'))calcItemSizeHint(prefix,id);
-}
-
-function calcItemSizeHint(prefix,id){
-  const panel=document.getElementById(prefix+'-sizes-'+id);
-  if(!panel)return;
-  const total=SPK_SIZES.reduce((s,sz)=>s+Number(panel.querySelector(`[data-size="${sz}"]`)?.value||0),0);
-  const qtyEl=document.querySelector(`#${prefix}-${id} .${prefix==='ii'?'iiq':'piq'}`);
-  const qty=Number(qtyEl?.value||0);
-  const hint=document.getElementById(prefix+'-sz-hint-'+id);
-  if(!hint)return;
-  if(!qty){hint.innerHTML=`Total breakdown: <b>${total}</b>`;return;}
-  const diff=total-qty;
-  hint.innerHTML=`Total breakdown: <b>${total}</b> &nbsp;|&nbsp; Qty item: <b>${qty}</b> ${diff!==0?`<span style="color:${diff>0?'var(--yellow)':'var(--red)'}">(selisih ${diff>0?'+':''}${diff})</span>`:'<span style="color:var(--green)">(sesuai)</span>'}`;
-}
-
-function getItemSizesFromRow(prefix,id){
-  const panel=document.getElementById(prefix+'-sizes-'+id);
-  if(!panel)return null;
-  const sizes={};
-  let hasAny=false;
-  SPK_SIZES.forEach(sz=>{
-    const v=Number(panel.querySelector(`[data-size="${sz}"]`)?.value||0);
-    if(v>0)hasAny=true;
-    sizes[sz]=v;
-  });
-  return hasAny?sizes:null;
-}
-
-function aggregateItemSizes(items){
-  const agg={};
-  let has=false;
-  (items||[]).forEach(it=>{
-    if(!it.sizes)return;
-    SPK_SIZES.forEach(sz=>{
-      const v=Number(it.sizes[sz]||0);
-      if(v>0){has=true;agg[sz]=(agg[sz]||0)+v;}
-    });
-  });
-  return has?agg:null;
-}
-
-function toSPKSizesShape(aggSizes){
-  const out={};
-  SPK_SIZES.forEach(sz=>{
-    out[sz]={qty:aggSizes[sz]||0,lebar:SPK_SIZE_DEFAULTS[sz].lebar,panjang:SPK_SIZE_DEFAULTS[sz].panjang};
-  });
-  return out;
-}
-
-//  FITUR 5: SPK (SURAT PERINTAH KERJA) - generate langsung dari Invoice / PO
-const SPK_SIZES=['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
-const SPK_SIZE_DEFAULTS={
-  XS:{lebar:44,panjang:66},S:{lebar:47,panjang:69},M:{lebar:50,panjang:72},
-  L:{lebar:53,panjang:75},XL:{lebar:56,panjang:78},'2XL':{lebar:59,panjang:81},
-  '3XL':{lebar:62,panjang:84},'4XL':{lebar:65,panjang:87},'5XL':{lebar:68,panjang:90}
-};
-let _curSPKKey=null,_spkMockups={depan:'',belakang:''},_spkSourceQty=0;
-
-function idDate(d){
-  if(!d)return'';
-  const dt=new Date(d);
-  if(isNaN(dt))return d;
-  return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-}
-
-function nextSPKNo(){
-  const all=DB.gO('spk');
-  return String(Object.keys(all).length+1).padStart(4,'0');
-}
-
-function getSPKMockupKey(sourceType,sourceId){return`spk_mock_${sourceType}_${sourceId}`;}
-function loadSPKMockups(sourceType,sourceId){
-  try{return JSON.parse(localStorage.getItem(getSPKMockupKey(sourceType,sourceId))||'{}')}catch{return{};}
-}
-function saveSPKMockups(sourceType,sourceId,mockups){
-  localStorage.setItem(getSPKMockupKey(sourceType,sourceId),JSON.stringify(mockups));
-}
-
-function showSPKMockupPreview(side,data){
-  const el=document.getElementById('spk-mock-'+side+'-preview');
-  if(!el)return;
-  el.innerHTML=data?`<img src="${data}" style="max-width:100%;max-height:100%;object-fit:contain"/>`:'<span style="font-size:11px;color:var(--g500);text-align:center">Belum ada<br>gambar</span>';
-}
-
-function handleSPKMockupUpload(e,side){
-  const file=e.target.files[0];if(!file)return;
-  if(file.size>819200){toast('Gambar terlalu besar. Maks 800KB','err');e.target.value='';return;}
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    _spkMockups[side]=ev.target.result;
-    showSPKMockupPreview(side,ev.target.result);
-  };
-  reader.readAsDataURL(file);
-  e.target.value='';
-}
-
-function removeSPKMockup(side){
-  _spkMockups[side]='';
-  showSPKMockupPreview(side,'');
-}
-
-function renderSPKSizeTable(sizes){
-  sizes=sizes||{};
-  document.getElementById('spk-sizes-body').innerHTML=SPK_SIZES.map(sz=>{
-    const d=sizes[sz]||{};
-    const def=SPK_SIZE_DEFAULTS[sz];
-    const qty=d.qty!==undefined&&d.qty!==null?d.qty:'';
-    const lebar=d.lebar!==undefined&&d.lebar!==null?d.lebar:def.lebar;
-    const panjang=d.panjang!==undefined&&d.panjang!==null?d.panjang:def.panjang;
-    return`<tr>
-      <td style="padding:5px 8px;border:1px solid var(--g200);font-weight:600;text-align:center">${sz}</td>
-      <td style="padding:3px;border:1px solid var(--g200)"><input type="number" min="0" id="spk-qty-${sz}" value="${qty}" oninput="updateSPKQtyHint()" style="width:100%;padding:5px 6px;text-align:center;border:1px solid var(--g300);border-radius:5px"/></td>
-      <td style="padding:3px;border:1px solid var(--g200)"><input type="number" min="0" id="spk-lebar-${sz}" value="${lebar}" style="width:100%;padding:5px 6px;text-align:center;border:1px solid var(--g300);border-radius:5px"/></td>
-      <td style="padding:3px;border:1px solid var(--g200)"><input type="number" min="0" id="spk-panjang-${sz}" value="${panjang}" style="width:100%;padding:5px 6px;text-align:center;border:1px solid var(--g300);border-radius:5px"/></td>
-    </tr>`;
-  }).join('');
-  updateSPKQtyHint();
-}
-
-function updateSPKQtyHint(){
-  const hint=document.getElementById('spk-qty-hint');
-  if(!hint)return;
-  const total=SPK_SIZES.reduce((s,sz)=>s+Number(document.getElementById('spk-qty-'+sz)?.value||0),0);
-  if(!_spkSourceQty){hint.innerHTML=`Total: <b>${total} pcs</b>`;return;}
-  const diff=total-_spkSourceQty;
-  hint.innerHTML=`Total: <b>${total} pcs</b> &nbsp;|&nbsp; Qty di dokumen sumber: <b>${_spkSourceQty} pcs</b> ${diff!==0?`<span style="color:${diff>0?'var(--yellow)':'var(--red)'}">(selisih ${diff>0?'+':''}${diff})</span>`:'<span style="color:var(--green)">(sesuai)</span>'}`;
-}
-
-function getSPKSizesFromForm(){
-  const sizes={};
-  SPK_SIZES.forEach(sz=>{
-    sizes[sz]={
-      qty:Number(document.getElementById('spk-qty-'+sz)?.value||0),
-      lebar:Number(document.getElementById('spk-lebar-'+sz)?.value||0),
-      panjang:Number(document.getElementById('spk-panjang-'+sz)?.value||0)
-    };
-  });
-  return sizes;
-}
-
-function openSPKModal(id,type){
-  const doc=(type==='inv'?DB.get('invoices'):DB.get('pos')).find(d=>d.id===id);
-  if(!doc){toast('Dokumen tidak ditemukan','err');return;}
-  const key=type+'_'+id;
-  _curSPKKey=key;
-  const existing=DB.gO('spk')[key];
-  document.getElementById('spk-sourcetype').value=type;
-  document.getElementById('spk-sourceid').value=id;
-  document.getElementById('spkmtt').textContent=existing?'Edit SPK':'Buat SPK (Surat Perintah Kerja)';
-  document.getElementById('spk-info').innerHTML=`<b>${esc(doc.customer)}</b> &nbsp;-&nbsp; ${esc(doc.ref)} <span style="color:var(--g500)">(${type==='inv'?'Invoice':'PO'})</span><br><span style="color:var(--g500)">${(doc.items||[]).length} item &nbsp;-&nbsp; ${fRp(doc.total)}</span>`;
-  document.getElementById('spk-no').value=existing?existing.no:'(otomatis saat disimpan)';
-  document.getElementById('spk-tgl').value=existing?existing.date:td();
-  document.getElementById('spk-cs').value=existing?existing.csName:(doc.customer||'');
-  document.getElementById('spk-file').value=existing?existing.fileName:(doc.items||[]).map(it=>it.desc).filter(Boolean).join(', ');
-  document.getElementById('spk-bahan').value=existing?existing.bahan:'';
-  document.getElementById('spk-design').value=existing?existing.designNotes:'';
-  document.getElementById('spk-note').value=existing?existing.note:(type==='po'&&doc.due?('Deadline '+idDate(doc.due)):'');
-  _spkSourceQty=(doc.items||[]).reduce((s,it)=>s+Number(it.qty||0),0);
-  const aggSizes=aggregateItemSizes(doc.items);
-  renderSPKSizeTable(existing?existing.sizes:(aggSizes?toSPKSizesShape(aggSizes):{}));
-  if(!existing&&aggSizes){
-    document.getElementById('spk-info').innerHTML+=`<div style="margin-top:6px;color:var(--green);font-weight:600">Ukuran otomatis terisi dari breakdown item ${type==='inv'?'Invoice':'PO'} - cek ulang sebelum simpan.</div>`;
-  }
-  const mocks=loadSPKMockups(type,id);
-  _spkMockups={depan:mocks.depan||'',belakang:mocks.belakang||''};
-  showSPKMockupPreview('depan',_spkMockups.depan);
-  showSPKMockupPreview('belakang',_spkMockups.belakang);
-  openM('spkm');
-}
-
-function openSPKFromPreview(type){
-  if(type==='inv'&&_curInvId){closeM('pvim');openSPKModal(_curInvId,'inv');}
-  else if(type==='po'&&_curPOId){closeM('pvpm');openSPKModal(_curPOId,'po');}
-}
-
-function saveSPKAndPreview(){
-  const type=document.getElementById('spk-sourcetype').value;
-  const id=document.getElementById('spk-sourceid').value;
-  const doc=type&&id?(type==='inv'?DB.get('invoices'):DB.get('pos')).find(d=>d.id===id):null;
-  if(!doc){toast('Dokumen sumber tidak ditemukan','err');return;}
-  const fileName=document.getElementById('spk-file').value.trim();
-  if(!fileName){toast('Nama File wajib diisi','err');return;}
-  const key=type+'_'+id;
-  const all=DB.gO('spk');
-  const existing=all[key];
-  const record={
-    no:existing?existing.no:nextSPKNo(),
-    sourceType:type,
-    sourceId:id,
-    sourceRef:doc.ref,
-    date:document.getElementById('spk-tgl').value||td(),
-    csName:document.getElementById('spk-cs').value.trim(),
-    fileName,
-    bahan:document.getElementById('spk-bahan').value.trim(),
-    sizes:getSPKSizesFromForm(),
-    designNotes:document.getElementById('spk-design').value,
-    note:document.getElementById('spk-note').value,
-    createdAt:existing?existing.createdAt:new Date().toISOString(),
-    updatedAt:new Date().toISOString()
-  };
-  DB.sO('spk',{...all,[key]:record});
-  saveSPKMockups(type,id,_spkMockups);
-  _curSPKKey=key;
-  document.getElementById('pvskb').innerHTML=buildSPKHTML(record,doc);
-  closeM('spkm');
-  openM('pvskm');
-  toast('SPK berhasil disimpan');
-}
-
-function editSPKFromPreview(){
-  if(!_curSPKKey)return;
-  const rec=DB.gO('spk')[_curSPKKey];
-  if(!rec)return;
-  closeM('pvskm');
-  openSPKModal(rec.sourceId,rec.sourceType);
-}
-
-function buildSPKHTML(spk,doc){
-  const cfg=DB.gO('settings');
-  const cn=cfg.name||'Hulya Apparel';
-  const ca=cfg.address||'';
-  const ct=cfg.telp||'';
-  const ce=cfg.email||'';
-  const logoData=localStorage.getItem('h_logo')||'';
-  const mocks=loadSPKMockups(spk.sourceType,spk.sourceId);
-  const sizeRows=SPK_SIZES.map(sz=>{
-    const d=(spk.sizes||{})[sz]||{};
-    return`<tr>
-      <td style="padding:7px 10px;border:1px solid #1A1A1A;text-align:center;font-weight:600">${sz}</td>
-      <td style="padding:7px 4px;border:1px solid #1A1A1A;text-align:center">:</td>
-      <td style="padding:7px 10px;border:1px solid #1A1A1A;text-align:center;font-weight:700">${d.qty?d.qty+' Pcs':'-  Pcs'}</td>
-      <td style="padding:7px 10px;border:1px solid #1A1A1A;text-align:center">${d.lebar||0} CM</td>
-      <td style="padding:7px 10px;border:1px solid #1A1A1A;text-align:center">${d.panjang||0} CM</td>
-    </tr>`;
-  }).join('');
-  const mockBox=(label,data)=>`
-    <td style="width:50%;padding:14px;border:1px solid #1A1A1A;text-align:center;vertical-align:top">
-      <div style="font-weight:700;font-size:12px;color:#374151;margin-bottom:8px">${label}</div>
-      ${data?`<img src="${data}" style="max-width:100%;max-height:260px;object-fit:contain"/>`:'<div style="height:120px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:12px">Belum ada gambar</div>'}
-    </td>`;
-  return`<div style="font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;padding:20px;border:1px solid #E5E7EB;border-radius:8px">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
-      ${logoData?`<img src="${logoData}" style="max-height:60px;max-width:160px;object-fit:contain"/>`:`<div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--navy)">${esc(cn)}</div>`}
-    </div>
-    <table style="width:100%;border-collapse:collapse;border:2px solid #1A1A1A;font-size:13px">
-      <tr><td colspan="5" style="text-align:center;font-weight:800;font-size:16px;letter-spacing:2px;padding:10px;border-bottom:2px solid #1A1A1A;background:#F8FAFD">SURAT PERINTAH KERJA</td></tr>
-      <tr>
-        <td style="width:110px;padding:6px 10px;border-bottom:1px solid #E5E7EB">NO</td>
-        <td style="width:14px;padding:6px 0;border-bottom:1px solid #E5E7EB">:</td>
-        <td colspan="3" style="padding:6px 10px;border-bottom:1px solid #E5E7EB;font-weight:700">${esc(spk.no)}</td>
-      </tr>
-      <tr>
-        <td style="padding:6px 10px;border-bottom:1px solid #E5E7EB">TGL</td>
-        <td style="padding:6px 0;border-bottom:1px solid #E5E7EB">:</td>
-        <td colspan="3" style="padding:6px 10px;border-bottom:1px solid #E5E7EB">${spk.date}</td>
-      </tr>
-      <tr>
-        <td style="padding:6px 10px;border-bottom:1px solid #E5E7EB">NAMA CS</td>
-        <td style="padding:6px 0;border-bottom:1px solid #E5E7EB">:</td>
-        <td colspan="3" style="padding:6px 10px;border-bottom:1px solid #E5E7EB">${esc(spk.csName||'-')}</td>
-      </tr>
-      <tr>
-        <td style="padding:6px 10px;border-bottom:1px solid #E5E7EB">NAMA FILE</td>
-        <td style="padding:6px 0;border-bottom:1px solid #E5E7EB">:</td>
-        <td colspan="3" style="padding:6px 10px;border-bottom:1px solid #E5E7EB;font-weight:700">${esc(spk.fileName||'-')}</td>
-      </tr>
-      <tr>
-        <td style="padding:6px 10px;border-bottom:2px solid #1A1A1A">BAHAN</td>
-        <td style="padding:6px 0;border-bottom:2px solid #1A1A1A">:</td>
-        <td colspan="3" style="padding:6px 10px;border-bottom:2px solid #1A1A1A">${esc(spk.bahan||'-')}</td>
-      </tr>
-      <tr style="background:#F8FAFD">
-        <td colspan="3" style="padding:6px 10px;border-bottom:1px solid #1A1A1A;font-weight:700">RINCIAN SIZE</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #1A1A1A;border-left:1px solid #1A1A1A;text-align:center;font-weight:700">LEBAR</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #1A1A1A;text-align:center;font-weight:700">PANJANG</td>
-      </tr>
-      ${sizeRows}
-      <tr><td colspan="5" style="padding:10px;font-weight:700;text-align:center;background:#F8FAFD;border-top:2px solid #1A1A1A;border-bottom:1px solid #1A1A1A">MOKUP</td></tr>
-      <tr>${mockBox('DEPAN',mocks.depan)}${mockBox('BELAKANG',mocks.belakang)}</tr>
-      <tr>
-        <td style="padding:10px;vertical-align:top;font-weight:700;border-top:2px solid #1A1A1A">Rincian Design</td>
-        <td style="padding:10px 0;vertical-align:top;border-top:2px solid #1A1A1A">:</td>
-        <td colspan="3" style="padding:10px;vertical-align:top;border-top:2px solid #1A1A1A;line-height:1.7">${esc(spk.designNotes||'-').replace(/\n/g,'<br>')}</td>
-      </tr>
-      <tr>
-        <td style="padding:10px;vertical-align:top;font-weight:700;color:#DC2626;border-top:1px solid #1A1A1A">Note</td>
-        <td style="padding:10px 0;vertical-align:top;color:#DC2626;border-top:1px solid #1A1A1A">:</td>
-        <td colspan="3" style="padding:10px;vertical-align:top;color:#DC2626;font-weight:700;border-top:1px solid #1A1A1A">${esc(spk.note||'-')}</td>
-      </tr>
-    </table>
-    <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:11px;color:#4B5563;flex-wrap:wrap;gap:8px">
-      <span>${esc(ct)}</span>
-      <span style="font-weight:700">${esc(cn)}</span>
-      <span>${esc(ca).replace(/\n/g,', ')}</span>
-    </div>
-  </div>`;
-}
-
-function printSPKDoc(){
-  const el=document.getElementById('pvskb');
-  if(!el)return;
-  const rec=_curSPKKey?DB.gO('spk')[_curSPKKey]:null;
-  printDocContent(el.innerHTML,'SPK '+(rec?rec.no:''));
-}
-
-function downloadSPKPDF(){
-  if(!_curSPKKey){toast('SPK belum disimpan','err');return;}
-  const rec=DB.gO('spk')[_curSPKKey];
-  if(!rec){toast('SPK tidak ditemukan','err');return;}
-  const doc=(rec.sourceType==='inv'?DB.get('invoices'):DB.get('pos')).find(d=>d.id===rec.sourceId)||{};
-  const html=buildSPKHTML(rec,doc);
-  const filename=`SPK-${rec.no}-${(rec.fileName||rec.sourceRef||'dokumen')}.pdf`.replace(/[\\/:*?"<>|]/g,'-');
-  toast('Menyiapkan PDF...');
-  const styleUrl='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap';
-  const wrapper=document.createElement('div');
-  wrapper.style.cssText='position:fixed;left:-9999px;top:-9999px;width:794px;background:#fff;';
-  wrapper.innerHTML=`<style>@import url('${styleUrl}');:root{--navy:#1B2A4A;--g500:#6B7280;--g200:#E5E7EB;--yellow:#D97706;--green:#16A34A;--red:#DC2626}*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body,div{font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff}</style>${html}`;
-  document.body.appendChild(wrapper);
-  const opt={
-    margin:[8,8,8,8],
-    filename,
-    image:{type:'jpeg',quality:0.97},
-    html2canvas:{scale:2,useCORS:true,logging:false,backgroundColor:'#fff'},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  };
-  html2pdf().set(opt).from(wrapper).save().then(()=>{
-    document.body.removeChild(wrapper);
-    toast('PDF SPK berhasil didownload');
-  }).catch(err=>{
-    document.body.removeChild(wrapper);
-    toast('Gagal download PDF: '+err.message,'err');
-  });
-}
-
-//  FITUR 6: KWITANSI - generate otomatis saat invoice berstatus Lunas
-let _curKwitansiId=null;
-
-function terbilang(n){
-  n=Math.floor(Math.abs(Number(n)||0));
-  if(n===0)return'nol';
-  const satuan=['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
-  function t(x){
-    if(x<12)return satuan[x];
-    if(x<20)return t(x-10)+' belas';
-    if(x<100)return t(Math.floor(x/10))+' puluh'+(x%10!==0?' '+t(x%10):'');
-    if(x<200)return'seratus'+(x%100!==0?' '+t(x%100):'');
-    if(x<1000)return t(Math.floor(x/100))+' ratus'+(x%100!==0?' '+t(x%100):'');
-    if(x<2000)return'seribu'+(x%1000!==0?' '+t(x%1000):'');
-    if(x<1000000)return t(Math.floor(x/1000))+' ribu'+(x%1000!==0?' '+t(x%1000):'');
-    if(x<1000000000)return t(Math.floor(x/1000000))+' juta'+(x%1000000!==0?' '+t(x%1000000):'');
-    if(x<1000000000000)return t(Math.floor(x/1000000000))+' miliar'+(x%1000000000!==0?' '+t(x%1000000000):'');
-    return t(Math.floor(x/1000000000000))+' triliun'+(x%1000000000000!==0?' '+t(x%1000000000000):'');
-  }
-  const words=t(n).trim().replace(/\s+/g,' ');
-  return words.charAt(0).toUpperCase()+words.slice(1);
-}
-
-function buildKwitansiHTML(inv){
-  const cfg=DB.gO('settings');
-  const cn=cfg.name||'Hulya Apparel';
-  const ca=cfg.address||'';
-  const ct=cfg.telp||'';
-  const ce=cfg.email||'';
-  const sg=cfg.signer||'';
-  const logoData=localStorage.getItem('h_logo')||'';
-  const ttdData=localStorage.getItem('h_ttd')||'';
-  const noKwitansi=(inv.ref||'').replace(/^INV/i,'KWT');
-  const itemDesc=(inv.items||[]).map(it=>it.desc).filter(Boolean).join(', ');
-  const today=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-  return`<div style="font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;padding:30px;border:1px solid #E5E7EB;border-radius:8px;max-width:620px;margin:0 auto">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;gap:14px">
-      <div style="flex:1">
-        ${logoData?`<img src="${logoData}" style="max-height:60px;max-width:160px;object-fit:contain;display:block;margin-bottom:8px"/>`:`<div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--navy)">${esc(cn)}</div>`}
-        <div style="font-size:11px;color:#4B5563;line-height:1.6;max-width:240px">${esc(ca).replace(/\n/g,'<br>')}${ct?'<br>Telp: '+esc(ct):''}${ce?'<br>Email: '+esc(ce):''}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;letter-spacing:1px;color:var(--navy)">KWITANSI</div>
-        <div style="font-size:12px;color:#6B7280;margin-top:6px">No: <b style="color:#1A1A1A">${esc(noKwitansi)}</b></div>
-        <div style="font-size:12px;color:#6B7280">Tanggal: <b style="color:#1A1A1A">${today}</b></div>
-      </div>
-    </div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:18px">
-      <tr><td style="padding:8px 0;color:#6B7280;width:150px;vertical-align:top">Sudah terima dari</td><td style="padding:8px 4px;vertical-align:top">:</td><td style="padding:8px 0;font-weight:700">${esc(inv.customer)}</td></tr>
-      <tr><td style="padding:8px 0;color:#6B7280;vertical-align:top">Uang sejumlah</td><td style="padding:8px 4px;vertical-align:top">:</td><td style="padding:8px 0;font-weight:700;font-style:italic">${terbilang(inv.total)} Rupiah</td></tr>
-      <tr><td style="padding:8px 0;color:#6B7280;vertical-align:top">Untuk pembayaran</td><td style="padding:8px 4px;vertical-align:top">:</td><td style="padding:8px 0">Pelunasan Invoice ${esc(inv.ref)}${itemDesc?' - '+esc(itemDesc):''}</td></tr>
-    </table>
-    <div style="display:flex;justify-content:flex-end;margin-bottom:26px">
-      <div style="border:2px solid #1A1A1A;border-radius:8px;padding:14px 24px;font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--navy)">Rp ${Number(inv.total||0).toLocaleString('id-ID')}</div>
-    </div>
-    <div style="display:flex;justify-content:flex-end">
-      <div style="text-align:center;min-width:160px">
-        <div style="font-size:12px;color:#4B5563;margin-bottom:4px">${today}</div>
-        <div style="height:60px;display:flex;align-items:center;justify-content:center;margin-bottom:4px">
-          ${ttdData?`<img src="${ttdData}" style="max-height:60px;max-width:130px;object-fit:contain"/>`:''}
-        </div>
-        <div style="border-bottom:1px solid #1A1A1A;width:140px;margin:0 auto 6px"></div>
-        <div style="font-weight:700;font-size:13px">${esc(sg)}</div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function prevKwitansi(id){
-  const inv=DB.get('invoices').find(i=>i.id===id);
-  if(!inv){toast('Invoice tidak ditemukan','err');return;}
-  if(inv.status!=='lunas'){toast('Kwitansi hanya bisa dibuat untuk invoice berstatus Lunas','err');return;}
-  _curKwitansiId=id;
-  document.getElementById('pvkb').innerHTML=buildKwitansiHTML(inv);
-  openM('pvkm');
-}
-
-function openKwitansiFromPreview(){
-  if(_curInvId){closeM('pvim');prevKwitansi(_curInvId);}
-}
-
-function printKwitansiDoc(){
-  const el=document.getElementById('pvkb');
-  if(!el)return;
-  const inv=_curKwitansiId?DB.get('invoices').find(i=>i.id===_curKwitansiId):null;
-  printDocContent(el.innerHTML,'Kwitansi '+(inv?inv.ref:''));
-}
-
-function downloadKwitansiPDF(){
-  if(!_curKwitansiId){toast('Kwitansi tidak ditemukan','err');return;}
-  const inv=DB.get('invoices').find(i=>i.id===_curKwitansiId);
-  if(!inv){toast('Invoice tidak ditemukan','err');return;}
-  const html=buildKwitansiHTML(inv);
-  const filename=`Kwitansi-${inv.ref}.pdf`.replace(/[\\/:*?"<>|]/g,'-');
-  toast('Menyiapkan PDF...');
-  const styleUrl='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap';
-  const wrapper=document.createElement('div');
-  wrapper.style.cssText='position:fixed;left:-9999px;top:-9999px;width:700px;background:#fff;';
-  wrapper.innerHTML=`<style>@import url('${styleUrl}');:root{--navy:#1B2A4A}*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body,div{font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff}</style>${html}`;
-  document.body.appendChild(wrapper);
-  const opt={
-    margin:[10,10,10,10],
-    filename,
-    image:{type:'jpeg',quality:0.97},
-    html2canvas:{scale:2,useCORS:true,logging:false,backgroundColor:'#fff'},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  };
-  html2pdf().set(opt).from(wrapper).save().then(()=>{
-    document.body.removeChild(wrapper);
-    toast('PDF Kwitansi berhasil didownload');
-  }).catch(err=>{
-    document.body.removeChild(wrapper);
-    toast('Gagal download PDF: '+err.message,'err');
-  });
-}
-
 // Refresh all open product dropdowns when stok changes
 function refreshItemDropdowns(){
   ['iitems','pitems'].forEach(containerId=>{
@@ -4255,7 +4300,6 @@ function refreshItemDropdowns(){
 
 //  APP INIT  -  Load Firebase then render
 async function initApp() {
-  if (_fbInitFailed) return; // biarkan pesan error + tombol Coba Lagi tetap tampil
   try {
     await loadFromFirestore();
     setupRealtimeSync();
