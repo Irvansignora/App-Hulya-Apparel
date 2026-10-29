@@ -1287,16 +1287,86 @@ const COLLECTIONS = ['invoices','pos','spk','kwitansi','stok','pembelian','pembu
 const OBJECTS = ['settings','produksi'];
 const ALL_KEYS = [...COLLECTIONS, ...OBJECTS];
 
+// key -> true setelah data key tsb BERHASIL dibaca dari server.
+// Selama belum true, penulisan ke key itu diblokir supaya cache kosong tidak menimpa data server.
+const _loaded = {};
+const WRITE_TIMEOUT_MS = 15000;
+const MAX_DOC_BYTES = 900000;   // batas Firestore 1 MiB per dokumen, sisakan ruang aman
+
+function _bytes(v){ try{ return new TextEncoder().encode(JSON.stringify(v)).length; }catch(e){ return 0; } }
+function _withTimeout(p, ms, msg){
+  let t;
+  const to = new Promise((_, rej)=>{ t=setTimeout(()=>{ const e=new Error(msg||'Timeout'); e.code='timeout'; rej(e); }, ms); });
+  return Promise.race([p, to]).finally(()=>clearTimeout(t));
+}
+function _errMsg(e){
+  const c=(e&&e.code)||'';
+  if(c==='permission-denied') return 'akses ditolak server (cek Firestore Rules)';
+  if(c==='unavailable') return 'tidak ada koneksi ke server';
+  if(c==='timeout') return 'koneksi lambat, perubahan belum terkonfirmasi server. Cek internet lalu coba lagi';
+  if(c==='resource-exhausted'||c==='invalid-argument') return 'data terlalu besar atau tidak valid (batas 1 MB per dokumen)';
+  return (e&&e.message)||String(e);
+}
+
 const DB = {
   get(k) { return Array.isArray(_cache[k]) ? _cache[k] : []; },
-  set(k, v) {
-    _cache[k] = v;
-    firestore.collection('app').doc(k).set({ data: v }).catch(e => console.error('Firestore write error:', k, e));
-  },
   gO(k) { return _cache[k] || {}; },
-  sO(k, v) {
+
+  // Tulis seluruh nilai satu key. Mengembalikan Promise<boolean>.
+  // Error TIDAK lagi disembunyikan: user dapat toast merah dan cache dikembalikan.
+  async set(k, v) {
+    if (!_loaded[k]) {
+      toast('Data "'+k+'" belum berhasil dimuat dari server. Muat ulang halaman, lalu coba lagi.', 'err');
+      return false;
+    }
+    if (_bytes(v) > MAX_DOC_BYTES) {
+      toast('Data "'+k+'" terlalu besar untuk disimpan (batas 1 MB). Kurangi data/gambar.', 'err');
+      return false;
+    }
+    const prev = _cache[k];
     _cache[k] = v;
-    firestore.collection('app').doc(k).set({ data: v }).catch(e => console.error('Firestore write error:', k, e));
+    try {
+      await _withTimeout(firestore.collection('app').doc(k).set({ data: v }), WRITE_TIMEOUT_MS);
+      return true;
+    } catch (e) {
+      console.error('Firestore write error:', k, e);
+      if (_cache[k] === v) _cache[k] = prev;
+      toast('Gagal menyimpan: ' + _errMsg(e), 'err');
+      try { onDataSync(); } catch (_) {}
+      return false;
+    }
+  },
+  sO(k, v) { return DB.set(k, v); },
+
+  // Ubah array berdasarkan data TERBARU di server (transaksi), bukan cache lokal.
+  // fn(arrayTerbaru) harus mengembalikan array baru (boleh throw Error untuk membatalkan).
+  // Mencegah dua user saling menimpa dan mencegah cache kosong menimpa server.
+  async mutate(k, fn, opts) {
+    opts = opts || {};
+    try {
+      const ref = firestore.collection('app').doc(k);
+      const result = await _withTimeout(firestore.runTransaction(async tx => {
+        const snap = await tx.get(ref);
+        const d = snap.exists ? snap.data() : null;
+        const cur = (d && Array.isArray(d.data)) ? d.data.slice() : [];
+        const next = fn(cur);
+        if (!Array.isArray(next)) throw new Error('Hasil perubahan tidak valid');
+        if (_bytes(next) > MAX_DOC_BYTES) {
+          const e = new Error('Data "'+k+'" terlalu besar (batas 1 MB per dokumen). Hapus data lama atau perkecil gambar.');
+          e.code = 'too-large';
+          throw e;
+        }
+        tx.set(ref, { data: next });
+        return next;
+      }), WRITE_TIMEOUT_MS);
+      _cache[k] = result;
+      _loaded[k] = true;
+      return { ok: true, data: result };
+    } catch (e) {
+      console.error('Firestore mutate error:', k, e);
+      if (!opts.silent) toast('Gagal menyimpan: ' + _errMsg(e), 'err');
+      return { ok: false, error: e };
+    }
   }
 };
 
@@ -1313,6 +1383,7 @@ async function loadFromFirestore() {
         if (COLLECTIONS.includes(key) && !Array.isArray(val)) val = [];
         _cache[key] = val;
       }
+      _loaded[key] = true;   // berhasil baca dari server (doc kosong = memang belum ada data)
     });
     await Promise.race([Promise.all(promises), timeout]);
   } catch (e) {
@@ -1325,6 +1396,7 @@ async function loadFromFirestore() {
 function setupRealtimeSync() {
   ALL_KEYS.forEach(key => {
     firestore.collection('app').doc(key).onSnapshot(doc => {
+      if (!doc.metadata.fromCache) _loaded[key] = true;
       if (doc.exists && doc.data()?.data !== undefined) {
         const newData = doc.data().data;
         const oldJSON = JSON.stringify(_cache[key]);
@@ -2590,43 +2662,83 @@ function bestProdNotes(sourceType,sourceId,doc){
   return linkedPO?.notes||'';
 }
 
-function genSPK(sourceType,sourceId){
+// ---- Mockup SPK disimpan di dokumen terpisah (app/spkmock_<id>_<side>) supaya dokumen "spk" tidak membengkak ----
+const _mockCache={};
+const mockDocId=(id,side)=>'spkmock_'+id+'_'+side;
+const mockVer=(spk,side)=>side==='front'?spk.mockFront:spk.mockBack;
+// return: string data URL ('' kalau tidak ada) atau null kalau gagal dimuat
+async function getMock(spk,side){
+  const inline=side==='front'?spk.mockupFront:spk.mockupBack;   // data lama (belum dimigrasi)
+  if(inline)return inline;
+  const ver=mockVer(spk,side);
+  if(!ver)return '';
+  const key=spk.id+'_'+side+'_'+ver;
+  if(_mockCache[key]!==undefined)return _mockCache[key];
+  try{
+    const d=await firestore.collection('app').doc(mockDocId(spk.id,side)).get();
+    const v=d.exists?(d.data().data||''):'';
+    _mockCache[key]=v;
+    return v;
+  }catch(e){console.error('Gagal muat mockup',e);return null;}
+}
+async function loadSPKMockups(spk){
+  const [f,b]=await Promise.all([getMock(spk,'front'),getMock(spk,'back')]);
+  if(f===null||b===null)toast('Sebagian gambar mockup gagal dimuat','err');
+  return {front:f||'',back:b||''};
+}
+function spkWithMockCached(doc){
+  const pick=(side,inline)=>inline||_mockCache[doc.id+'_'+side+'_'+mockVer(doc,side)]||'';
+  return {...doc,mockupFront:pick('front',doc.mockupFront),mockupBack:pick('back',doc.mockupBack)};
+}
+
+let _spkBusy=false;
+async function genSPK(sourceType,sourceId){
   if(!sourceId){toast('Dokumen sumber tidak ditemukan','err');return;}
   const doc=findSPKSource(sourceType,sourceId);
   if(!doc){toast('Dokumen sumber tidak ditemukan','err');return;}
   if(!(doc.items||[]).some(it=>it.desc)){toast('Dokumen ini belum punya item produk','err');return;}
-  let all=DB.get('spk');
-  const exists=all.find(s=>s.sourceType===sourceType&&s.sourceId===sourceId);
-  const data={
-    id:exists?exists.id:uid(),
-    ref:exists?exists.ref:autoRef('SPK'),
-    sourceType,sourceId,sourceRef:doc.ref,
-    customer:doc.customer,phone:doc.phone||'',
-    date:exists?exists.date:td(),
-    due:exists&&exists.due?exists.due:(doc.due||''),
-    items:(doc.items||[]).map(it=>({...it})),
-    total:doc.total||0,
-    pic:exists?.pic||'',
-    notes:exists?.notes!==undefined?exists.notes:bestProdNotes(sourceType,sourceId,doc),
-    status:exists?.status||'pending',
-    namaFile:exists?.namaFile!==undefined?exists.namaFile:((doc.items||[])[0]?.desc||''),
-    bahan:exists?.bahan||'',
-    mockupFront:exists?.mockupFront||'',
-    mockupBack:exists?.mockupBack||'',
-    sizeChart:exists?.sizeChart&&exists.sizeChart.length?exists.sizeChart:computeDefaultSizeChart(doc.items||[])
-  };
-  all=exists?all.map(s=>s.id===exists.id?data:s):[...all,data];
-  DB.set('spk',all);
+  if(_spkBusy)return;
+  _spkBusy=true;
+  let outId=null,existed=false;
+  try{
+    const res=await DB.mutate('spk',all=>{
+      const exists=all.find(s=>s.sourceType===sourceType&&s.sourceId===sourceId);
+      existed=!!exists;
+      const data={
+        ...(exists||{}),   // pertahankan field lain (mockup, dll)
+        id:exists?exists.id:uid(),
+        ref:exists?exists.ref:autoRef('SPK',all),
+        sourceType,sourceId,sourceRef:doc.ref,
+        customer:doc.customer,phone:doc.phone||'',
+        date:exists?exists.date:td(),
+        due:exists&&exists.due?exists.due:(doc.due||''),
+        items:(doc.items||[]).map(it=>({...it})),
+        total:doc.total||0,
+        pic:exists?.pic||'',
+        notes:exists?.notes!==undefined?exists.notes:bestProdNotes(sourceType,sourceId,doc),
+        status:exists?.status||'pending',
+        namaFile:exists?.namaFile!==undefined?exists.namaFile:((doc.items||[])[0]?.desc||''),
+        bahan:exists?.bahan||'',
+        sizeChart:exists?.sizeChart&&exists.sizeChart.length?exists.sizeChart:computeDefaultSizeChart(doc.items||[])
+      };
+      outId=data.id;
+      return exists?all.map(s=>s.id===exists.id?data:s):[...all,data];
+    });
+    if(!res.ok)return;
+  }finally{_spkBusy=false;}
   if(document.getElementById('pg-spk')?.classList.contains('on'))rSPKT();
-  toast(exists?'SPK diperbarui dari sumber terbaru':'SPK berhasil dibuat dari '+(sourceType==='invoice'?'Invoice':'PO'));
-  prevSPK(data.id);
+  toast(existed?'SPK diperbarui dari sumber terbaru':'SPK berhasil dibuat dari '+(sourceType==='invoice'?'Invoice':'PO'));
+  prevSPK(outId);
 }
 
-function prevSPK(id){
+async function prevSPK(id){
   const spk=DB.get('spk').find(s=>s.id===id);if(!spk)return;
   _curSPKId=id;
   closeM('pvim');closeM('pvpm');
-  document.getElementById('pvsb').innerHTML=buildSPKHTML(spk);
+  const mk=await loadSPKMockups(spk);
+  const cur=DB.get('spk').find(s=>s.id===id)||spk;
+  if(_curSPKId!==id)return;
+  document.getElementById('pvsb').innerHTML=buildSPKHTML({...cur,mockupFront:mk.front,mockupBack:mk.back});
   openM('pvsm');
 }
 
@@ -2751,14 +2863,22 @@ function rSPKT(){
     </tr>`).join('')}</tbody></table>`:emSt('clipboard-list','Belum ada SPK. Klik tombol SPK pada Invoice/PO, atau tombol Buat SPK di atas.');
 }
 
-function updSPKSt(id,st){
-  DB.set('spk',DB.get('spk').map(s=>s.id===id?{...s,status:st}:s));
-  toast('Status SPK diperbarui');
+async function updSPKSt(id,st){
+  const res=await DB.mutate('spk',all=>{
+    const i=all.findIndex(s=>s.id===id);
+    if(i<0)throw new Error('SPK tidak ditemukan - mungkin sudah dihapus dari perangkat lain');
+    all[i]={...all[i],status:st};
+    return all;
+  });
+  if(res.ok)toast('Status SPK diperbarui');
+  rSPKT();   // kalau gagal, dropdown dikembalikan ke nilai sebenarnya
 }
 
-function delSPK(id){
+async function delSPK(id){
   if(!confirm('Hapus SPK ini?'))return;
-  DB.set('spk',DB.get('spk').filter(s=>s.id!==id));
+  const res=await DB.mutate('spk',all=>all.filter(s=>s.id!==id));
+  if(!res.ok)return;
+  ['front','back'].forEach(side=>firestore.collection('app').doc(mockDocId(id,side)).delete().catch(()=>{}));
   rSPKT();toast('SPK dihapus');
 }
 
@@ -2776,13 +2896,22 @@ function openSPKEditModal(id){
   renderSPKSizeTable((s.sizeChart&&s.sizeChart.length)?s.sizeChart:computeDefaultSizeChart(s.items||[]));
   document.getElementById('spk-mockup-front').value='';
   document.getElementById('spk-mockup-back').value='';
-  _spkMockupTemp={front:s.mockupFront||'',back:s.mockupBack||''};
-  showMockupPreview('front',_spkMockupTemp.front);
-  showMockupPreview('back',_spkMockupTemp.back);
+  _spkMockupTemp={front:'',back:'',dirty:{front:false,back:false}};
+  showMockupPreview('front','');
+  showMockupPreview('back','');
   openM('spkm');
+  // mockup dimuat dari dokumen terpisah; sisi yang tidak diubah user tidak akan ditulis ulang saat Simpan
+  loadSPKMockups(s).then(mk=>{
+    if(document.getElementById('spk-eid').value!==id)return;
+    ['front','back'].forEach(side=>{
+      if(_spkMockupTemp.dirty[side])return;
+      _spkMockupTemp[side]=mk[side];
+      showMockupPreview(side,mk[side]);
+    });
+  });
 }
 
-let _spkMockupTemp={front:'',back:''};
+let _spkMockupTemp={front:'',back:'',dirty:{front:false,back:false}};
 
 function renderSPKSizeTable(rows){
   const tb=document.getElementById('spk-size-tbody');
@@ -2822,15 +2951,20 @@ function showMockupPreview(side,data){
 
 function removeMockup(side){
   _spkMockupTemp[side]='';
+  _spkMockupTemp.dirty[side]=true;
   document.getElementById('spk-mockup-'+side).value='';
   showMockupPreview(side,'');
 }
 
 function handleMockupUpload(e,side){
   const file=e.target.files[0];if(!file)return;
+  e.target.value='';
+  const fail=()=>toast('Gambar tidak bisa dibaca (format HEIC/rusak?). Gunakan JPG atau PNG.','err');
   const img=new Image();
   const reader=new FileReader();
+  reader.onerror=fail;
   reader.onload=ev=>{
+    img.onerror=fail;
     img.onload=()=>{
       const maxDim=600;
       let w=img.width,h=img.height;
@@ -2838,47 +2972,98 @@ function handleMockupUpload(e,side){
       else if(h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}
       const canvas=document.createElement('canvas');
       canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      const data=canvas.toDataURL('image/jpeg',0.75);
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);   // PNG transparan jangan jadi hitam
+      ctx.drawImage(img,0,0,w,h);
+      let q=0.75,data=canvas.toDataURL('image/jpeg',q);
+      while(data.length>250000&&q>0.4){q-=0.1;data=canvas.toDataURL('image/jpeg',q);}
       _spkMockupTemp[side]=data;
+      _spkMockupTemp.dirty[side]=true;
       showMockupPreview(side,data);
     };
     img.src=ev.target.result;
   };
   reader.readAsDataURL(file);
-  e.target.value='';
 }
 
-function saveSPKEdit(){
+let _spkSaving=false;
+async function saveSPKEdit(){
+  if(_spkSaving)return;
   const id=document.getElementById('spk-eid').value;
-  let all=DB.get('spk');
-  const idx=all.findIndex(s=>s.id===id);if(idx<0)return;
-  all[idx]={...all[idx],
-    due:document.getElementById('spk-due').value,
-    status:document.getElementById('spk-status').value,
-    pic:document.getElementById('spk-pic').value,
-    notes:document.getElementById('spk-notes').value,
-    namaFile:document.getElementById('spk-namafile').value,
-    bahan:document.getElementById('spk-bahan').value,
-    sizeChart:readSPKSizeTable(),
-    mockupFront:_spkMockupTemp.front,
-    mockupBack:_spkMockupTemp.back
-  };
-  DB.set('spk',all);
-  closeM('spkm');rSPKT();toast('Detail SPK disimpan');
-  prevSPK(id);
+  if(!DB.get('spk').find(s=>s.id===id)){
+    toast('SPK tidak ditemukan - mungkin sudah dihapus dari perangkat lain','err');
+    closeM('spkm');rSPKT();return;
+  }
+  _spkSaving=true;
+  const btn=document.querySelector('#spkm .mf .btn.bp')||document.querySelector('#spkm .btn.bp');
+  const btnTxt=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Menyimpan...';}
+  try{
+    const fields={
+      due:document.getElementById('spk-due').value,
+      status:document.getElementById('spk-status').value,
+      pic:document.getElementById('spk-pic').value,
+      notes:document.getElementById('spk-notes').value,
+      namaFile:document.getElementById('spk-namafile').value,
+      bahan:document.getElementById('spk-bahan').value
+    };
+    const sizeChart=readSPKSizeTable();
+    // 1) simpan gambar mockup yang berubah ke dokumen terpisah
+    const mockPatch={};
+    for(const side of ['front','back']){
+      if(!_spkMockupTemp.dirty[side])continue;
+      const val=_spkMockupTemp[side];
+      const mref=firestore.collection('app').doc(mockDocId(id,side));
+      if(val){
+        if(val.length>MAX_DOC_BYTES)throw new Error('Gambar mockup terlalu besar');
+        await _withTimeout(mref.set({data:val}),WRITE_TIMEOUT_MS);
+        const ver=Date.now();
+        mockPatch[side]=ver;
+        _mockCache[id+'_'+side+'_'+ver]=val;
+      }else{
+        await _withTimeout(mref.delete(),WRITE_TIMEOUT_MS);
+        mockPatch[side]=0;
+      }
+    }
+    // 2) update record SPK berdasarkan data terbaru di server
+    const res=await DB.mutate('spk',all=>{
+      const idx=all.findIndex(s=>s.id===id);
+      if(idx<0)throw new Error('SPK tidak ditemukan - mungkin sudah dihapus dari perangkat lain');
+      const next={...all[idx],...fields,sizeChart};
+      if('front' in mockPatch){next.mockFront=mockPatch.front;next.mockupFront='';}
+      if('back' in mockPatch){next.mockBack=mockPatch.back;next.mockupBack='';}
+      all[idx]=next;
+      return all;
+    });
+    if(!res.ok)return;   // DB.mutate sudah menampilkan pesan error; modal tetap terbuka
+    closeM('spkm');rSPKT();toast('Detail SPK disimpan');
+    prevSPK(id);
+  }catch(e){
+    console.error('saveSPKEdit',e);
+    toast('Gagal menyimpan: '+_errMsg(e),'err');
+  }finally{
+    _spkSaving=false;
+    if(btn){btn.disabled=false;btn.textContent=btnTxt||'Simpan';}
+  }
 }
 
-function syncSPKFromSource(){
+async function syncSPKFromSource(){
   const id=document.getElementById('spk-eid').value;
   const s=DB.get('spk').find(x=>x.id===id);if(!s)return;
   const doc=findSPKSource(s.sourceType,s.sourceId);
   if(!doc){toast('Dokumen sumber sudah tidak ada','err');return;}
+  const items=(doc.items||[]).map(it=>({...it}));
+  const chart=computeDefaultSizeChart(items);
+  const res=await DB.mutate('spk',all=>{
+    const i=all.findIndex(x=>x.id===id);
+    if(i<0)throw new Error('SPK tidak ditemukan - mungkin sudah dihapus dari perangkat lain');
+    all[i]={...all[i],customer:doc.customer,phone:doc.phone||'',items,total:doc.total||0,sourceRef:doc.ref,sizeChart:chart};
+    return all;
+  });
+  if(!res.ok)return;
   document.getElementById('spk-due').value=doc.due||s.due||'';
-  let all=DB.get('spk');
-  all=all.map(x=>x.id===id?{...x,customer:doc.customer,phone:doc.phone||'',items:(doc.items||[]).map(it=>({...it})),total:doc.total||0,sourceRef:doc.ref}:x);
-  DB.set('spk',all);
-  toast('Item, pelanggan & total disinkronkan ulang dari sumber');
+  renderSPKSizeTable(chart);   // tabel ukuran ikut disinkronkan dengan item terbaru
+  toast('Item, pelanggan, total & tabel ukuran disinkronkan ulang dari sumber');
 }
 
 function openSPKPickModal(){
@@ -3500,7 +3685,7 @@ function downloadPDF(type){
   } else if(type==='spk'&&_curSPKId){
     doc=DB.get('spk').find(s=>s.id===_curSPKId);
     label='SPK';
-    if(doc)html=buildSPKHTML(doc);
+    if(doc)html=buildSPKHTML(spkWithMockCached(doc));
   } else if(type==='kwitansi'&&_curKwitansiId){
     doc=DB.get('kwitansi').find(k=>k.id===_curKwitansiId);
     label='Kwitansi';
@@ -3789,46 +3974,86 @@ function dlCSV(rows,fn){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-function backupData(){
+async function backupData(){
   const all={};
   ALL_KEYS.forEach(k=>{
     all['h_'+k]=_cache[k];
   });
+  // sertakan gambar mockup SPK (disimpan di dokumen terpisah)
+  const mocks={};let failed=0;
+  for(const s of DB.get('spk')){
+    for(const side of ['front','back']){
+      const inline=side==='front'?s.mockupFront:s.mockupBack;
+      if(inline||!mockVer(s,side))continue;
+      const v=await getMock(s,side);
+      if(v===null)failed++;
+      else if(v)mocks[s.id+'_'+side]=v;
+    }
+  }
+  all['h_spkmock']=mocks;
   const blob=new Blob([JSON.stringify(all,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`hulya-backup-${td()}.json`;a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
-  toast('Backup berhasil didownload ');
+  if(failed)toast('Backup selesai, tapi '+failed+' gambar mockup gagal diambil. Coba ulangi backup.','err');
+  else toast('Backup berhasil didownload ');
 }
 
 function restoreData(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=ev=>{
+  r.onload=async ev=>{
+    let d;
+    try{d=JSON.parse(ev.target.result);}catch{toast('File tidak valid','err');return;}
+    if(!confirm('Restore akan menimpa semua data. Lanjutkan?'))return;
     try{
-      const d=JSON.parse(ev.target.result);
-      if(!confirm('Restore akan menimpa semua data. Lanjutkan?'))return;
-      Object.keys(d).forEach(k=>{
+      const mocks={...(d.h_spkmock||{})};
+      // pindahkan mockup inline (backup lama) ke dokumen terpisah
+      if(Array.isArray(d.h_spk)){
+        d.h_spk=d.h_spk.map(s=>{
+          const n={...s};
+          [['front','mockupFront','mockFront'],['back','mockupBack','mockBack']].forEach(([side,inl,flag])=>{
+            if(n[inl]){mocks[n.id+'_'+side]=n[inl];n[inl]='';n[flag]=Date.now();}
+          });
+          return n;
+        });
+      }
+      toast('Merestore data...','inf');
+      for(const mk of Object.keys(mocks)){
+        await _withTimeout(firestore.collection('app').doc('spkmock_'+mk).set({data:mocks[mk]}),WRITE_TIMEOUT_MS);
+      }
+      for(const k of Object.keys(d)){
         const key=k.replace('h_','');
-        if(ALL_KEYS.includes(key)){
-          _cache[key]=d[k];
-          firestore.collection('app').doc(key).set({data:d[k]});
-        }
-      });
+        if(!ALL_KEYS.includes(key))continue;
+        let val=d[k];
+        if(COLLECTIONS.includes(key)&&!Array.isArray(val))continue;
+        await _withTimeout(firestore.collection('app').doc(key).set({data:val}),WRITE_TIMEOUT_MS);
+        _cache[key]=val;
+      }
       toast('Data direstore ','inf');setTimeout(()=>location.reload(),1500);
-    }catch{toast('File tidak valid','err');}
+    }catch(err){
+      console.error('restore',err);
+      toast('Restore gagal: '+_errMsg(err),'err');
+    }
   };r.readAsText(f);e.target.value='';
 }
 
-function resetAll(){
+async function resetAll(){
   if(!confirm('[!] HAPUS SEMUA DATA? Tidak bisa dibatalkan!'))return;
   if(!confirm('Yakin? Data hilang permanen!'))return;
-  ALL_KEYS.forEach(k=>{
-    const empty=COLLECTIONS.includes(k)?[]:{};
-    _cache[k]=empty;
-    firestore.collection('app').doc(k).set({data:empty});
-  });
-  toast('Data direset','inf');setTimeout(()=>location.reload(),1500);
+  try{
+    const oldSpk=DB.get('spk').slice();
+    for(const k of ALL_KEYS){
+      const empty=COLLECTIONS.includes(k)?[]:{};
+      await _withTimeout(firestore.collection('app').doc(k).set({data:empty}),WRITE_TIMEOUT_MS);
+      _cache[k]=empty;
+    }
+    oldSpk.forEach(s=>['front','back'].forEach(side=>firestore.collection('app').doc(mockDocId(s.id,side)).delete().catch(()=>{})));
+    toast('Data direset','inf');setTimeout(()=>location.reload(),1500);
+  }catch(err){
+    console.error('reset',err);
+    toast('Reset gagal: '+_errMsg(err),'err');
+  }
 }
 
 //  HELPERS
@@ -3844,11 +4069,17 @@ function emSt(ic,msg){
   return`<div class="empty"><div class="ei">${icn(ic)}</div><p>${msg}</p></div>`;
 }
 
-function autoRef(pfx){
+function autoRef(pfx,list){
   const n=new Date();
   const ym=n.getFullYear()+String(n.getMonth()+1).padStart(2,'0');
-  const all=pfx==='INV'?DB.get('invoices'):pfx==='PO'?DB.get('pos'):pfx==='SPK'?DB.get('spk'):pfx==='KW'?DB.get('kwitansi'):DB.get('pembelian');
-  return`${pfx}/${ym}/${String(all.length+1).padStart(4,'0')}`;
+  const all=list||(pfx==='INV'?DB.get('invoices'):pfx==='PO'?DB.get('pos'):pfx==='SPK'?DB.get('spk'):pfx==='KW'?DB.get('kwitansi'):DB.get('pembelian'));
+  // pakai nomor urut TERBESAR + 1 (bukan jumlah data + 1) supaya tidak kembar setelah ada yang dihapus
+  let max=0;
+  all.forEach(d=>{const m=String(d.ref||'').match(/\/(\d+)$/);if(m)max=Math.max(max,parseInt(m[1],10));});
+  let seq=max?max+1:all.length+1;
+  let ref=`${pfx}/${ym}/${String(seq).padStart(4,'0')}`;
+  while(all.some(d=>d.ref===ref)){seq++;ref=`${pfx}/${ym}/${String(seq).padStart(4,'0')}`;}
+  return ref;
 }
 
 //  FITUR 1 & 2: WA SHARE + TEMPLATE PESAN
@@ -4298,6 +4529,41 @@ function refreshItemDropdowns(){
   });
 }
 
+// Migrasi satu kali: pindahkan mockup base64 yang masih menempel di array SPK ke dokumen terpisah,
+// supaya dokumen "spk" mengecil dan tidak mentok batas 1 MB.
+async function migrateInlineMockups(){
+  try{
+    if(!_loaded.spk)return;
+    const todo=DB.get('spk').filter(s=>s.mockupFront||s.mockupBack);
+    if(!todo.length)return;
+    const patches={};
+    for(const s of todo){
+      const p={};
+      for(const side of ['front','back']){
+        const inline=side==='front'?s.mockupFront:s.mockupBack;
+        if(!inline||inline.length>MAX_DOC_BYTES)continue;
+        await _withTimeout(firestore.collection('app').doc(mockDocId(s.id,side)).set({data:inline}),WRITE_TIMEOUT_MS);
+        p[side]={ver:Date.now(),inline};
+      }
+      if(Object.keys(p).length)patches[s.id]=p;
+    }
+    if(!Object.keys(patches).length)return;
+    const res=await DB.mutate('spk',all=>all.map(s=>{
+      const p=patches[s.id];if(!p)return s;
+      const n={...s};
+      if(p.front&&n.mockupFront===p.front.inline){n.mockFront=p.front.ver;n.mockupFront='';}
+      if(p.back&&n.mockupBack===p.back.inline){n.mockBack=p.back.ver;n.mockupBack='';}
+      return n;
+    }),{silent:true});
+    if(res.ok){
+      Object.keys(patches).forEach(id=>Object.keys(patches[id]).forEach(side=>{
+        _mockCache[id+'_'+side+'_'+patches[id][side].ver]=patches[id][side].inline;
+      }));
+      console.log('Migrasi mockup SPK selesai:',Object.keys(patches).length,'SPK');
+    }
+  }catch(e){console.error('Migrasi mockup gagal (akan dicoba lagi saat muat ulang):',e);}
+}
+
 //  APP INIT  -  Load Firebase then render
 async function initApp() {
   try {
@@ -4320,6 +4586,7 @@ async function initApp() {
   loadLogoPreview();
   loadTTDPreview();
   loadQRISPreview();
+  migrateInlineMockups();   // berjalan di latar belakang
 }
 
 initApp();
