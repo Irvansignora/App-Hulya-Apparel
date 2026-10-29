@@ -383,6 +383,19 @@ textarea{resize:vertical;min-height:68px}
   body{background:white!important}
   #loading-overlay{display:none!important}
 }
+/* paginasi */
+.pgn{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;padding:12px 20px;border-top:1px solid var(--g200);font-size:12.5px;color:var(--g500)}
+.pgn-l{display:flex;align-items:center;gap:6px}
+.pgn-l select{padding:4px 8px;border-radius:6px;border:1px solid var(--g300);font-size:12.5px;font-weight:600;background:var(--white);color:var(--g700);cursor:pointer}
+.pgn-i{font-weight:500}
+.pgn-b{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.pgb{min-width:32px;height:32px;padding:0 8px;border-radius:7px;border:1px solid var(--g300);background:var(--white);color:var(--g700);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s}
+.pgb:hover:not(:disabled):not(.on){background:var(--g100)}
+.pgb.on{background:var(--navy);border-color:var(--navy);color:#fff;cursor:default}
+.pgb:disabled{opacity:.4;cursor:not-allowed}
+.pgd{padding:0 4px;color:var(--g500)}
+@media(max-width:640px){.pgn{padding:10px 12px;justify-content:center;text-align:center}.pgn-b{justify-content:center}}
+@media print{.pgn{display:none!important}}
 </style>
 </head>
 <body>
@@ -1432,6 +1445,78 @@ function onDataSync() {
   updateCRMCount();
 }
 
+//  PAGINASI  -  dipakai semua tabel daftar (pilihan 5 / 10 / 25 per halaman, diingat per tabel)
+const PG_SIZES=[5,10,25];
+const PG_DEFAULT=10;
+// id elemen cari/filter tiap tabel: kalau salah satu berubah, halaman kembali ke 1
+const PG_FILTERS={'crm-table':['crm-search'],invt:['invs','invf','invso'],pot:['pos-s','pos-f'],spkt:['spk-s','spk-f'],stokt:['stoks','stokf-cat','stokf-st'],belit:['belis'],bukut:['bukus','bukuf-t','bukuf-m']};
+const _pgState={};
+function _pgSizes(){try{return JSON.parse(localStorage.getItem('hulya_pg_size')||'{}')||{};}catch(e){return {};}}
+function _pgSaveSize(key,size){try{const o=_pgSizes();o[key]=size;localStorage.setItem('hulya_pg_size',JSON.stringify(o));}catch(e){}}
+function pgState(key){
+  if(!_pgState[key]){
+    const s=Number(_pgSizes()[key]);
+    _pgState[key]={page:1,size:PG_SIZES.includes(s)?s:PG_DEFAULT,sig:null};
+  }
+  return _pgState[key];
+}
+function pgRerender(key){
+  const fn={'crm-table':renderCRMTable,invt:rInvT,pot:rPOT,spkt:rSPKT,stokt:rStokT,belit:rBeliT,bukut:rBukuT}[key];
+  if(fn)fn();
+}
+function pgGo(key,p){pgState(key).page=Number(p)||1;pgRerender(key);}
+function pgSize(key,v){
+  const st=pgState(key);const n=Number(v);
+  st.size=PG_SIZES.includes(n)?n:PG_DEFAULT;st.page=1;
+  _pgSaveSize(key,st.size);pgRerender(key);
+}
+// Potong list sesuai halaman aktif dan gambar bar paginasi di bawah tabel. return {items,total,page,pages}
+function pgPaginate(key,list){
+  const st=pgState(key);
+  const sig=(PG_FILTERS[key]||[]).map(id=>document.getElementById(id)?.value||'').join('\u0001');
+  if(st.sig!==null&&st.sig!==sig)st.page=1;   // cari/filter/urutan berubah -> kembali ke halaman 1
+  st.sig=sig;
+  const total=list.length;
+  const pages=Math.max(1,Math.ceil(total/st.size));
+  if(st.page>pages)st.page=pages;   // mis. item terakhir di halaman terakhir dihapus
+  if(st.page<1)st.page=1;
+  const start=(st.page-1)*st.size;
+  const items=list.slice(start,start+st.size);
+  pgDraw(key,st,total,pages,start,items.length);
+  return {items,total,page:st.page,pages};
+}
+function pgDraw(key,st,total,pages,start,n){
+  const tw=document.getElementById(key);if(!tw)return;
+  const hid=key+'-pg';
+  let host=document.getElementById(hid);
+  if(!host){
+    host=document.createElement('div');host.id=hid;
+    tw.insertAdjacentElement('afterend',host);
+  }
+  if(!total){host.innerHTML='';return;}
+  const opts=PG_SIZES.map(s=>`<option value="${s}"${s===st.size?' selected':''}>${s}</option>`).join('');
+  const nums=[];
+  for(let p=1;p<=pages;p++){
+    if(pages<=7||p===1||p===pages||Math.abs(p-st.page)<=1)nums.push(p);
+    else if(nums[nums.length-1]!=='...')nums.push('...');
+  }
+  const btns=nums.map(p=>p==='...'?`<span class="pgd">&hellip;</span>`
+    :`<button type="button" class="pgb${p===st.page?' on':''}" onclick="pgGo('${key}',${p})"${p===st.page?' aria-current="page"':''}>${p}</button>`).join('');
+  host.innerHTML=`<div class="pgn">
+    <div class="pgn-l"><span>Tampilkan</span><select onchange="pgSize('${key}',this.value)">${opts}</select><span>per halaman</span></div>
+    <div class="pgn-i">${start+1}&ndash;${start+n} dari ${total}</div>
+    ${pages>1?`<div class="pgn-b"><button type="button" class="pgb" onclick="pgGo('${key}',${st.page-1})"${st.page<=1?' disabled':''} aria-label="Sebelumnya">&lsaquo;</button>${btns}<button type="button" class="pgb" onclick="pgGo('${key}',${st.page+1})"${st.page>=pages?' disabled':''} aria-label="Berikutnya">&rsaquo;</button></div>`:''}
+  </div>`;
+}
+
+// Alias untuk handler cari/filter di HTML. Sebelumnya fungsi-fungsi ini TIDAK PERNAH didefinisikan,
+// sehingga kolom cari & filter Invoice, PO, Stok, Pembelian, dan Pembukuan tidak berfungsi.
+function renderInvTable(){rInvT();}
+function renderPOTable(){rPOT();}
+function renderStokTable(){rStokT();}
+function renderBeliTable(){rBeliT();}
+function renderBukuTable(){rBukuT();}
+
 //  CORE HELPERS
 const fRp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
 const dateKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -1540,9 +1625,10 @@ function renderCRMTable() {
   const invs = DB.get('invoices');
   const pos = DB.get('pos');
 
+  const pg = pgPaginate('crm-table', custs);
   document.getElementById('crm-table').innerHTML = custs.length ? `<table>
     <thead><tr><th>Customer</th><th>Telepon</th><th>Email</th><th>Invoice</th><th>PO</th><th>Total Revenue</th><th>Aksi</th></tr></thead>
-    <tbody>${custs.map(c => {
+    <tbody>${pg.items.map(c => {
       const cInvs = invs.filter(i => i.customer?.toLowerCase() === c.name?.toLowerCase());
       const cPOs = pos.filter(p => p.customer?.toLowerCase() === c.name?.toLowerCase());
       const rev = cInvs.filter(i => i.status === 'lunas').reduce((s, i) => s + Number(i.total || 0), 0);
@@ -2115,9 +2201,10 @@ function rInvT(){
   if(q)invs=invs.filter(i=>(i.ref+i.customer).toLowerCase().includes(q));
   if(f)invs=invs.filter(i=>i.status===f);
   invs.sort((a,b)=>so==='newest'?b.id>a.id?1:-1:so==='oldest'?a.id>b.id?1:-1:so==='high'?b.total-a.total:a.total-b.total);
+  const pg=pgPaginate('invt',invs);
   document.getElementById('invt').innerHTML=invs.length?`<table>
     <thead><tr><th>No. Invoice</th><th>Pelanggan</th><th>Tanggal</th><th>Jatuh Tempo</th><th>Pengiriman</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
-    <tbody>${invs.map(i=>`<tr>
+    <tbody>${pg.items.map(i=>`<tr>
       <td style="font-weight:700;color:var(--red);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevInv('${i.id}')">${esc(i.ref)}</td>
       <td>${esc(i.customer)}<br><small class="tgy">${esc(i.phone||'')}</small></td>
       <td>${i.date}</td><td>${i.due||'-'}<br>${(()=>{const bc=getBuktiCount(i.id,'inv');return bc>0?`<small style="color:var(--accent)"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> ${bc} bukti</small>`:''})()}</td>
@@ -2566,9 +2653,10 @@ function rPOT(){
   const f=document.getElementById('pos-f')?.value||'';
   if(q)pos=pos.filter(p=>(p.ref+p.customer).toLowerCase().includes(q));
   if(f)pos=pos.filter(p=>p.status===f);
+  const pg=pgPaginate('pot',pos);
   document.getElementById('pot').innerHTML=pos.length?`<table>
     <thead><tr><th>No. PO</th><th>Pelanggan</th><th>Tanggal</th><th>Target</th><th>Pengiriman</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
-    <tbody>${pos.map(p=>`<tr>
+    <tbody>${pg.items.map(p=>`<tr>
       <td style="font-weight:700;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevPO('${p.id}')">${esc(p.ref)}</td>
       <td>${esc(p.customer)}<br><small class="tgy">${esc(p.phone||'')}</small></td><td>${p.date}</td>
       <td>${p.due||'-'}<br>${(()=>{const pd=DB.gO('produksi')[p.id];if(!pd)return'';const d=Object.keys(pd.stages||{}).length;return d>0?`<small style="color:var(--accent)"><svg class="lucide lucide-icon " xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg> ${d}/5 tahap</small>`:''})()}</td>
@@ -2843,9 +2931,10 @@ function rSPKT(){
   all=[...all].reverse();
   const stTxt={pending:'Belum Dikerjakan',proses:'Proses',selesai:'Selesai'};
   const stCls={pending:'bp2',proses:'bpr',selesai:'bl'};
+  const pg=pgPaginate('spkt',all);
   document.getElementById('spkt').innerHTML=all.length?`<table>
     <thead><tr><th>No. SPK</th><th>Sumber</th><th>Pelanggan</th><th>Tanggal</th><th>Target</th><th>Item</th><th>Status</th><th>Aksi</th></tr></thead>
-    <tbody>${all.map(s=>`<tr>
+    <tbody>${pg.items.map(s=>`<tr>
       <td style="font-weight:700;color:var(--gold-dark);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="prevSPK('${s.id}')">${esc(s.ref)}</td>
       <td><span class="chip">${s.sourceType==='invoice'?'Invoice':'PO'}</span><br><small class="tgy">${esc(s.sourceRef||'-')}</small></td>
       <td>${esc(s.customer)}<br><small class="tgy">${esc(s.phone||'')}</small></td>
@@ -3345,9 +3434,10 @@ function rStokT(){
   if(cat)stoks=stoks.filter(s=>s.category===cat);
   if(st==='low')stoks=stoks.filter(s=>Number(s.qty)<=Number(s.minQty));
   if(st==='ok')stoks=stoks.filter(s=>Number(s.qty)>Number(s.minQty));
+  const pg=pgPaginate('stokt',stoks);
   document.getElementById('stokt').innerHTML=stoks.length?`<table>
     <thead><tr><th>Produk</th><th>SKU</th><th>Kategori</th><th>Stok</th><th>Min</th><th>Harga Jual</th><th>HPP</th><th>Margin</th><th>Aksi</th></tr></thead>
-    <tbody>${stoks.map(s=>{
+    <tbody>${pg.items.map(s=>{
       const low=Number(s.qty)<=Number(s.minQty);
       const pct=s.minQty>0?Math.min(100,Math.round((s.qty/(s.minQty*2||1))*100)):100;
       const mg=s.harga>0?Math.round(((s.harga-s.hpp)/s.harga)*100):0;
@@ -3428,9 +3518,10 @@ function rBeliT(){
   const q=(document.getElementById('belis')?.value||'').toLowerCase();
   if(q)bl=bl.filter(b=>(b.ref+b.supplier).toLowerCase().includes(q));
   bl=[...bl].reverse();
+  const pg=pgPaginate('belit',bl);
   document.getElementById('belit').innerHTML=bl.length?`<table>
     <thead><tr><th>Referensi</th><th>Supplier</th><th>Tanggal</th><th>Total</th><th>Catatan</th><th>Aksi</th></tr></thead>
-    <tbody>${bl.map(b=>`<tr>
+    <tbody>${pg.items.map(b=>`<tr>
       <td style="font-weight:700">${esc(b.ref)}</td>
       <td>${esc(b.supplier)}</td><td>${b.date}</td>
       <td style="font-weight:700;color:var(--red)">${fRp(b.total)}</td>
@@ -3498,9 +3589,10 @@ function rBukuT(){
   if(mo)buku=buku.filter(b=>b.date&&b.date.slice(5,7)===mo);
   buku=[...buku].reverse();
   const sB=s=>({invoice:'bl',pembelian:'bpr',manual:'bp2'}[s]||'bp2');
+  const pg=pgPaginate('bukut',buku);
   document.getElementById('bukut').innerHTML=buku.length?`<table>
     <thead><tr><th>Tanggal</th><th>Referensi</th><th>Keterangan</th><th>Akun</th><th>Debit (Masuk)</th><th>Kredit (Keluar)</th><th>Sumber</th></tr></thead>
-    <tbody>${buku.map(b=>`<tr>
+    <tbody>${pg.items.map(b=>`<tr>
       <td>${b.date}</td>
       <td style="font-size:11px;font-family:monospace;color:var(--g500)">${esc(b.ref)}</td>
       <td>${esc(b.desc)}</td>
