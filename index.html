@@ -1968,6 +1968,18 @@ function openInvModal(eid=null){
   calcIT();openM('im');
 }
 
+// Cocokkan item invoice/PO dengan produk di stok.
+// PENTING: SKU kosong tidak boleh dianggap "sama". Sebelumnya ('' === '') membuat SEMUA item manual
+// cocok dengan produk stok mana pun yang SKU-nya kosong, sehingga keterangan item hilang dari form.
+function findStokForItem(stoks,d){
+  if(!d||!d.desc)return null;
+  if(d.skuRef){
+    const bySku=stoks.find(s=>s.sku&&s.sku===d.skuRef);
+    if(bySku)return bySku;
+  }
+  return stoks.find(s=>s.name===d.desc)||null;
+}
+
 function buildStokOptions(selectedDesc='',selectedSku=''){
   const stoks=DB.get('stok');
   const opts=stoks.map(s=>{
@@ -1989,7 +2001,7 @@ function addII(d=null){
   const r=document.createElement('div');
   r.className='ir-inv';r.id='ii-'+id;
   const stoks=DB.get('stok');
-  const matchStok=d?.desc?stoks.find(s=>s.name===d.desc||s.sku===d.skuRef):null;
+  const matchStok=findStokForItem(stoks,d);
   const selectedSku=d?.skuRef||matchStok?.sku||'';
   const currentQty=matchStok?.qty??null;
   const minQty=matchStok?.minQty??0;
@@ -2159,6 +2171,7 @@ function saveInv(preview=false){
   ensureCustomerInCRM(cus, phone);
   const items=getII();
   if(!items.some(i=>i.desc)){toast('Tambahkan minimal 1 produk','err');return;}
+  if(items.some(i=>!i.desc&&i.price>0)){toast('Ada item yang sudah berharga tapi belum dipilih produk / diisi nama. Periksa lagi sebelum menyimpan.','err');return;}
   const sub=items.reduce((s,i)=>s+i.qty*i.price,0);
   const dsc=Number(document.getElementById('idsc').value)||0;
   const ship=getShip('i');
@@ -2473,7 +2486,7 @@ function addPI(d=null){
   const r=document.createElement('div');
   r.className='ir-inv';r.id='pi-'+id;
   const stoks=DB.get('stok');
-  const matchStok=d?.desc?stoks.find(s=>s.name===d.desc||s.sku===d.skuRef):null;
+  const matchStok=findStokForItem(stoks,d);
   const selectedSku=d?.skuRef||matchStok?.sku||'';
   const currentQty=matchStok?.qty??null;
   const minQty=matchStok?.minQty??0;
@@ -2624,6 +2637,7 @@ function savePO(){
   ensureCustomerInCRM(cus, phone);
   const items=getPOItems();
   if(!items.some(i=>i.desc)){toast('Tambahkan minimal 1 produk','err');return;}
+  if(items.some(i=>!i.desc&&i.price>0)){toast('Ada item yang sudah berharga tapi belum dipilih produk / diisi nama. Periksa lagi sebelum menyimpan.','err');return;}
   const ship=getShip('p');
   const tot=items.reduce((s,i)=>s+i.qty*i.price,0)+ship.fee;
   const eid=document.getElementById('peid').value;
